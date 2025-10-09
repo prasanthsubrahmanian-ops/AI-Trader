@@ -2,23 +2,22 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Page Config
 st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide")
 
-# Custom CSS for full black background, no blue
-st.markdown("""
+# Hide Streamlit default footer, menu, and user profile icon (community cloud)
+hide_streamlit_style = """
     <style>
-    body, .main, .block-container {
-        background-color: #000 !important;
-        color: #fff !important;
-    }
-    .sidebar .sidebar-content, .css-1v0mbdj, .css-fblp2m {
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .css-1v3fvcr.egzxvld0 {visibility: hidden;}  /* user profile icon */
+    body, .main, .block-container, .sidebar .sidebar-content {
         background-color: #000 !important;
         color: #fff !important;
     }
     .header-text {
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
         font-size: 2.5rem;
         font-weight: 700;
         color: #fff;
@@ -29,7 +28,7 @@ st.markdown("""
         padding: 2rem 2.5rem;
         border-radius: 12px;
         margin: 1.5rem 0;
-        box-shadow: 0 3px 20px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
     }
     h2, h3, h4 {
         color: #fff !important;
@@ -39,9 +38,10 @@ st.markdown("""
         color: #fff !important;
     }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Sidebar navigation only, no user info
+# Sidebar navigation only
 section = st.sidebar.radio(
     "Navigation",
     ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
@@ -53,7 +53,6 @@ st.markdown('<div class="header-text">PRASANTH AI Trading Insights</div>', unsaf
 if section == "Home":
     stock_name = st.selectbox("Stock Name", ["TCS", "RELIANCE", "INFY", "NIFTY"])
     period = st.slider("Period (Days)", 10, 60, 30)
-
     dates = pd.date_range(end=pd.Timestamp.today(), periods=period)
     base = np.linspace(1800, 2200, period) + np.random.normal(0, 20, period)
     df = pd.DataFrame({
@@ -64,18 +63,13 @@ if section == "Home":
         "Close": base + np.random.normal(0, 3, period),
         "Volume": np.random.randint(50000, 120000, period)
     })
-
     st.subheader(f"{stock_name} Price Chart")
     st.line_chart(df.set_index("Date")["Close"])
-
     st.subheader(f"{stock_name} OHLC Data")
     st.dataframe(df.set_index("Date")[["Open", "High", "Low", "Close"]])
-
     st.subheader(f"{stock_name} Trading Volume")
     st.bar_chart(df.set_index("Date")["Volume"])
-
     st.markdown("---")
-
     st.subheader("NIFTY Chart Example")
     nifty_days = 30
     nifty_dates = pd.date_range(end=pd.Timestamp.today(), periods=nifty_days)
@@ -85,36 +79,24 @@ if section == "Home":
 
 elif section == "Research Reports":
     st.markdown(
-        '<div class="landing-box">'
-        '<h2>Research Reports</h2>'
-        '<p>Access detailed AI-powered market research here. Customize this section with your reports and visuals.</p>'
-        '</div>',
+        '<div class="landing-box"><h2>Research Reports</h2><p>Access detailed AI-powered market research here. Customize with your reports and visuals.</p></div>',
         unsafe_allow_html=True,
     )
 
 elif section == "Options Trading":
     st.markdown(
-        '<div class="landing-box">'
-        '<h2>Options Trading</h2>'
-        '<p>Options strategies, analytics, and visualizations will appear here. Add your trading tools and analysis.</p>'
-        '</div>',
+        '<div class="landing-box"><h2>Options Trading</h2><p>Options strategies, analytics, and visualizations will appear here. Add your trading tools.</p></div>',
         unsafe_allow_html=True,
     )
 
 elif section == "Chart Analysis":
     st.markdown(
-        '<div class="landing-box">'
-        '<h2>Chart Analysis</h2>'
-        '<p>Technical charts, indicators, and price action tools go here. Add your custom charting features.</p>'
-        '</div>',
+        '<div class="landing-box"><h2>Chart Analysis</h2><p>Technical charts, indicators, and price action tools go here. Add your charting features.</p></div>',
         unsafe_allow_html=True,
     )
 
 elif section == "AI Predictions":
     st.markdown(
-        '<div class="landing-box">'
-        '<h2>AI Predictions</h2>'
-        '<p>AI-driven market and stock predictions will be displayed here. Plug in your models or prediction results.</p>'
-        '</div>',
+        '<div class="landing-box"><h2>AI Predictions</h2><p>AI-driven market and stock predictions displayed here. Plug in your models or prediction outputs.</p></div>',
         unsafe_allow_html=True,
     )
