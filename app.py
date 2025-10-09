@@ -4,9 +4,13 @@ import numpy as np
 
 st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide")
 
-# Black theme for the whole app (main and sidebar)
-st.markdown("""
+# Hide Streamlit footer, menu, and user profile badges
+st.markdown(
+    """
     <style>
+    footer {visibility: hidden;}
+    .css-1rs6os.edgvbvh3 {visibility: hidden;}
+    .css-1v3fvcr.egzxvld0 {visibility: hidden;}
     body, .main, .block-container, .sidebar .sidebar-content {
         background-color: #111 !important;
         color: #fff !important;
@@ -14,30 +18,33 @@ st.markdown("""
     .header-text {
         margin-top: 2rem;
         margin-bottom: 2rem;
-        font-size: 2.2rem;
+        font-size: 2.3rem;
         font-weight: 700;
         color: #fff;
         text-align: left;
+        letter-spacing: 1px;
     }
     .landing-box {
         background-color: #222;
-        padding: 1.8rem 2rem;
-        border-radius: 12px;
+        padding: 2rem 2.5rem;
+        border-radius: 16px;
         margin: 2rem 0;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.5);
     }
-    h2, h3, h4 { color: #fff !important; }
+    h2, h3, h4, h5 { color: #fff !important; }
     div[data-testid="stDataFrame"] { background-color: #222 !important; color: #fff !important;}
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-# Sidebar navigation only (no user info)
+# Sidebar navigation
 section = st.sidebar.radio(
     "Navigation",
     ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
 )
 
-# Heading
+# Main header
 st.markdown('<div class="header-text">PRASANTH AI Trading Insights</div>', unsafe_allow_html=True)
 
 if section == "Home":
@@ -68,13 +75,13 @@ if section == "Home":
     st.line_chart(nifty_df.set_index("Date")["NIFTY"])
 
 elif section == "Research Reports":
-    st.markdown('<div class="landing-box"><h2>Research Reports</h2><p>Access detailed AI-powered market research here. (Customize this section to add your reports.)</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="landing-box"><h2>Research Reports</h2><p>Access detailed AI-powered market research here. Customize this space with your own reports and visuals.</p></div>', unsafe_allow_html=True)
 
 elif section == "Options Trading":
-    st.markdown('<div class="landing-box"><h2>Options Trading</h2><p>View analytics, strategies, and option chain visuals. (Expand this section for options tools.)</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="landing-box"><h2>Options Trading</h2><p>Options strategies, analytics and chain visualizations will appear here. Expand this section for trading tools.</p></div>', unsafe_allow_html=True)
 
 elif section == "Chart Analysis":
-    st.markdown('<div class="landing-box"><h2>Chart Analysis</h2><p>Explore technical indicators and price charts here. (Customize this area for charting features.)</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="landing-box"><h2>Chart Analysis</h2><p>Technical charts, indicators, and price action tools go here. Add your charting logic or uploads.</p></div>', unsafe_allow_html=True)
 
 elif section == "AI Predictions":
-    st.markdown('<div class="landing-box"><h2>AI Predictions</h2><p>Find AI-generated forecasts and signals. (Add model outputs or prediction charts here.)</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="landing-box"><h2>AI Predictions</h2><p>AI-driven market and stock predictions displayed here. Plug in your models or prediction outputs.</p></div>', unsafe_allow_html=True)
