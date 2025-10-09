@@ -22,20 +22,16 @@ def main():
     df = pd.DataFrame({"Date": dates, "Close": prices})
     st.dataframe(df)
 
-    # -----------------------------
-    # Technical Indicators
-    # -----------------------------
-    st.subheader("📈 Technical Indicators")
+    # Technical Indicators Section
+    st.subheader("📈 Technical Indicators")  # ✅ THIS LINE IS CORRECTLY INDENTED
 
-    # Example: Moving Average
+    # Example: Moving Averages
     df['MA5'] = df['Close'].rolling(window=5).mean()
     df['MA10'] = df['Close'].rolling(window=10).mean()
 
     st.line_chart(df.set_index('Date')[['Close', 'MA5', 'MA10']])
 
-    # -----------------------------
     # Next Day Prediction (Linear Regression Example)
-    # -----------------------------
     st.subheader("🤖 Next Day Price Prediction")
     df['Target'] = df['Close'].shift(-1)
     X = np.arange(len(df)).reshape(-1, 1)
@@ -48,8 +44,7 @@ def main():
     pred_next = model.predict(next_day_index)
     st.write(f"Predicted Close for next day: ₹{round(pred_next[0], 2)}")
 
-# -----------------------------
+
 # Run the App
-# -----------------------------
 if __name__ == "__main__":
     main()
