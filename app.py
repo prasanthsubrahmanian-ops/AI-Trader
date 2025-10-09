@@ -27,7 +27,7 @@ body, .main, .block-container, .sidebar .sidebar-content {
     font-size: 2.5rem;
     font-weight: 700;
     color: #00ffcc;
-    text-align: left;
+    text-align: center;
 }
 
 .landing-box {
@@ -86,20 +86,13 @@ def calculate_macd(prices, fast=12, slow=26, signal=9):
     histogram = macd - signal_line
     return macd, signal_line, histogram
 
-# ----------------------- SIDEBAR NAVIGATION -----------------------
-st.sidebar.image("https://i.imgur.com/R6yR4hZ.png", use_container_width=True)
-section = st.sidebar.radio(
-    "Navigation",
-    ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
-)
-
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="header-text">PRASANTH AI Trading Insights</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-text">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
-    "TCS": "TCS.NS", 
     "RELIANCE": "RELIANCE.NS", 
+    "TCS": "TCS.NS", 
     "INFY": "INFY.NS", 
     "HDFC BANK": "HDFCBANK.NS",
     "ICICI BANK": "ICICIBANK.NS",
@@ -109,13 +102,21 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-stock_name = st.selectbox("Select Stock", list(stocks.keys()))
-period = st.slider("Period (Days)", 10, 365, 60)
+# ----------------------- SIDEBAR NAVIGATION -----------------------
+section = st.sidebar.radio(
+    "Navigation",
+    ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
+)
+
+# Stock selection in sidebar
+st.sidebar.markdown("---")
+stock_name = st.sidebar.selectbox("Select Stock", list(stocks.keys()))
+period = st.sidebar.slider("Period (Days)", 10, 365, 60)
 ticker = stocks[stock_name]
 
 # ----------------------- HOME SECTION -----------------------
 if section == "Home":
-    st.subheader("📊 Real-Time Market Data")
+    st.subheader(f"📊 {stock_name} - Real-Time Market Data")
     
     with st.spinner(f"Fetching {stock_name} data..."):
         try:
@@ -134,7 +135,7 @@ if section == "Home":
                 
                 with col1:
                     price_change = ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
-                    st.metric("Daily Change", f"₹{df['Close'].iloc[-1]:.2f}", f"{price_change:+.2f}%")
+                    st.metric("Current Price", f"₹{df['Close'].iloc[-1]:.2f}", f"{price_change:+.2f}%")
                 
                 with col2:
                     volume_change = ((df['Volume'].iloc[-1] - df['Volume'].iloc[-5:].mean()) / df['Volume'].iloc[-5:].mean()) * 100
@@ -186,6 +187,15 @@ elif section == "Research Reports":
         unsafe_allow_html=True,
     )
     
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = df['Close'].iloc[-1]
+            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+    except:
+        pass
+    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -210,6 +220,15 @@ elif section == "Options Trading":
         '<div class="landing-box"><h2>💹 Options Trading</h2><p>Monitor open interest, volatility, and strategy payoffs.</p></div>',
         unsafe_allow_html=True,
     )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = df['Close'].iloc[-1]
+            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+    except:
+        pass
     
     st.subheader("Options Chain")
     
@@ -241,6 +260,15 @@ elif section == "Chart Analysis":
         '<div class="landing-box"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators.</p></div>',
         unsafe_allow_html=True,
     )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = df['Close'].iloc[-1]
+            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+    except:
+        pass
     
     try:
         df = get_stock_data(ticker, period)
@@ -317,7 +345,7 @@ elif section == "AI Predictions":
             rsi = calculate_rsi(df['Close']).iloc[-1]
             
             # Simple AI Prediction Logic
-            st.subheader("🎯 AI Trading Signal")
+            st.subheader(f"🎯 {stock_name} - AI Trading Signal")
             
             prediction_score = 0
             
@@ -374,7 +402,7 @@ elif section == "AI Predictions":
                 st.metric("Confidence Score", f"{confidence:.1f}%")
             
             with col3:
-                st.metric("Current Trend", trend)
+                st.metric("Current Price", f"₹{current_price:.2f}")
             
             # Technical Factors
             st.subheader("Technical Factors")
@@ -426,4 +454,4 @@ elif section == "AI Predictions":
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI Trading Insights • Real-time Market Data</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
