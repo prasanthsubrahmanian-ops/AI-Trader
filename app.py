@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-st.set_page_config(page_title="AI Trader Dashboard", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide", initial_sidebar_state="expanded")
 
-# Sidebar Navigation
+# Sidebar Navigation and Inputs
 st.sidebar.markdown("## 📂 Navigation")
 section = st.sidebar.radio(
     "Go to", 
@@ -14,39 +14,37 @@ section = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Built with Streamlit | pandas | NumPy")
 
-# Top Header
-st.markdown("""
-    <div style="background-color:#1565c0;padding:28px 0 18px 0; border-radius:16px;margin-bottom:32px;">
-        <h1 style="color:white;text-align:center; margin:0;">
-            <span style="font-size:2.0rem;vertical-align:middle;">💹</span>
-            <span style="vertical-align:middle;font-size:2.7rem;">AI Trader Dashboard</span>
-        </h1>
-    </div>
-""", unsafe_allow_html=True)
-
 if section == "Home":
-    # Custom info cards for shares, period, values
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("#### 🔄 Shares")
-        st.write("75%")
-    with col2:
-        st.markdown("#### ⏳ Period")
-        st.write("Last 30 days")
-    with col3:
-        st.markdown("#### 💲 Values")
-        st.write("340,108")  # Sample value; replace with real data or a dynamic fetch
+    st.markdown("""
+        <div style="background-color:#1565c0;padding:28px 0 18px 0; border-radius:16px;margin-bottom:24px;">
+            <h1 style="color:white;text-align:center; margin:0;">
+                <span style="font-size:2.0rem;vertical-align:middle;">📈</span>
+                <span style="vertical-align:middle;font-size:2.4rem;">PRASANTH AI Trading Insights</span>
+            </h1>
+        </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### Market Trends (Nifty Example)")
+    st.markdown("### Market Trends")
 
-    # Simulated Nifty historical data
-    dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
-    prices = np.random.randint(19500, 20300, size=(30,))
-    df = pd.DataFrame({"Date": dates, "Nifty": prices})
-    df['MA5'] = df['Nifty'].rolling(window=5).mean()
-    df['MA10'] = df['Nifty'].rolling(window=10).mean()
-    st.line_chart(df.set_index('Date')[['Nifty', 'MA5', 'MA10']])
+    # Sidebar for user input (stock, price type, period)
+    st.sidebar.markdown("### Select Stock & Price")
+    stock_symbol = st.sidebar.selectbox("Stock Name", ["TCS", "RELIANCE", "INFY", "NIFTY"])
+    price_type = st.sidebar.selectbox("Price Type", ["Close", "Open", "High", "Low"])
+    num_days = st.sidebar.slider("Number of Days", 10, 60, 30)
+
+    # Simulate sample data
+    dates = pd.date_range(end=pd.Timestamp.today(), periods=num_days)
+    np.random.seed(42)
+    # This part simulates different price types for illustration
+    price_base = np.linspace(3000, 3500, num=num_days)
+    df = pd.DataFrame({
+        "Date": dates,
+        "Close": price_base + np.random.normal(0, 10, size=num_days),
+        "Open": price_base + np.random.normal(0, 15, size=num_days),
+        "High": price_base + 10 + np.random.normal(0, 5, size=num_days),
+        "Low": price_base - 10 + np.random.normal(0, 5, size=num_days),
+    })
+    st.line_chart(df.set_index('Date')[[price_type]])
 
 elif section == "Research Reports":
     st.header("Research Reports")
