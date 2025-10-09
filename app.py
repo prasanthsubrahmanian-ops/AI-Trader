@@ -38,7 +38,7 @@ else:
 
     # ---- Calculate Indicators ----
     data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
-    data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
+    data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()  
 
     # RSI calculation (clean version)
     gain = data['Close'].diff().apply(lambda x: np.where(x > 0, x, 0))
