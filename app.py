@@ -18,6 +18,7 @@ interval = st.sidebar.selectbox("Select Interval:", ["1d", "1wk", "1mo"])
 
 # Fetch data
 data = yf.download(ticker, period=period, interval=interval)
+
 if data.empty:
     st.error("No data found. Please check the symbol.")
 else:
@@ -38,23 +39,18 @@ else:
     data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
     data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
 
-    # RSI Calculation (Fixed)
+    # RSI Calculation
     delta = data['Close'].diff()
-    # RSI Calculation (Safe)
-delta = data['Close'].diff()
-gain = delta.clip(lower=0)
-loss = -delta.clip(upper=0)
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
 
-avg_gain = gain.rolling(14).mean()
-avg_loss = loss.rolling(14).mean()
+    avg_gain = gain.rolling(14).mean()
+    avg_loss = loss.rolling(14).mean()
 
-rs = avg_gain / avg_loss
-data['RSI'] = 100 - (100 / (1 + rs))
-
-
-
+    rs = avg_gain / avg_loss
+    data['RSI'] = 100 - (100 / (1 + rs))
     # Technical indicators chart
-    st.subheader("📈 Technical Indicators")
+    st.subheader("Technical Indicators")
     st.line_chart(data[['Close', 'EMA20', 'EMA50']])
 
     # RSI chart
@@ -75,5 +71,6 @@ data['RSI'] = 100 - (100 / (1 + rs))
     # Show raw data
     with st.expander("View Raw Data"):
         st.dataframe(data.tail())
+
 
 
