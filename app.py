@@ -5,46 +5,23 @@ import numpy as np
 st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide")
 
 st.markdown("""
-<style>
-body, .main, .block-container {
-    background-color: #002258 !important;
-    color: #fff !important;
-}
-.sidebar .sidebar-content, .css-fblp2m {
-    background-color: #143364 !important;
-}
-.user-panel { 
-    text-align: center; 
-    margin-bottom: 1rem;
-}
-.user-avatar { 
-    border-radius: 50%; 
-    width: 60px; 
-    margin-bottom: .7rem; 
-}
-.nav-menu { 
-    text-align: left; 
-    margin-top: 1.25rem; 
-}
-.nav-link { 
-    color: #fff; 
-    font-weight: 600; 
-    font-size: 1.12rem; 
-    margin-bottom: 1rem; 
-    display: block; 
-    text-decoration: none; 
-}
-.nav-link:hover { color: #ffda3a; }
-.header-text { 
-    margin-top: 1.5rem; 
-    color: #fff; 
-    font-size: 2.3rem; 
-    font-weight: 700; 
-    padding-left: .5rem; 
-    margin-bottom: 1.8rem; 
-    text-align: left;
-}
-</style>
+    <style>
+    body, .main, .block-container {
+        background-color: #00214d !important;
+        color: #fff !important;
+    }
+    .sidebar .sidebar-content, .css-1v0mbdj, .css-fblp2m {
+        background-color: #072146 !important;
+    }
+    .user-panel {
+        text-align: center; margin-bottom: 2rem;
+    }
+    .user-avatar { border-radius: 50%; width: 60px; margin-bottom: .7rem; }
+    .nav-menu { text-align: left; margin-top: 2rem; }
+    .nav-link { color: #fff; font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; display: block; text-decoration: none; }
+    .nav-link:hover { color: #ffbb33; }
+    .header-text { margin-top: 1.2rem; margin-bottom: 1.6rem; font-size: 2.2rem; font-weight: 700; padding-left: 0.5rem; color: #fff; text-align: left; }
+    </style>
 """, unsafe_allow_html=True)
 
 with st.sidebar:
@@ -74,7 +51,7 @@ df = pd.DataFrame({
     "High": base + np.random.normal(10, 3, period),
     "Low": base - np.random.normal(10, 3, period),
     "Close": base + np.random.normal(0, 3, period),
-    "Volume": np.random.randint(50000, 120000, period)
+    "Volume": np.random.randint(55000, 150000, period)
 })
 
 st.subheader(f"{stock_name} Price Chart")
