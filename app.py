@@ -5,7 +5,6 @@ import numpy as np
 import plotly.graph_objects as go
 import datetime
 
-# Page config
 st.set_page_config(page_title="AI Trading Dashboard", layout="wide")
 
 st.title("🤖 AI Trading Dashboard")
@@ -19,13 +18,12 @@ interval = st.sidebar.selectbox("Select Interval:", ["1d", "1wk", "1mo"])
 
 # Fetch data
 data = yf.download(ticker, period=period, interval=interval)
-
 if data.empty:
     st.error("No data found. Please check the symbol.")
 else:
     st.success(f"Showing {ticker} data")
 
-    # Candlestick chart
+    # Plot chart
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
         x=data.index,
@@ -36,32 +34,27 @@ else:
     fig.update_layout(title=f"{ticker} Price Chart", xaxis_rangeslider_visible=False)
     st.plotly_chart(fig, use_container_width=True)
 
-    # ---- Calculate Indicators ----
+    # Calculate indicators
     data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
-    data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()  
+    data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
 
-    # RSI calculation (clean version)
-    gain = data['Close'].diff().apply(lambda x: np.where(x > 0, x, 0))
-    loss = data['Close'].diff().apply(lambda x: np.where(x < 0, abs(x), 0))
+    # RSI Calculation (Fixed)
+    delta = data['Close'].diff()
+    gain = delta.apply(lambda x: x if x > 0 else 0)
+    loss = delta.apply(lambda x: abs(x) if x < 0 else 0)
     avg_gain = gain.rolling(14).mean()
     avg_loss = loss.rolling(14).mean()
-    rs = avg_gain / avg_loss
-    data['RSI'] = 100 - (100 / (1 + rs))
+    data['RSI'] = 100 - (100 / (1 + (avg_gain / avg_loss)))
 
-    # ---- Technical Indicators ----
+    # Technical indicators chart
     st.subheader("📈 Technical Indicators")
     st.line_chart(data[['Close', 'EMA20', 'EMA50']])
 
-    # ---- RSI Chart ----
+    # RSI chart
     st.subheader("RSI (Relative Strength Index)")
-    rsi_fig = go.Figure()
-    rsi_fig.add_trace(go.Scatter(x=data.index, y=data['RSI'], mode='lines', name='RSI'))
-    rsi_fig.add_hline(y=70, line_dash="dot", line_color="red", annotation_text="Overbought (70)")
-    rsi_fig.add_hline(y=30, line_dash="dot", line_color="green", annotation_text="Oversold (30)")
-    rsi_fig.update_layout(title="RSI (14-period)", yaxis_title="RSI Value", xaxis_title="Date")
-    st.plotly_chart(rsi_fig, use_container_width=True)
+    st.line_chart(data['RSI'])
 
-    # ---- Simple AI Insight ----
+    # Simple AI comment (rule-based for now)
     latest_rsi = data['RSI'].iloc[-1]
     if latest_rsi > 70:
         ai_comment = "⚠ The RSI suggests the stock may be *overbought*. Caution advised."
@@ -72,6 +65,8 @@ else:
 
     st.markdown(f"### 🤖 AI Insight: {ai_comment}")
 
-    # ---- Show Raw Data ----
+    # Show raw data
     with st.expander("View Raw Data"):
-        st.dataframe(data.tail()
+        st.dataframe(data.tail())
+
+
