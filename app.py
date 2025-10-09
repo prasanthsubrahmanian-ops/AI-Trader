@@ -135,17 +135,17 @@ if section == "Home":
                 
                 with col1:
                     price_change = ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
-                    st.metric("Current Price", f"₹{df['Close'].iloc[-1]:.2f}", f"{price_change:+.2f}%")
+                    st.metric("Current Price", f"{df['Close'].iloc[-1]:.2f}", f"{price_change:+.2f}%")
                 
                 with col2:
                     volume_change = ((df['Volume'].iloc[-1] - df['Volume'].iloc[-5:].mean()) / df['Volume'].iloc[-5:].mean()) * 100
                     st.metric("Volume", f"{df['Volume'].iloc[-1]:,}", f"{volume_change:+.1f}%")
                 
                 with col3:
-                    st.metric("52W High", f"₹{df['High'].max():.2f}")
+                    st.metric("52W High", f"{df['High'].max():.2f}")
                 
                 with col4:
-                    st.metric("52W Low", f"₹{df['Low'].min():.2f}")
+                    st.metric("52W Low", f"{df['Low'].min():.2f}")
                 
                 # Price Chart with Indicators
                 st.subheader(f"{stock_name} Price Chart")
@@ -192,7 +192,7 @@ elif section == "Research Reports":
         df = get_stock_data(ticker, 30)
         if not df.empty:
             current_price = df['Close'].iloc[-1]
-            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
     
@@ -201,8 +201,8 @@ elif section == "Research Reports":
     with col1:
         st.subheader("Fundamental Analysis")
         st.metric("P/E Ratio", "22.5", "+1.2")
-        st.metric("EPS", "₹85.20", "+5%")
-        st.metric("Market Cap", "₹12.5T", "+2.3%")
+        st.metric("EPS", "85.20", "+5%")
+        st.metric("Market Cap", "12.5T", "+2.3%")
         
     with col2:
         st.subheader("Technical Ratings")
@@ -226,7 +226,7 @@ elif section == "Options Trading":
         df = get_stock_data(ticker, 30)
         if not df.empty:
             current_price = df['Close'].iloc[-1]
-            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
     
@@ -266,7 +266,7 @@ elif section == "Chart Analysis":
         df = get_stock_data(ticker, 30)
         if not df.empty:
             current_price = df['Close'].iloc[-1]
-            st.info(f"**Current {stock_name} Price:** ₹{current_price:.2f}")
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
     
@@ -402,7 +402,7 @@ elif section == "AI Predictions":
                 st.metric("Confidence Score", f"{confidence:.1f}%")
             
             with col3:
-                st.metric("Current Price", f"₹{current_price:.2f}")
+                st.metric("Current Price", f"{current_price:.2f}")
             
             # Technical Factors
             st.subheader("Technical Factors")
@@ -430,17 +430,17 @@ elif section == "AI Predictions":
                 if trend == "BULLISH":
                     target_1 = current_price * 1.05
                     target_2 = current_price * 1.10
-                    st.metric("Target 1 (5%)", f"₹{target_1:.2f}")
-                    st.metric("Target 2 (10%)", f"₹{target_2:.2f}")
+                    st.metric("Target 1 (5%)", f"{target_1:.2f}")
+                    st.metric("Target 2 (10%)", f"{target_2:.2f}")
                 else:
                     target_1 = current_price * 0.95
                     target_2 = current_price * 0.90
-                    st.metric("Support 1 (5%)", f"₹{target_1:.2f}")
-                    st.metric("Support 2 (10%)", f"₹{target_2:.2f}")
+                    st.metric("Support 1 (5%)", f"{target_1:.2f}")
+                    st.metric("Support 2 (10%)", f"{target_2:.2f}")
             
             with col2:
                 stop_loss = current_price * 0.97 if trend == "BULLISH" else current_price * 1.03
-                st.metric("Stop Loss", f"₹{stop_loss:.2f}")
+                st.metric("Stop Loss", f"{stop_loss:.2f}")
             
             with col3:
                 risk_reward = "1:2" if trend == "BULLISH" else "1:1.5"
