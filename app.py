@@ -41,15 +41,16 @@ else:
     # RSI Calculation (Fixed)
     delta = data['Close'].diff()
     # RSI Calculation (Safe)
-delta = data['Close'].diff()       # price change
-gain = delta.clip(lower=0)         # keep positive changes, set negatives to 0
-loss = -delta.clip(upper=0)        # keep negative changes as positive, set positives to 0
+delta = data['Close'].diff()       # price changes
+gain = delta.clip(lower=0)         # positive changes only
+loss = -delta.clip(upper=0)        # negative changes as positive
 
 avg_gain = gain.rolling(14).mean()
 avg_loss = loss.rolling(14).mean()
 
 rs = avg_gain / avg_loss
 data['RSI'] = 100 - (100 / (1 + rs))
+
 
 
 
