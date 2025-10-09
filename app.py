@@ -40,11 +40,17 @@ else:
 
     # RSI Calculation (Fixed)
     delta = data['Close'].diff()
-    gain = delta.apply(lambda x: x if x > 0 else 0)
-    loss = delta.apply(lambda x: abs(x) if x < 0 else 0)
-    avg_gain = gain.rolling(14).mean()
-    avg_loss = loss.rolling(14).mean()
-    data['RSI'] = 100 - (100 / (1 + (avg_gain / avg_loss)))
+    # RSI Calculation (Safe)
+delta = data['Close'].diff()
+gain = delta.clip(lower=0)       # positive changes only
+loss = -delta.clip(upper=0)      # negative changes as positive
+
+avg_gain = gain.rolling(14).mean()
+avg_loss = loss.rolling(14).mean()
+
+rs = avg_gain / avg_loss
+data['RSI'] = 100 - (100 / (1 + rs))
+
 
     # Technical indicators chart
     st.subheader("📈 Technical Indicators")
