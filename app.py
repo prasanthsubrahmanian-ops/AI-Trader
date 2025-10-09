@@ -1,63 +1,55 @@
 import streamlit as st
-import yfinance as yf
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
-import datetime
+from sklearn.linear_model import LinearRegression
 
-st.set_page_config(page_title="AI Trading Dashboard", layout="wide")
+# -----------------------------
+# Main App Function
+# -----------------------------
+def main():
+    # App Title
+    st.title("AI Trader App")
 
-st.title("🤖 AI Trading Dashboard")
-st.markdown("Analyze stocks, visualize trends, and get simple AI insights.")
+    # Sidebar for user inputs
+    st.sidebar.header("User Inputs")
+    stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "TCS")
+    num_days = st.sidebar.slider("Number of Days to Predict", 1, 10, 1)
 
-# Sidebar inputs
-st.sidebar.header("📊 Select Stock")
-ticker = st.sidebar.text_input("Enter stock symbol (e.g. TCS.NS, INFY.NS, RELIANCE.NS):", "TCS.NS")
-period = st.sidebar.selectbox("Select Time Period:", ["1mo", "3mo", "6mo", "1y", "2y"])
-interval = st.sidebar.selectbox("Select Interval:", ["1d", "1wk", "1mo"])
+    # Load sample data (replace with real API or CSV)
+    st.subheader(f"📊 Historical Data for {stock_symbol}")
+    dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
+    prices = np.random.randint(3000, 4000, size=(30,))
+    df = pd.DataFrame({"Date": dates, "Close": prices})
+    st.dataframe(df)
 
-# Fetch data
-data = yf.download(ticker, period=period, interval=interval)
-if data.empty:
-    st.error("No data found. Please check the symbol.")
-else:
-    st.success(f"Showing {ticker} data")
-
-    # Plot chart
-    fig = go.Figure()
-    fig.add_trace(go.Candlestick(
-        x=data.index,
-        open=data['Open'], high=data['High'],
-        low=data['Low'], close=data['Close'],
-        name='Market Data'
-    ))
-    fig.update_layout(title=f"{ticker} Price Chart", xaxis_rangeslider_visible=False)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Calculate indicators
-    data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
-    data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
-    data['RSI'] = 100 - (100 / (1 + (data['Close'].diff().apply(lambda x: np.where(x>0, x, 0)).rolling(14).mean() /
-                                     data['Close'].diff().apply(lambda x: np.where(x<0, abs(x), 0)).rolling(14).mean()))))
-
+    # -----------------------------
+    # Technical Indicators
+    # -----------------------------
     st.subheader("📈 Technical Indicators")
-    st.line_chart(data[['Close', 'EMA20', 'EMA50']])
 
-    # RSI chart
-    st.subheader("RSI (Relative Strength Index)")
-    st.line_chart(data['RSI'])
+    # Example: Moving Average
+    df['MA5'] = df['Close'].rolling(window=5).mean()
+    df['MA10'] = df['Close'].rolling(window=10).mean()
 
-    # Simple AI comment (rule-based for now)
-    latest_rsi = data['RSI'].iloc[-1]
-    if latest_rsi > 70:
-        ai_comment = "⚠ The RSI suggests the stock may be *overbought*. Caution advised."
-    elif latest_rsi < 30:
-        ai_comment = "💡 The RSI suggests the stock may be *oversold*. It could rebound soon."
-    else:
-        ai_comment = "📊 The RSI indicates a *neutral* zone. Watch for breakout signals."
+    st.line_chart(df.set_index('Date')[['Close', 'MA5', 'MA10']])
 
-    st.markdown(f"### 🤖 AI Insight: {ai_comment}")
+    # -----------------------------
+    # Next Day Prediction (Linear Regression Example)
+    # -----------------------------
+    st.subheader("🤖 Next Day Price Prediction")
+    df['Target'] = df['Close'].shift(-1)
+    X = np.arange(len(df)).reshape(-1, 1)
+    y = df['Close'].values
 
-    # Show raw data
-    with st.expander("View Raw Data"):
-        st.dataframe(data.tail())
+    model = LinearRegression()
+    model.fit(X[:-1], y[:-1])
+
+    next_day_index = np.array([[len(df)]])
+    pred_next = model.predict(next_day_index)
+    st.write(f"Predicted Close for next day: ₹{round(pred_next[0], 2)}")
+
+# -----------------------------
+# Run the App
+# -----------------------------
+if __name__ == "__main__":
+    main()
