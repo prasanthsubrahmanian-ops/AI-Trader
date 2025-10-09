@@ -18,7 +18,6 @@ custom_css = """
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-.css-1v3fvcr.egzxvld0 {visibility: hidden;}
 
 body, .main, .block-container, .sidebar .sidebar-content {
     background-color: #000 !important;
@@ -62,12 +61,25 @@ div[data-testid="stDataFrame"] {
 }
 
 /* Sidebar styling */
-.css-1d391kg, .css-1lcbmhc, .css-1outpf7 {
+section[data-testid="stSidebar"] {
+    background-color: #111 !important;
+    border-right: 1px solid #333;
+}
+
+section[data-testid="stSidebar"] > div {
     background-color: #111 !important;
 }
 
-.css-1d391kg {
-    border-right: 1px solid #333;
+section[data-testid="stSidebar"] .stRadio label {
+    color: white !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox label {
+    color: white !important;
+}
+
+section[data-testid="stSidebar"] .stSlider label {
+    color: white !important;
 }
 
 @media (max-width: 768px) {
@@ -124,14 +136,15 @@ with st.sidebar:
     
     section = st.radio(
         "Choose Section",
-        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
+        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"),
+        key="nav_radio"
     )
     
     st.markdown("---")
     st.markdown("### 🔍 Stock Selection")
     
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()))
-    period = st.slider("Period (Days)", 10, 365, 60)
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()), key="stock_select")
+    period = st.slider("Period (Days)", 10, 365, 60, key="period_slider")
     
     st.markdown("---")
     st.markdown("### ℹ️ Info")
@@ -184,7 +197,7 @@ if section == "Home":
                     low_52w = float(df['Low'].min())
                     st.metric("52W Low", f"{low_52w:.2f}")
                 
-                # Price Chart with Indicators - FIXED VERSION
+                # Price Chart with Indicators
                 st.subheader(f"{stock_name} Price Chart")
                 
                 # Create a simple chart using Altair with proper data structure
@@ -194,8 +207,7 @@ if section == "Home":
                 base = alt.Chart(chart_data).encode(
                     x='Date:T'
                 ).properties(
-                    height=400,
-                    width=800
+                    height=400
                 )
                 
                 # Create individual lines
@@ -230,7 +242,7 @@ if section == "Home":
                 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
                 st.dataframe(display_df, use_container_width=True)
                 
-                # Volume Chart - FIXED VERSION
+                # Volume Chart
                 st.subheader("Trading Volume")
                 volume_chart = alt.Chart(df).mark_bar(color='#00ccff').encode(
                     x='Date:T',
