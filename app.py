@@ -4,17 +4,38 @@ import numpy as np
 
 st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide")
 
-# Sidebar Navigation - functional navigation!
+# Black background for all content
+st.markdown("""
+    <style>
+        body, .main, .block-container {
+            background-color: #111 !important;
+            color: #fff !important;
+        }
+        .sidebar .sidebar-content, .css-1v0mbdj, .css-fblp2m {
+            background-color: #111 !important;
+            color: #fff !important;
+        }
+        .header-text {
+            margin-top: 1.2rem;
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: left;
+        }
+        h2, h3, h4, h5 { color: #fff !important; }
+        div[data-testid="stDataFrame"] { background-color: #222 !important; color: #fff !important;}
+    </style>
+""", unsafe_allow_html=True)
+
+# Sidebar navigation—no name/email at all
 section = st.sidebar.radio(
-    "Go to", 
+    "Navigation",
     ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
 )
 
-# Clean heading
-st.markdown(
-    '<h1 style="margin-top:1.4rem; font-size:2.2rem;font-weight:700; text-align:left;">PRASANTH AI Trading Insights</h1>',
-    unsafe_allow_html=True
-)
+# Main heading
+st.markdown('<div class="header-text">PRASANTH AI Trading Insights</div>', unsafe_allow_html=True)
 
 if section == "Home":
     stock_name = st.selectbox("Stock Name", ["TCS", "RELIANCE", "INFY", "NIFTY"])
@@ -48,16 +69,17 @@ if section == "Home":
 
 elif section == "Research Reports":
     st.subheader("Research Reports")
-    st.write("Detailed AI-powered research reports will be displayed here. (Add your own reporting logic or files!)")
+    st.write("Detailed AI-powered research will be displayed here. Add your reports, visuals or upload content!")
 
 elif section == "Options Trading":
     st.subheader("Options Trading")
-    st.write("Options trading analytics and tools appear here. (You can integrate options chain charts, strategies, etc.)")
+    st.write("Options trading analytics and tools are displayed here. Integrate your options charts, signals, etc!")
 
 elif section == "Chart Analysis":
     st.subheader("Chart Analysis")
-    st.write("Comprehensive chart analysis and technical indicators displayed here. (Add more charting logic or uploads!)")
+    st.write("Technical chart analysis and indicators appear here. Expand with custom chart code or uploads.")
 
 elif section == "AI Predictions":
     st.subheader("AI Predictions")
-    st.write("Future AI-driven stock/option/market predictions would show here. (Plug in your models or upload prediction results!)")
+    st.write("AI-driven market predictions appear here. Plug in your models or show output data/results.")
+
