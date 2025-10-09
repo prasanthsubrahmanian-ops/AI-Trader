@@ -38,7 +38,8 @@ else:
     data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
     data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
     data['RSI'] = 100 - (100 / (1 + (data['Close'].diff().apply(lambda x: np.where(x>0, x, 0)).rolling(14).mean() /
-                                     data['Close'].diff().apply(lambda x: np.where(x<0, abs(x), 0)).rolling(14).mean()))))
+                         data['Close'].diff().apply(lambda x: np.where(x < 0, abs(x), 0)).rolling(14).mean())
+      
 
     st.subheader("📈 Technical Indicators")
     st.line_chart(data[['Close', 'EMA20', 'EMA50']])
