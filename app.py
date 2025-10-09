@@ -129,23 +129,30 @@ if section == "Home":
                 df["SMA50"] = df["Close"].rolling(50).mean()
                 df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
                 
-                # Key Metrics
+                # Key Metrics - Simplified formatting
                 st.subheader("📈 Key Metrics")
                 col1, col2, col3, col4 = st.columns(4)
                 
+                current_price = float(df['Close'].iloc[-1])
+                prev_price = float(df['Close'].iloc[-2])
+                price_change_pct = ((current_price - prev_price) / prev_price) * 100
+                
                 with col1:
-                    price_change = ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
-                    st.metric("Current Price", f"{df['Close'].iloc[-1]:.2f}", f"{price_change:+.2f}%")
+                    st.metric("Current Price", f"{current_price:.2f}", f"{price_change_pct:+.2f}%")
                 
                 with col2:
-                    volume_change = ((df['Volume'].iloc[-1] - df['Volume'].iloc[-5:].mean()) / df['Volume'].iloc[-5:].mean()) * 100
-                    st.metric("Volume", f"{df['Volume'].iloc[-1]:,}", f"{volume_change:+.1f}%")
+                    current_volume = int(df['Volume'].iloc[-1])
+                    avg_volume = float(df['Volume'].iloc[-5:].mean())
+                    volume_change_pct = ((current_volume - avg_volume) / avg_volume) * 100
+                    st.metric("Volume", f"{current_volume:,}", f"{volume_change_pct:+.1f}%")
                 
                 with col3:
-                    st.metric("52W High", f"{df['High'].max():.2f}")
+                    high_52w = float(df['High'].max())
+                    st.metric("52W High", f"{high_52w:.2f}")
                 
                 with col4:
-                    st.metric("52W Low", f"{df['Low'].min():.2f}")
+                    low_52w = float(df['Low'].min())
+                    st.metric("52W Low", f"{low_52w:.2f}")
                 
                 # Price Chart with Indicators
                 st.subheader(f"{stock_name} Price Chart")
@@ -166,7 +173,9 @@ if section == "Home":
                 
                 # OHLC Data
                 st.subheader("OHLC Data")
-                st.dataframe(df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(30), use_container_width=True)
+                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(30).copy()
+                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+                st.dataframe(display_df, use_container_width=True)
                 
                 # Volume Chart
                 st.subheader("Trading Volume")
@@ -191,7 +200,7 @@ elif section == "Research Reports":
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
-            current_price = df['Close'].iloc[-1]
+            current_price = float(df['Close'].iloc[-1])
             st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
@@ -200,15 +209,15 @@ elif section == "Research Reports":
     
     with col1:
         st.subheader("Fundamental Analysis")
-        st.metric("P/E Ratio", "22.5", "+1.2")
-        st.metric("EPS", "85.20", "+5%")
-        st.metric("Market Cap", "12.5T", "+2.3%")
+        st.metric("P/E Ratio", "22.5", "1.2")
+        st.metric("EPS", "85.20", "5.0")
+        st.metric("Market Cap", "12.5T", "2.3")
         
     with col2:
         st.subheader("Technical Ratings")
-        st.metric("RSI Signal", "Neutral", "-")
-        st.metric("Moving Avg", "Bullish", "↑")
-        st.metric("Volatility", "Medium", "-")
+        st.metric("RSI Signal", "Neutral")
+        st.metric("Moving Avg", "Bullish")
+        st.metric("Volatility", "Medium")
     
     uploaded_file = st.file_uploader("Upload Research PDF", type="pdf")
     if uploaded_file:
@@ -225,7 +234,7 @@ elif section == "Options Trading":
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
-            current_price = df['Close'].iloc[-1]
+            current_price = float(df['Close'].iloc[-1])
             st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
@@ -244,15 +253,17 @@ elif section == "Options Trading":
                 
                 with col1:
                     st.write("**Calls**")
-                    st.dataframe(opt_chain.calls.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']])
+                    calls_df = opt_chain.calls.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']]
+                    st.dataframe(calls_df)
                 
                 with col2:
                     st.write("**Puts**")
-                    st.dataframe(opt_chain.puts.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']])
+                    puts_df = opt_chain.puts.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']]
+                    st.dataframe(puts_df)
             else:
                 st.info("Options data not available for this symbol")
         except Exception as e:
-            st.info("Options data not available for this symbol")
+            st.info(f"Options data not available: {str(e)}")
 
 # ----------------------- CHART ANALYSIS -----------------------
 elif section == "Chart Analysis":
@@ -265,7 +276,7 @@ elif section == "Chart Analysis":
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
-            current_price = df['Close'].iloc[-1]
+            current_price = float(df['Close'].iloc[-1])
             st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
     except:
         pass
@@ -339,10 +350,10 @@ elif section == "AI Predictions":
             df["SMA20"] = df["Close"].rolling(20).mean()
             df["SMA50"] = df["Close"].rolling(50).mean()
             
-            current_price = df['Close'].iloc[-1]
-            sma_20 = df['SMA20'].iloc[-1]
-            sma_50 = df['SMA50'].iloc[-1]
-            rsi = calculate_rsi(df['Close']).iloc[-1]
+            current_price = float(df['Close'].iloc[-1])
+            sma_20 = float(df['SMA20'].iloc[-1])
+            sma_50 = float(df['SMA50'].iloc[-1])
+            rsi = float(calculate_rsi(df['Close']).iloc[-1])
             
             # Simple AI Prediction Logic
             st.subheader(f"🎯 {stock_name} - AI Trading Signal")
@@ -366,7 +377,8 @@ elif section == "AI Predictions":
                 prediction_score -= 25  # Overbought - potential sell
             
             # Price momentum
-            price_change_5d = ((current_price - df['Close'].iloc[-5]) / df['Close'].iloc[-5]) * 100
+            price_5d_ago = float(df['Close'].iloc[-5])
+            price_change_5d = ((current_price - price_5d_ago) / price_5d_ago) * 100
             if price_change_5d > 2:
                 prediction_score += 15
             elif price_change_5d < -2:
@@ -419,7 +431,7 @@ elif section == "AI Predictions":
                 st.metric("5D Change", f"{price_change_5d:+.1f}%")
             
             with tech_col4:
-                volatility = df['Close'].pct_change().std() * 100
+                volatility = float(df['Close'].pct_change().std() * 100)
                 st.metric("Volatility", f"{volatility:.1f}%")
             
             # Price Targets
