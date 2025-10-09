@@ -4,14 +4,17 @@ import numpy as np
 
 st.set_page_config(page_title="PRASANTH AI Trading Insights", layout="wide", initial_sidebar_state="expanded")
 
-# Sidebar Navigation and Inputs
+# SIDEBAR
 st.sidebar.markdown("## 📂 Navigation")
 section = st.sidebar.radio(
-    "Go to", 
+    "Go to",
     ["Home", "Research Reports", "Option Trading AI", "Chart Analysis"]
 )
-
 st.sidebar.markdown("---")
+st.sidebar.markdown("### Stock Selection")
+stock_name = st.sidebar.selectbox("Stock Name", ["TCS", "RELIANCE", "INFY", "NIFTY"])
+period = st.sidebar.slider("Period (Days)", 10, 60, 30)
+show_chart = st.sidebar.button("Show Price Chart")
 st.sidebar.caption("Built with Streamlit | pandas | NumPy")
 
 if section == "Home":
@@ -24,27 +27,30 @@ if section == "Home":
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Market Trends")
+    # Stock chart and OHLC display only when button is pressed
+    if show_chart:
+        st.subheader(f"{stock_name} Price Chart & OHLC (Last {period} Days)")
+        dates = pd.date_range(end=pd.Timestamp.today(), periods=period)
+        # Simulated OHLC data: replace with real data as needed
+        base = np.linspace(1800, 2200, period) + np.random.normal(0, 20, period)
+        df = pd.DataFrame({
+            'Date': dates,
+            'Open': base + np.random.normal(2, 2, period),
+            'High': base + np.random.normal(10, 3, period),
+            'Low': base - np.random.normal(10, 3, period),
+            'Close': base + np.random.normal(0, 3, period)
+        })
+        st.line_chart(df.set_index("Date")[["Close"]])
+        st.dataframe(df.set_index("Date")[["Open", "High", "Low", "Close"]])
 
-    # Sidebar for user input (stock, price type, period)
-    st.sidebar.markdown("### Select Stock & Price")
-    stock_symbol = st.sidebar.selectbox("Stock Name", ["TCS", "RELIANCE", "INFY", "NIFTY"])
-    price_type = st.sidebar.selectbox("Price Type", ["Close", "Open", "High", "Low"])
-    num_days = st.sidebar.slider("Number of Days", 10, 60, 30)
-
-    # Simulate sample data
-    dates = pd.date_range(end=pd.Timestamp.today(), periods=num_days)
-    np.random.seed(42)
-    # This part simulates different price types for illustration
-    price_base = np.linspace(3000, 3500, num=num_days)
-    df = pd.DataFrame({
-        "Date": dates,
-        "Close": price_base + np.random.normal(0, 10, size=num_days),
-        "Open": price_base + np.random.normal(0, 15, size=num_days),
-        "High": price_base + 10 + np.random.normal(0, 5, size=num_days),
-        "Low": price_base - 10 + np.random.normal(0, 5, size=num_days),
-    })
-    st.line_chart(df.set_index('Date')[[price_type]])
+    # Always show NIFTY chart below
+    st.markdown("---")
+    st.subheader("NIFTY Chart Example")
+    nifty_days = 30
+    nifty_dates = pd.date_range(end=pd.Timestamp.today(), periods=nifty_days)
+    nifty = np.linspace(19500, 20000, nifty_days) + np.random.normal(0, 25, nifty_days)
+    nifty_df = pd.DataFrame({"Date": nifty_dates, "NIFTY": nifty})
+    st.line_chart(nifty_df.set_index("Date")["NIFTY"])
 
 elif section == "Research Reports":
     st.header("Research Reports")
@@ -58,7 +64,7 @@ elif section == "Chart Analysis":
     st.header("Chart Analysis")
     st.write("Market data visualization - indicators, trends, and more.")
 
-# Optional: Small CSS tweaks for dark theme enhancements
+# Dark theme tweaks (optional)
 st.markdown("""
     <style>
     .css-1d391kg {background-color: #222 !important;}
