@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 st.set_page_config(
     page_title="PRASANTH AI Trading Insights", 
     layout="wide",
-    initial_sidebar_state="expanded"  # Ensure sidebar is expanded by default
+    initial_sidebar_state="expanded"
 )
 
 # ----------------------- CUSTOM STYLE -----------------------
@@ -18,7 +18,7 @@ custom_css = """
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-.css-1v3fvcr.egzxvld0 {visibility: hidden;}  /* user profile icon */
+.css-1v3fvcr.egzxvld0 {visibility: hidden;}
 
 body, .main, .block-container, .sidebar .sidebar-content {
     background-color: #000 !important;
@@ -70,11 +70,6 @@ div[data-testid="stDataFrame"] {
     border-right: 1px solid #333;
 }
 
-/* Hide the sidebar collapse button */
-.css-1v0mbdj, .css-15zrgzn { 
-    display: none !important; 
-}
-
 @media (max-width: 768px) {
     .landing-box { padding: 1.5rem; }
     .main-header { font-size: 2rem; text-align: center; }
@@ -86,7 +81,7 @@ div[data-testid="stDataFrame"] {
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ----------------------- CACHED FUNCTIONS -----------------------
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=300)
 def get_stock_data(ticker, period):
     return yf.download(ticker, period=f"{period}d")
 
@@ -129,15 +124,14 @@ with st.sidebar:
     
     section = st.radio(
         "Choose Section",
-        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"),
-        key="nav_radio"
+        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
     )
     
     st.markdown("---")
     st.markdown("### 🔍 Stock Selection")
     
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), key="stock_select")
-    period = st.slider("Period (Days)", 10, 365, 60, key="period_slider")
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()))
+    period = st.slider("Period (Days)", 10, 365, 60)
     
     st.markdown("---")
     st.markdown("### ℹ️ Info")
@@ -190,13 +184,45 @@ if section == "Home":
                     low_52w = float(df['Low'].min())
                     st.metric("52W Low", f"{low_52w:.2f}")
                 
-                # Price Chart with Indicators
+                # Price Chart with Indicators - FIXED VERSION
                 st.subheader(f"{stock_name} Price Chart")
                 
-                # Create a simple dataframe for the chart
-                chart_df = df[['Date', 'Close', 'SMA20', 'SMA50', 'EMA20']].set_index('Date')
-                st.line_chart(chart_df, height=400)
-                st.caption("Price (Blue) | SMA20 (Orange) | SMA50 (Green) | EMA20 (Red)")
+                # Create a simple chart using Altair with proper data structure
+                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50', 'EMA20']].copy()
+                
+                # Create base chart
+                base = alt.Chart(chart_data).encode(
+                    x='Date:T'
+                ).properties(
+                    height=400,
+                    width=800
+                )
+                
+                # Create individual lines
+                close_line = base.mark_line(color='#00ffcc').encode(
+                    y='Close:Q',
+                    tooltip=['Date:T', 'Close:Q']
+                )
+                
+                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(
+                    y='SMA20:Q',
+                    tooltip=['Date:T', 'SMA20:Q']
+                )
+                
+                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(
+                    y='SMA50:Q',
+                    tooltip=['Date:T', 'SMA50:Q']
+                )
+                
+                ema20_line = base.mark_line(color='#33cc33', strokeDash=[2,2]).encode(
+                    y='EMA20:Q',
+                    tooltip=['Date:T', 'EMA20:Q']
+                )
+                
+                # Combine all lines
+                chart = close_line + sma20_line + sma50_line + ema20_line
+                st.altair_chart(chart, use_container_width=True)
+                st.caption("🟢 Close | 🟡 SMA20 | 🟣 SMA50 | 🟢 EMA20")
                 
                 # OHLC Data
                 st.subheader("OHLC Data")
@@ -204,10 +230,16 @@ if section == "Home":
                 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
                 st.dataframe(display_df, use_container_width=True)
                 
-                # Volume Chart
+                # Volume Chart - FIXED VERSION
                 st.subheader("Trading Volume")
-                volume_df = df[['Date', 'Volume']].set_index('Date')
-                st.bar_chart(volume_df, height=300)
+                volume_chart = alt.Chart(df).mark_bar(color='#00ccff').encode(
+                    x='Date:T',
+                    y='Volume:Q',
+                    tooltip=['Date:T', 'Volume:Q']
+                ).properties(
+                    height=300
+                )
+                st.altair_chart(volume_chart, use_container_width=True)
                 
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
@@ -336,9 +368,19 @@ elif section == "Chart Analysis":
                 with col3:
                     st.metric("RSI Trend", "Up" if current_rsi > df['RSI'].iloc[-5] else "Down")
                 
-                # Simple RSI chart using line_chart
-                rsi_df = df[['Date', 'RSI']].set_index('Date')
-                st.line_chart(rsi_df, height=300)
+                # RSI chart using Altair
+                rsi_chart = alt.Chart(df).mark_line(color='#ff6b6b').encode(
+                    x='Date:T',
+                    y=alt.Y('RSI:Q', scale=alt.Scale(domain=[0, 100])),
+                    tooltip=['Date:T', 'RSI:Q']
+                ).properties(height=300)
+                
+                # Add reference lines
+                overbought = alt.Chart(pd.DataFrame({'y': [70]})).mark_rule(color='red', strokeDash=[5,5]).encode(y='y:Q')
+                oversold = alt.Chart(pd.DataFrame({'y': [30]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='y:Q')
+                neutral = alt.Chart(pd.DataFrame({'y': [50]})).mark_rule(color='gray', strokeDash=[2,2]).encode(y='y:Q')
+                
+                st.altair_chart(rsi_chart + overbought + oversold + neutral, use_container_width=True)
                 st.caption("RSI above 70: Overbought | RSI below 30: Oversold")
             
             # MACD Calculation and Display
@@ -357,16 +399,28 @@ elif section == "Chart Analysis":
                 with col2:
                     st.metric("Signal", f"{current_signal:.4f}")
                 with col3:
-                    color = "green" if current_histogram > 0 else "red"
-                    st.metric("Histogram", f"{current_histogram:.4f}", delta_color="off")
+                    st.metric("Histogram", f"{current_histogram:.4f}")
                 
-                # Simple MACD chart using line_chart
-                macd_df = pd.DataFrame({
+                # MACD chart using Altair
+                macd_data = pd.DataFrame({
                     'Date': df['Date'],
-                    'MACD': macd,
-                    'Signal': signal
-                }).set_index('Date')
-                st.line_chart(macd_df, height=300)
+                    'MACD': macd.values,
+                    'Signal': signal.values
+                })
+                
+                macd_base = alt.Chart(macd_data).encode(x='Date:T')
+                
+                macd_line = macd_base.mark_line(color='#00ffcc').encode(
+                    y='MACD:Q',
+                    tooltip=['Date:T', 'MACD:Q']
+                )
+                
+                signal_line = macd_base.mark_line(color='#ffaa00').encode(
+                    y='Signal:Q',
+                    tooltip=['Date:T', 'Signal:Q']
+                )
+                
+                st.altair_chart(macd_line + signal_line, use_container_width=True)
                 
     except Exception as e:
         st.error(f"Error in chart analysis: {str(e)}")
@@ -502,23 +556,3 @@ elif section == "AI Predictions":
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
 st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
-
-# ----------------------- SIDEBAR COLLAPSE FIX -----------------------
-st.markdown("""
-<script>
-// Prevent sidebar from collapsing
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('[data-testid="stSidebar"]');
-    if (sidebar) {
-        sidebar.style.minWidth = '300px';
-        sidebar.style.maxWidth = '300px';
-    }
-    
-    // Hide the collapse button
-    const collapseBtn = document.querySelector('[data-testid="baseButton-headerNoPadding"]');
-    if (collapseBtn) {
-        collapseBtn.style.display = 'none';
-    }
-});
-</script>
-""", unsafe_allow_html=True)
