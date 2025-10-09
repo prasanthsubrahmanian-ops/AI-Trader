@@ -52,8 +52,6 @@ rs = avg_gain / avg_loss
 data['RSI'] = 100 - (100 / (1 + rs))
 
 
-
-
     # Technical indicators chart
     st.subheader("📈 Technical Indicators")
     st.line_chart(data[['Close', 'EMA20', 'EMA50']])
