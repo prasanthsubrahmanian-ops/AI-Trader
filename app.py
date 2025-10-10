@@ -622,28 +622,174 @@ def show_ai_predictions():
     with signal_cols[3]:
         st.metric("Target 1", f"₹{current_price * 1.08:.2f}", "+8.0%")
 
-# Continue with other pages (Options Trading, Portfolio Insights, Backtesting)...
-# [The rest of your existing code for other pages remains the same]
+# ----------------------- OPTIONS TRADING PAGE -----------------------
+def show_options_trading():
+    """Options Trading - Option chain & strategy analyzer"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>💹 Options Trading</h2>'
+        '<p>Options chain analysis and strategy builder</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current price
+    current_price = 2500
+    try:
+        df = get_daily_data(ticker, 1)
+        if not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
+    except:
+        current_price = 2500
+    
+    # Options Overview
+    st.markdown("### 📊 Options Overview")
+    overview_cols = st.columns(4)
+    with overview_cols[0]:
+        st.metric("IV Rank", "78%", "High")
+    with overview_cols[1]:
+        st.metric("Put/Call Ratio", "0.82", "Bullish")
+    with overview_cols[2]:
+        st.metric("Open Interest", "2.8M", "+15%")
+    with overview_cols[3]:
+        st.metric("Volume", "1.9M", "+22%")
+    
+    # Strategy Builder
+    st.markdown("### 🛠 Strategy Builder")
+    
+    strat_cols = st.columns(2)
+    with strat_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Strategy Configuration</div>', unsafe_allow_html=True)
+        
+        strategy = st.selectbox("Select Strategy", 
+                              ["Long Call", "Long Put", "Covered Call", "Bull Spread", "Iron Condor"])
+        expiry = st.selectbox("Expiry", ["Weekly", "Monthly"])
+        strike = st.selectbox("Strike", ["ATM", "OTM 10%", "OTM 20%", "ITM 10%"])
+        
+        if st.button("Analyze Strategy", use_container_width=True):
+            st.success("Strategy analyzed successfully!")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with strat_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Strategy Analysis</div>', unsafe_allow_html=True)
+        
+        # P&L Chart
+        strikes = np.arange(current_price - 100, current_price + 100, 10)
+        pnl = [max(s - (current_price + 15), -15) * 100 for s in strikes]  # Mock P&L
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=strikes, y=pnl, mode='lines', name='P&L', line=dict(color='#00ffcc')))
+        fig.add_vline(x=current_price, line_dash="dash", line_color="white")
+        fig.update_layout(title="Profit & Loss", height=250, template="plotly_dark", showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.metric("Max Profit", "₹12,500")
+        st.metric("Max Loss", "₹1,500")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# ----------------------- MAIN PAGE ROUTING -----------------------
-if section == "Home":
-    show_home()
-elif section == "Market Trends":
-    show_market_trends()
-elif section == "AI Predictions":
-    show_ai_predictions()
-elif section == "Options Trading":
-    show_options_trading()
-elif section == "Portfolio Insights":
-    show_portfolio_insights()
-elif section == "Backtesting":
-    show_backtesting()
+# ----------------------- PORTFOLIO INSIGHTS PAGE -----------------------
+def show_portfolio_insights():
+    """Portfolio Insights - User or sample portfolio charts"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>📊 Portfolio Insights</h2>'
+        '<p>Portfolio analysis and performance tracking</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Sample Portfolio
+    st.markdown("### 💼 Sample Portfolio")
+    
+    portfolio_data = {
+        "Stock": ["RELIANCE", "TCS", "HDFC BANK", "INFY", "ICICI BANK"],
+        "Quantity": [50, 100, 75, 120, 80],
+        "Avg Price": [2450, 3200, 1650, 1850, 920],
+        "Current Price": [2580, 3350, 1680, 1920, 950],
+        "P&L (%)": ["+5.3%", "+4.7%", "+1.8%", "+3.8%", "+3.3%"]
+    }
+    
+    portfolio_df = pd.DataFrame(portfolio_data)
+    portfolio_df['Investment'] = portfolio_df['Quantity'] * portfolio_df['Avg Price']
+    portfolio_df['Current Value'] = portfolio_df['Quantity'] * portfolio_df['Current Price']
+    portfolio_df['P&L'] = portfolio_df['Current Value'] - portfolio_df['Investment']
+    
+    # Portfolio Summary
+    total_investment = portfolio_df['Investment'].sum()
+    total_value = portfolio_df['Current Value'].sum()
+    total_pnl = total_value - total_investment
+    total_pnl_pct = (total_pnl / total_investment) * 100
+    
+    summary_cols = st.columns(4)
+    with summary_cols[0]:
+        st.metric("Total Investment", f"₹{total_investment:,.0f}")
+    with summary_cols[1]:
+        st.metric("Current Value", f"₹{total_value:,.0f}")
+    with summary_cols[2]:
+        st.metric("Total P&L", f"₹{total_pnl:,.0f}", f"{total_pnl_pct:+.1f}%")
+    with summary_cols[3]:
+        st.metric("Portfolio Beta", "0.92", "Low Risk")
+    
+    # Portfolio Allocation Chart
+    st.markdown("### 📈 Portfolio Allocation")
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=portfolio_df['Stock'],
+        values=portfolio_df['Current Value'],
+        hole=0.4,
+        marker_colors=['#00ffcc', '#0099ff', '#ff4444', '#ffaa00', '#ff00ff']
+    )])
+    fig.update_layout(template="plotly_dark", height=400)
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Performance Chart
+    st.markdown("### 📊 Performance Trend")
+    
+    # Mock performance data
+    dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
+    performance = 1000000 + np.cumsum(np.random.normal(5000, 20000, len(dates)))
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=dates, y=performance, mode='lines', name='Portfolio Value', line=dict(color='#00ffcc')))
+    fig.update_layout(
+        title="Portfolio Value Over Time",
+        template="plotly_dark",
+        height=300,
+        xaxis_title="Date",
+        yaxis_title="Portfolio Value (₹)"
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #666;'>"
-    "Smart Trade with Prasanth Subrahmanian • Advanced Trading Analytics • Powered by AI"
-    "</div>", 
-    unsafe_allow_html=True
-)
+# ----------------------- BACKTESTING PAGE -----------------------
+def show_backtesting():
+    """Backtesting - Test strategies on past data"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>🔍 Strategy Backtesting</h2>'
+        '<p>Test trading strategies on historical data</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Strategy Configuration
+    st.markdown("### ⚙ Strategy Configuration")
+    
+    config_cols = st.columns(3)
+    with config_cols[0]:
+        strategy = st.selectbox("Trading Strategy", 
+                              ["Moving Average Crossover", "RSI Strategy", "MACD Strategy", "Bollinger Bands"])
+    with config_cols[1]:
+        capital = st.number_input("Initial Capital (₹)", value=100000, step=10000)
+    with config_cols[2]:
+        period = st.selectbox("Backtest Period", ["3 Months", "6 Months", "1 Year", "2 Years"])
+    
+    # Parameters
+    st.markdown("### 📊 Strategy Parameters")
+    param_cols = st.columns(4)
+    with param_cols[0]:
+        ma_fast = st.slider("MA Fast Period", 5, 50, 20)
+    with param_cols[1]:
+        ma_slow = st.slider("MA Slow Period", 20, 
