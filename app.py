@@ -191,270 +191,6 @@ def get_stock_info(ticker):
     except:
         return {}
 
-# ----------------------- SESSION STATE -----------------------
-if 'current_section' not in st.session_state:
-    st.session_state.current_section = "Home"
-if 'stock_name' not in st.session_state:
-    st.session_state.stock_name = "RELIANCE"
-if 'period' not in st.session_state:
-    st.session_state.period = 60
-if 'current_report' not in st.session_state:
-    st.session_state.current_report = None
-
-# ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
-
-# ----------------------- SIMPLE NAVIGATION -----------------------
-# Create navigation using radio buttons instead of complex JavaScript
-nav_options = ["🏠 Home", "📑 Research Reports", "💹 Options Trading", "📈 Chart Analysis", "🤖 AI Predictions"]
-nav_labels = [option.split(" ")[-1] for option in nav_options]
-
-# Create columns for navigation
-nav_cols = st.columns(5)
-for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
-    with col:
-        if st.button(option, use_container_width=True, 
-                    type="primary" if st.session_state.current_section == nav_labels[i] else "secondary"):
-            st.session_state.current_section = nav_labels[i]
-            st.rerun()
-
-# ----------------------- STOCK SELECTION -----------------------
-stocks = {
-    "RELIANCE": "RELIANCE.NS", 
-    "TCS": "TCS.NS", 
-    "INFY": "INFY.NS", 
-    "HDFC BANK": "HDFCBANK.NS",
-    "ICICI BANK": "ICICIBANK.NS",
-    "NIFTY 50": "^NSEI",
-    "BANK NIFTY": "^NSEBANK",
-    "AAPL": "AAPL",
-    "TSLA": "TSLA"
-}
-
-# Stock selection
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
-                             index=list(stocks.keys()).index(st.session_state.stock_name))
-with col2:
-    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
-with col3:
-    st.write("")
-    st.write(f"**Current:** {stock_name} | {period} days")
-
-st.session_state.stock_name = stock_name
-st.session_state.period = period
-ticker = stocks[stock_name]
-section = st.session_state.current_section
-
-# ----------------------- HOME SECTION -----------------------
-if section == "Home":
-    st.markdown("### Real-Time Market Data")
-    
-    with st.spinner(f"Fetching {stock_name} data..."):
-        try:
-            df = get_stock_data(ticker, period)
-            stock_info = get_stock_info(ticker)
-            
-            if df.empty:
-                st.error("No data available. Try again later or choose another stock.")
-            else:
-                df.reset_index(inplace=True)
-                
-                # COMPACT KEY METRICS SECTION
-                st.markdown("#### 📊 Key Metrics")
-                
-                current_price = float(df['Close'].iloc[-1])
-                prev_price = float(df['Close'].iloc[-2])
-                price_change = current_price - prev_price
-                price_change_pct = (price_change / prev_price) * 100
-                
-                # Get additional metrics from stock info
-                pe_ratio = stock_info.get('trailingPE', 'N/A')
-                market_cap = stock_info.get('marketCap', 'N/A')
-                if market_cap != 'N/A':
-                    market_cap = f"${market_cap/1e9:.1f}B" if market_cap > 1e9 else f"${market_cap/1e6:.1f}M"
-                
-                dividend_yield = stock_info.get('dividendYield', 'N/A')
-                if dividend_yield != 'N/A':
-                    dividend_yield = f"{dividend_yield*100:.2f}%"
-                
-                # Compact metrics grid
-                st.markdown(f"""
-                <div class="compact-metrics">
-                    <div class="metric-box">
-                        <div class="metric-label">Current Price</div>
-                        <div class="metric-value">₹{current_price:.2f}</div>
-                        <div class="metric-change {'negative' if price_change < 0 else ''}">
-                            {price_change:+.2f} ({price_change_pct:+.2f}%)
-                        </div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Previous Close</div>
-                        <div class="metric-value">₹{prev_price:.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Open</div>
-                        <div class="metric-value">₹{float(df['Open'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Day High</div>
-                        <div class="metric-value">₹{float(df['High'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Day Low</div>
-                        <div class="metric-value">₹{float(df['Low'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Volume</div>
-                        <div class="metric-value">{int(df['Volume'].iloc[-1]):,}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">P/E Ratio</div>
-                        <div class="metric-value">{pe_ratio if pe_ratio != 'N/A' else 'N/A'}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Market Cap</div>
-                        <div class="metric-value">{market_cap}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Div Yield</div>
-                        <div class="metric-value">{dividend_yield}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">52W Range</div>
-                        <div class="metric-value">₹{float(df['Low'].min()):.0f}-₹{float(df['High'].max()):.0f}</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Price Chart
-                st.subheader("Price Chart")
-                df["SMA20"] = df["Close"].rolling(20).mean()
-                df["SMA50"] = df["Close"].rolling(50).mean()
-                
-                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50']].copy()
-                base = alt.Chart(chart_data).encode(x='Date:T').properties(height=400)
-                close_line = base.mark_line(color='#00ffcc').encode(y='Close:Q', tooltip=['Date:T', 'Close:Q'])
-                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q')
-                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q')
-                chart = close_line + sma20_line + sma50_line
-                st.altair_chart(chart, use_container_width=True)
-                
-        except Exception as e:
-            st.error(f"Error fetching data: {str(e)}")
-
-# ----------------------- RESEARCH REPORTS SECTION -----------------------
-elif section == "Research Reports":
-    
-    # If a specific report is selected, show its details
-    if st.session_state.current_report:
-        show_report_details()
-    else:
-        show_research_main_page()
-
-# ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
-def show_research_main_page():
-    """Show the main research reports page"""
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Current Stock Info
-    try:
-        df = get_stock_data(ticker, 30)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current Analysis for {stock_name}: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    # RESEARCH REPORT SECTIONS
-    st.markdown("### 📋 Research Report Sections")
-    
-    research_sections = [
-        {
-            "icon": "📊",
-            "title": "Executive Summary",
-            "description": "High-level overview and investment recommendation",
-            "page": "executive_summary"
-        },
-        {
-            "icon": "🔍",
-            "title": "Company Overview", 
-            "description": "Business model, management, and competitive positioning",
-            "page": "company_overview"
-        },
-        {
-            "icon": "💹",
-            "title": "Financial Analysis",
-            "description": "Income statement, balance sheet, and cash flow analysis",
-            "page": "financial_analysis"
-        },
-        {
-            "icon": "📈",
-            "title": "Valuation Analysis",
-            "description": "DCF, comparable companies, and intrinsic value calculation",
-            "page": "valuation_analysis"
-        },
-        {
-            "icon": "⚡", 
-            "title": "Technical Analysis",
-            "description": "Chart patterns, indicators, and price targets",
-            "page": "technical_analysis"
-        },
-        {
-            "icon": "🔄",
-            "title": "Industry Analysis",
-            "description": "Market trends, competition, and growth prospects", 
-            "page": "industry_analysis"
-        },
-        {
-            "icon": "⚠️",
-            "title": "Risk Assessment",
-            "description": "Key risks and mitigation strategies",
-            "page": "risk_assessment"
-        },
-        {
-            "icon": "🎯",
-            "title": "Investment Thesis",
-            "description": "Bull and bear cases with probability assessment",
-            "page": "investment_thesis"
-        }
-    ]
-    
-    # Create research cards in 2 columns
-    col1, col2 = st.columns(2)
-    
-    for idx, research in enumerate(research_sections):
-        with col1 if idx % 2 == 0 else col2:
-            st.markdown(f"""
-            <div class="research-card">
-                <div class="research-icon">{research['icon']}</div>
-                <div class="research-title">{research['title']}</div>
-                <div class="research-desc">{research['description']}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button(f"View {research['title']}", key=research['page'], use_container_width=True):
-                st.session_state.current_report = research['page']
-                st.rerun()
-    
-    # Quick Stats
-    st.markdown("---")
-    st.subheader("📊 Quick Stats")
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Analyst Rating", "BUY", "4.2/5")
-    with col2:
-        st.metric("Price Target", "₹1,650", "+12%")
-    with col3:
-        st.metric("Upside Potential", "15%", "+2%")
-    with col4:
-        st.metric("Risk Level", "Medium", "Stable")
-
 # ----------------------- REPORT DETAILS FUNCTION -----------------------
 def show_report_details():
     """Display detailed report content"""
@@ -591,61 +327,180 @@ def show_report_details():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ----------------------- OTHER SECTIONS -----------------------
-elif section == "Options Trading":
+# ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
+def show_research_main_page():
+    """Show the main research reports page"""
     st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
+        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
         unsafe_allow_html=True,
     )
     
-    # Options content
-    st.subheader("Options Overview")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("IV Rank", "65%", "High")
-    with col2:
-        st.metric("Put/Call Ratio", "0.85", "Bullish")
-    with col3:
-        st.metric("Open Interest", "2.5M", "+15%")
-    with col4:
-        st.metric("Volume", "1.8M", "+22%")
-
-elif section == "Chart Analysis":
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
-        unsafe_allow_html=True,
-    )
+    # Current Stock Info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current Analysis for {stock_name}: ₹{current_price:.2f}**")
+    except:
+        pass
     
-    # Chart analysis content
-    st.subheader("Technical Indicators")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("RSI", "54.2", "Neutral")
-    with col2:
-        st.metric("MACD", "Bullish", "↑")
-    with col3:
-        st.metric("Support", "₹1,350", "Strong")
-    with col4:
-        st.metric("Resistance", "₹1,480", "Moderate")
-
-elif section == "AI Predictions":
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
-        unsafe_allow_html=True,
-    )
+    # RESEARCH REPORT SECTIONS
+    st.markdown("### 📋 Research Report Sections")
     
-    # AI predictions content
-    st.subheader("AI Analysis")
+    research_sections = [
+        {
+            "icon": "📊",
+            "title": "Executive Summary",
+            "description": "High-level overview and investment recommendation",
+            "page": "executive_summary"
+        },
+        {
+            "icon": "🔍",
+            "title": "Company Overview", 
+            "description": "Business model, management, and competitive positioning",
+            "page": "company_overview"
+        },
+        {
+            "icon": "💹",
+            "title": "Financial Analysis",
+            "description": "Income statement, balance sheet, and cash flow analysis",
+            "page": "financial_analysis"
+        },
+        {
+            "icon": "📈",
+            "title": "Valuation Analysis",
+            "description": "DCF, comparable companies, and intrinsic value calculation",
+            "page": "valuation_analysis"
+        },
+        {
+            "icon": "⚡", 
+            "title": "Technical Analysis",
+            "description": "Chart patterns, indicators, and price targets",
+            "page": "technical_analysis"
+        },
+        {
+            "icon": "🔄",
+            "title": "Industry Analysis",
+            "description": "Market trends, competition, and growth prospects", 
+            "page": "industry_analysis"
+        },
+        {
+            "icon": "⚠️",
+            "title": "Risk Assessment",
+            "description": "Key risks and mitigation strategies",
+            "page": "risk_assessment"
+        },
+        {
+            "icon": "🎯",
+            "title": "Investment Thesis",
+            "description": "Bull and bear cases with probability assessment",
+            "page": "investment_thesis"
+        }
+    ]
+    
+    # Create research cards in 2 columns
+    col1, col2 = st.columns(2)
+    
+    for idx, research in enumerate(research_sections):
+        with col1 if idx % 2 == 0 else col2:
+            st.markdown(f"""
+            <div class="research-card">
+                <div class="research-icon">{research['icon']}</div>
+                <div class="research-title">{research['title']}</div>
+                <div class="research-desc">{research['description']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"View {research['title']}", key=research['page'], use_container_width=True):
+                st.session_state.current_report = research['page']
+                st.rerun()
+    
+    # Quick Stats
+    st.markdown("---")
+    st.subheader("📊 Quick Stats")
     col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
-        st.metric("AI Signal", "BUY", "Strong")
+        st.metric("Analyst Rating", "BUY", "4.2/5")
     with col2:
-        st.metric("Confidence", "85%", "High")
+        st.metric("Price Target", "₹1,650", "+12%")
     with col3:
-        st.metric("1W Target", "₹1,420", "+3.1%")
+        st.metric("Upside Potential", "15%", "+2%")
     with col4:
-        st.metric("1M Target", "₹1,520", "+10.4%")
+        st.metric("Risk Level", "Medium", "Stable")
 
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
+# ----------------------- SESSION STATE -----------------------
+if 'current_section' not in st.session_state:
+    st.session_state.current_section = "Home"
+if 'stock_name' not in st.session_state:
+    st.session_state.stock_name = "RELIANCE"
+if 'period' not in st.session_state:
+    st.session_state.period = 60
+if 'current_report' not in st.session_state:
+    st.session_state.current_report = None
+
+# ----------------------- HEADER -----------------------
+st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
+
+# ----------------------- SIMPLE NAVIGATION -----------------------
+# Create navigation using radio buttons instead of complex JavaScript
+nav_options = ["🏠 Home", "📑 Research Reports", "💹 Options Trading", "📈 Chart Analysis", "🤖 AI Predictions"]
+nav_labels = [option.split(" ")[-1] for option in nav_options]
+
+# Create columns for navigation
+nav_cols = st.columns(5)
+for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
+    with col:
+        if st.button(option, use_container_width=True, 
+                    type="primary" if st.session_state.current_section == nav_labels[i] else "secondary"):
+            st.session_state.current_section = nav_labels[i]
+            st.rerun()
+
+# ----------------------- STOCK SELECTION -----------------------
+stocks = {
+    "RELIANCE": "RELIANCE.NS", 
+    "TCS": "TCS.NS", 
+    "INFY": "INFY.NS", 
+    "HDFC BANK": "HDFCBANK.NS",
+    "ICICI BANK": "ICICIBANK.NS",
+    "NIFTY 50": "^NSEI",
+    "BANK NIFTY": "^NSEBANK",
+    "AAPL": "AAPL",
+    "TSLA": "TSLA"
+}
+
+# Stock selection
+col1, col2, col3 = st.columns([1, 1, 1])
+with col1:
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
+                             index=list(stocks.keys()).index(st.session_state.stock_name))
+with col2:
+    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
+with col3:
+    st.write("")
+    st.write(f"**Current:** {stock_name} | {period} days")
+
+st.session_state.stock_name = stock_name
+st.session_state.period = period
+ticker = stocks[stock_name]
+section = st.session_state.current_section
+
+# ----------------------- HOME SECTION -----------------------
+if section == "Home":
+    st.markdown("### Real-Time Market Data")
+    
+    with st.spinner(f"Fetching {stock_name} data..."):
+        try:
+            df = get_stock_data(ticker, period)
+            stock_info = get_stock_info(ticker)
+            
+            if df.empty:
+                st.error("No data available. Try again later or choose another stock.")
+            else:
+                df.reset_index(inplace=True)
+                
+                # COMPACT KEY METRICS SECTION
+                st.markdown("#### 📊 Key Metrics")
+                
+                current_price = float(df['Close'].iloc[-1])
+                prev_price = float(df['Close'].iloc
