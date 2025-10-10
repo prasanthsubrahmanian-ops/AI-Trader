@@ -12,6 +12,27 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ----------------------- CACHED FUNCTIONS -----------------------
+@st.cache_data(ttl=300)
+def get_stock_data(ticker, period):
+    return yf.download(ticker, period=f"{period}d")
+
+def calculate_rsi(prices, window=14):
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def calculate_macd(prices, fast=12, slow=26, signal=9):
+    ema_fast = prices.ewm(span=fast).mean()
+    ema_slow = prices.ewm(span=slow).mean()
+    macd = ema_fast - ema_slow
+    signal_line = macd.ewm(span=signal).mean()
+    histogram = macd - signal_line
+    return macd, signal_line, histogram
+
 # ----------------------- CUSTOM STYLE -----------------------
 custom_css = """
 <style>
@@ -42,31 +63,6 @@ body, .main, .block-container {
     text-align: center;
     padding: 1rem 0;
     border-bottom: 2px solid #00ffcc;
-}
-
-/* Custom toggle button that's always visible */
-.custom-toggle-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 9999;
-    background-color: #00ffcc;
-    color: #000;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 255, 204, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.custom-toggle-btn:hover {
-    background-color: #00e6b8;
-    transform: scale(1.1);
 }
 
 .landing-box {
@@ -423,24 +419,3 @@ elif section == "AI Predictions":
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
 st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
-
-# ----------------------- CACHED FUNCTIONS -----------------------
-@st.cache_data(ttl=300)
-def get_stock_data(ticker, period):
-    return yf.download(ticker, period=f"{period}d")
-
-def calculate_rsi(prices, window=14):
-    delta = prices.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-def calculate_macd(prices, fast=12, slow=26, signal=9):
-    ema_fast = prices.ewm(span=fast).mean()
-    ema_slow = prices.ewm(span=slow).mean()
-    macd = ema_fast - ema_slow
-    signal_line = macd.ewm(span=signal).mean()
-    histogram = macd - signal_line
-    return macd, signal_line, histogram
