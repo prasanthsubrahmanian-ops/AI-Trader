@@ -200,8 +200,8 @@ if 'current_section' not in st.session_state:
     st.session_state.current_section = "Home"
 if 'stock_name' not in st.session_state:
     st.session_state.stock_name = "RELIANCE"
-if 'period' not in st.session_state:
-    st.session_state.period = 60
+if 'chart_period' not in st.session_state:
+    st.session_state.chart_period = "1Y"
 if 'current_report' not in st.session_state:
     st.session_state.current_report = None
 if 'current_ticker' not in st.session_state:
@@ -222,7 +222,7 @@ for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
             st.session_state.current_section = nav_labels[i]
             st.rerun()
 
-# ----------------------- STOCK SELECTION -----------------------
+# ----------------------- STOCK SELECTION (Only on Home Page) -----------------------
 stocks = {
     "RELIANCE": "RELIANCE.NS", 
     "TCS": "TCS.NS", 
@@ -235,21 +235,26 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
-                             index=list(stocks.keys()).index(st.session_state.stock_name))
-with col2:
-    # Changed to selectbox for better user experience
-    chart_period = st.selectbox("Chart Period", 
-                               ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
-                               index=3)
-with col3:
-    st.write("")
-    st.write(f"**Current:** {stock_name} | {chart_period}")
+# Only show stock selection on Home page
+if st.session_state.current_section == "Home":
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
+                                 index=list(stocks.keys()).index(st.session_state.stock_name))
+    with col2:
+        # Chart period selection only on Home page
+        chart_period = st.selectbox("Chart Period", 
+                                   ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
+                                   index=3)
+    with col3:
+        st.write("")
+        st.write(f"**Current:** {stock_name} | {chart_period}")
 
-st.session_state.stock_name = stock_name
-ticker = stocks[stock_name]
+    st.session_state.stock_name = stock_name
+    st.session_state.chart_period = chart_period
+
+# Always update ticker based on selected stock
+ticker = stocks[st.session_state.stock_name]
 st.session_state.current_ticker = ticker
 section = st.session_state.current_section
 
@@ -519,12 +524,14 @@ def show_report_details():
 
 # ----------------------- HOME SECTION -----------------------
 if section == "Home":
+    # Stock selection is already shown above for Home page
+    
     st.markdown("### Real-Time Market Data")
     
-    with st.spinner(f"Fetching {stock_name} data..."):
+    with st.spinner(f"Fetching {st.session_state.stock_name} data..."):
         try:
             # Get daily data for the selected period
-            df = get_stock_data(ticker, period_map[chart_period])
+            df = get_stock_data(ticker, period_map[st.session_state.chart_period])
             stock_info = get_stock_info(ticker)
             
             if df.empty:
@@ -564,7 +571,7 @@ if section == "Home":
                 col1, col2, col3 = st.columns([2, 1, 1])
                 with col1:
                     st.metric(
-                        f"{stock_name} Current Price",
+                        f"{st.session_state.stock_name} Current Price",
                         f"₹{current_price:.2f}",
                         f"{price_change:+.2f} ({price_change_pct:+.2f}%)"
                     )
@@ -625,7 +632,7 @@ if section == "Home":
                 st.markdown(metrics_html, unsafe_allow_html=True)
                 
                 # Daily Price Chart
-                st.subheader(f"📈 {chart_period} Price Chart - {stock_name}")
+                st.subheader(f"📈 {st.session_state.chart_period} Price Chart - {st.session_state.stock_name}")
                 
                 # Calculate moving averages
                 df["SMA20"] = df["Close"].rolling(20).mean()
@@ -638,7 +645,7 @@ if section == "Home":
                     x=alt.X('Date:T', title='Date')
                 ).properties(
                     height=400,
-                    title=f"{stock_name} Price Chart ({chart_period})"
+                    title=f"{st.session_state.stock_name} Price Chart ({st.session_state.chart_period})"
                 )
                 
                 # Create layers for different lines
@@ -668,29 +675,13 @@ if section == "Home":
                 st.altair_chart(chart, use_container_width=True)
                 st.caption("Close Price (Green) | 20-Day SMA (Orange) | 50-Day SMA (Pink)")
                 
-                # Recent Price Data Table
-                st.subheader("Recent Price Action")
-                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(10).copy()
-                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
-                display_df["Change"] = display_df["Close"].diff()
-                display_df["Change %"] = (display_df["Change"] / display_df["Close"].shift(1)) * 100
-                
-                # Format the display
-                display_df["Open"] = display_df["Open"].apply(lambda x: f"₹{x:.2f}")
-                display_df["High"] = display_df["High"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Low"] = display_df["Low"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Close"] = display_df["Close"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Volume"] = display_df["Volume"].apply(lambda x: f"{x:,.0f}")
-                display_df["Change"] = display_df["Change"].apply(lambda x: f"{x:+.2f}" if not pd.isna(x) else "")
-                display_df["Change %"] = display_df["Change %"].apply(lambda x: f"{x:+.2f}%" if not pd.isna(x) else "")
-                
-                st.dataframe(display_df, use_container_width=True)
-                
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
 
 # ----------------------- RESEARCH REPORTS SECTION -----------------------
 elif section == "Research Reports":
+    # Show current stock info
+    st.write(f"**Currently Analyzing:** {st.session_state.stock_name}")
     
     # If a specific report is selected, show its details
     if st.session_state.current_report:
@@ -710,7 +701,7 @@ elif section == "Options Trading":
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         pass
     
@@ -737,7 +728,7 @@ elif section == "Chart Analysis":
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         pass
     
@@ -764,7 +755,7 @@ elif section == "AI Predictions":
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         pass
     
