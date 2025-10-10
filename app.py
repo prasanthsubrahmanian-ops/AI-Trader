@@ -169,8 +169,9 @@ def get_market_data():
         try:
             df = yf.download(ticker, period='2d', progress=False)
             if not df.empty and len(df) > 1:
-                current_price = df['Close'].iloc[-1]
-                prev_price = df['Close'].iloc[-2]
+                # Convert to scalar values
+                current_price = float(df['Close'].iloc[-1])
+                prev_price = float(df['Close'].iloc[-2])
                 change = current_price - prev_price
                 change_pct = (change / prev_price) * 100
                 
@@ -262,7 +263,9 @@ def show_home():
         
         for i, (idx_name, idx_data) in enumerate(market_data.items()):
             with cols[i % 4]:
-                change_color = "#00ffcc" if idx_data['change'] >= 0 else "#ff4444"
+                # FIXED: Ensure we're comparing scalar values, not pandas Series
+                change_value = float(idx_data['change'])
+                change_color = "#00ffcc" if change_value >= 0 else "#ff4444"
                 st.markdown(f"""
                 <div class="feature-card">
                     <div style="font-weight: 600; margin-bottom: 0.5rem;">{idx_name}</div>
