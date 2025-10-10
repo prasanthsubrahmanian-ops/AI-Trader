@@ -169,7 +169,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 def get_stock_data(ticker, period="1y"):
     try:
         data = yf.download(ticker, period=period, progress=False)
-        if data.empty:
+        if hasattr(data, 'empty') and data.empty:
             return pd.DataFrame()
         return data
     except Exception as e:
@@ -199,8 +199,7 @@ def get_market_data():
     for name, ticker in indices.items():
         try:
             df = yf.download(ticker, period='2d', progress=False)
-            if not df.empty and len(df) > 1:
-                # Convert to scalar values
+            if hasattr(df, 'empty') and not df.empty and len(df) > 1:
                 current_price = float(df['Close'].iloc[-1])
                 prev_price = float(df['Close'].iloc[-2])
                 change = current_price - prev_price
@@ -323,7 +322,6 @@ def show_home():
         
         for i, (idx_name, idx_data) in enumerate(market_data.items()):
             with cols[i % 4]:
-                # FIXED: Ensure we're comparing scalar values, not pandas Series
                 change_value = float(idx_data['change'])
                 change_color = "#00ffcc" if change_value >= 0 else "#ff4444"
                 st.markdown(f"""
@@ -429,9 +427,8 @@ def show_market_trends():
     
     # Current Price Overview
     try:
-        # Get sufficient data for proper calculation
         period_map = {
-            "1D": "5d",  # Get 5 days for 1D to ensure we have previous close
+            "1D": "5d",
             "1W": "1mo", 
             "1M": "3mo",
             "3M": "6mo",
@@ -442,22 +439,20 @@ def show_market_trends():
         selected_period = period_map.get(timeframe, "3mo")
         df = get_stock_data(ticker, selected_period)
         
-        if df is not None and not df.empty and len(df) > 1:
-            # Get current and previous prices correctly
+        # Simple and clear DataFrame check
+        if df is not None and hasattr(df, 'empty') and not df.empty and len(df) > 1:
             current_price = float(df['Close'].iloc[-1])
             
-            # For 1D timeframe, we need to find yesterday's close
+            # Calculate price change
             if timeframe == "1D" and len(df) >= 2:
                 prev_price = float(df['Close'].iloc[-2])
             else:
-                # For other timeframes, calculate from the beginning of the period
-                start_price = float(df['Close'].iloc[0])
-                prev_price = start_price
+                prev_price = float(df['Close'].iloc[0])
             
             price_change = current_price - prev_price
             price_change_pct = (price_change / prev_price) * 100 if prev_price != 0 else 0
             
-            # Display current price prominently
+            # Display current price
             st.markdown(f"""
             <div class="feature-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -522,7 +517,7 @@ def show_market_trends():
     st.markdown(f"### 📊 {stock_name} Advanced Chart")
     
     try:
-        # Get stock data with proper period mapping for chart
+        # Get chart data
         chart_period_map = {
             "1D": "5d",
             "1W": "1mo", 
@@ -535,62 +530,44 @@ def show_market_trends():
         selected_chart_period = chart_period_map.get(timeframe, "3mo")
         df_chart = get_stock_data(ticker, selected_chart_period)
         
-        # Proper check for DataFrame emptiness and data availability
-        if df_chart is not None and not df_chart.empty and len(df_chart) > 1:
-            # Convert to scalar values explicitly
-            current_price = float(df_chart['Close'].iloc[-1])
+        # Simple and clear data validation
+        if (df_chart is not None and 
+            hasattr(df_chart, 'empty') and 
+            not df_chart.empty and 
+            len(df_chart) > 1 and
+            'Close' in df_chart.columns):
             
-            # Advanced Chart with multiple indicators
+            # Create basic chart
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
-            # Create chart - Use line chart for better reliability
             fig = go.Figure()
             
-            # Check if we have enough data for candlestick (need Open, High, Low, Close)
-            if all(col in df_chart.columns for col in ['Open', 'High', 'Low', 'Close']) and len(df_chart) > 1:
-                # Use candlestick if we have all required data
-                fig.add_trace(go.Candlestick(
-                    x=df_chart.index,
-                    open=df_chart['Open'],
-                    high=df_chart['High'],
-                    low=df_chart['Low'],
-                    close=df_chart['Close'],
-                    name='Price'
-                ))
-            else:
-                # Fallback to line chart
-                fig.add_trace(go.Scatter(
-                    x=df_chart.index, 
-                    y=df_chart['Close'], 
-                    mode='lines', 
-                    name='Price',
-                    line=dict(color='#00ffcc', width=2)
-                ))
+            # Always use line chart for simplicity
+            fig.add_trace(go.Scatter(
+                x=df_chart.index, 
+                y=df_chart['Close'], 
+                mode='lines', 
+                name='Price',
+                line=dict(color='#00ffcc', width=2)
+            ))
             
-            # Add moving averages if enough data
+            # Simple moving average calculation
             if len(df_chart) > 20:
-                ma20 = df_chart['Close'].rolling(window=20).mean()
-                if not ma20.isna().all():
-                    fig.add_trace(go.Scatter(
-                        x=df_chart.index, 
-                        y=ma20, 
-                        mode='lines', 
-                        name='MA20',
-                        line=dict(color='#ff4444', width=2)
-                    ))
+                try:
+                    ma20 = df_chart['Close'].rolling(window=20).mean()
+                    # Use .any() instead of ambiguous boolean
+                    if ma20.notna().any():
+                        fig.add_trace(go.Scatter(
+                            x=df_chart.index, 
+                            y=ma20, 
+                            mode='lines', 
+                            name='MA20',
+                            line=dict(color='#ff4444', width=1, dash='dash')
+                        ))
+                except:
+                    pass
             
-            if len(df_chart) > 50:
-                ma50 = df_chart['Close'].rolling(window=50).mean()
-                if not ma50.isna().all():
-                    fig.add_trace(go.Scatter(
-                        x=df_chart.index, 
-                        y=ma50, 
-                        mode='lines', 
-                        name='MA50',
-                        line=dict(color='#0099ff', width=2)
-                    ))
-            
-            # Determine title and y-axis label
+            # Chart layout
             is_index = stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]
             chart_title = f"{stock_name} - {timeframe} Chart"
             y_axis_title = "Index Value" if is_index else "Price (₹)"
@@ -598,20 +575,12 @@ def show_market_trends():
             fig.update_layout(
                 title=chart_title,
                 template="plotly_dark",
-                height=600,
+                height=500,
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
-                yaxis_title=y_axis_title,
-                margin=dict(l=50, r=50, t=80, b=50),
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white')
+                yaxis_title=y_axis_title
             )
-            
-            # Configure axis colors for dark theme
-            fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.1)')
-            fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.1)')
             
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -622,79 +591,107 @@ def show_market_trends():
             tech_cols = st.columns(4)
             
             with tech_cols[0]:
-                # Calculate actual RSI
-                if len(df_chart) > 14:
-                    delta = df_chart['Close'].diff()
-                    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-                    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                    rs = gain / loss
-                    rsi = 100 - (100 / (1 + rs))
-                    current_rsi = rsi.iloc[-1] if not rsi.isna().all() and not pd.isna(rsi.iloc[-1]) else 50
-                else:
+                # Simple RSI calculation
+                try:
+                    if len(df_chart) > 14:
+                        delta = df_chart['Close'].diff()
+                        gain = (delta.where(delta > 0, 0)).fillna(0)
+                        loss = (-delta.where(delta < 0, 0)).fillna(0)
+                        avg_gain = gain.rolling(window=14).mean()
+                        avg_loss = loss.rolling(window=14).mean()
+                        rs = avg_gain / avg_loss
+                        rsi = 100 - (100 / (1 + rs))
+                        current_rsi = float(rsi.iloc[-1]) if not pd.isna(rsi.iloc[-1]) else 50
+                    else:
+                        current_rsi = 50
+                except:
                     current_rsi = 50
                 
                 rsi_status = "Overbought" if current_rsi > 70 else "Oversold" if current_rsi < 30 else "Neutral"
                 st.metric("RSI (14)", f"{current_rsi:.1f}", rsi_status)
                 
             with tech_cols[1]:
-                # Simple MACD calculation
-                if len(df_chart) > 26:
-                    exp12 = df_chart['Close'].ewm(span=12, adjust=False).mean()
-                    exp26 = df_chart['Close'].ewm(span=26, adjust=False).mean()
-                    macd = exp12 - exp26
-                    current_macd = macd.iloc[-1] if not macd.isna().all() and not pd.isna(macd.iloc[-1]) else 0
-                else:
-                    current_macd = 0
+                # Simple trend detection
+                try:
+                    if len(df_chart) > 5:
+                        recent_prices = df_chart['Close'].tail(5)
+                        trend = "Bullish" if recent_prices.iloc[-1] > recent_prices.iloc[0] else "Bearish"
+                    else:
+                        trend = "Neutral"
+                except:
+                    trend = "Neutral"
                 
-                macd_status = "Bullish" if current_macd > 0 else "Bearish"
-                st.metric("MACD", f"{current_macd:.2f}", macd_status)
+                st.metric("Trend", trend, "")
                 
             with tech_cols[2]:
-                if 'Volume' in df_chart.columns and not df_chart['Volume'].isna().all() and len(df_chart) > 0:
-                    try:
-                        volume_avg = float(df_chart['Volume'].mean())
-                        current_volume = float(df_chart['Volume'].iloc[-1])
-                        volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
-                        st.metric("Volume Ratio", f"{volume_ratio:.1f}x", "High" if volume_ratio > 1.5 else "Normal")
-                    except:
+                # Volume indicator
+                try:
+                    if 'Volume' in df_chart.columns:
+                        current_vol = float(df_chart['Volume'].iloc[-1])
+                        avg_vol = float(df_chart['Volume'].mean())
+                        vol_ratio = current_vol / avg_vol if avg_vol > 0 else 1
+                        st.metric("Volume", f"{vol_ratio:.1f}x", "High" if vol_ratio > 1.5 else "Normal")
+                    else:
                         st.metric("Volume", "N/A", "")
-                else:
+                except:
                     st.metric("Volume", "N/A", "")
                 
             with tech_cols[3]:
-                if len(df_chart) > 1:
-                    try:
-                        returns = df_chart['Close'].pct_change().dropna()
-                        if not returns.empty:
-                            volatility = float(returns.std() * np.sqrt(252) * 100)  # Annualized volatility
-                            st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                # Simple volatility
+                try:
+                    if len(df_chart) > 1:
+                        daily_returns = df_chart['Close'].pct_change().dropna()
+                        if len(daily_returns) > 0:
+                            vol = float(daily_returns.std() * 100)
+                            st.metric("Volatility", f"{vol:.1f}%", "High" if vol > 2 else "Low")
                         else:
                             st.metric("Volatility", "N/A", "")
-                    except:
+                    else:
                         st.metric("Volatility", "N/A", "")
-                else:
+                except:
                     st.metric("Volatility", "N/A", "")
                     
         else:
-            st.warning(f"Insufficient data for {stock_name}. Please try a different timeframe or stock.")
-            # Show fallback chart for demonstration
-            st.markdown("""
-            <div class="chart-container">
-                <p style="text-align: center; color: #888; padding: 2rem;">
-                    Chart data loading... Please wait or try a different stock/timeframe.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.warning(f"Chart data not available for {stock_name}. Trying fallback data...")
+            
+            # Fallback: Create a simple demo chart
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+            
+            # Generate sample data for demonstration
+            dates = pd.date_range(end=datetime.now(), periods=30, freq='D')
+            prices = [1000 + i*10 + np.random.normal(0, 5) for i in range(30)]
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=dates, 
+                y=prices, 
+                mode='lines', 
+                name='Price',
+                line=dict(color='#00ffcc', width=2)
+            ))
+            
+            fig.update_layout(
+                title=f"{stock_name} - Sample Chart (Demo Data)",
+                template="plotly_dark",
+                height=400,
+                showlegend=True,
+                xaxis_title="Date",
+                yaxis_title="Price"
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.info("⚠️ Showing demo data. Real market data will load when available.")
             
     except Exception as e:
-        st.error(f"Error loading chart data: {str(e)}")
-        # Show fallback chart with more details
-        st.markdown(f"""
+        st.error(f"Error in chart section: {str(e)}")
+        
+        # Ultra-simple fallback
+        st.markdown("""
         <div class="chart-container">
-            <p style="text-align: center; color: #ff4444; padding: 2rem;">
-                Unable to load chart data for {stock_name}.<br>
-                Error: {str(e)}<br>
-                Please check your internet connection and try again.
+            <p style="text-align: center; color: #888; padding: 2rem;">
+                Chart is temporarily unavailable. Please try refreshing the page or select a different stock.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -714,8 +711,8 @@ def show_ai_predictions():
     current_price = 2500
     try:
         df = get_stock_data(ticker, "1mo")
-        if df is not None and not df.empty and len(df) > 0:
-            current_price = float(df['Close'].iloc[-1])  # FIXED: Convert to float
+        if df is not None and hasattr(df, 'empty') and not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
         current_price = 2500
@@ -837,8 +834,8 @@ def show_options_trading():
     current_price = 2500
     try:
         df = get_stock_data(ticker, "1d")
-        if df is not None and not df.empty and len(df) > 0:
-            current_price = float(df['Close'].iloc[-1])  # FIXED: Convert to float
+        if df is not None and hasattr(df, 'empty') and not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
         current_price = 2500
@@ -1057,7 +1054,7 @@ def show_backtesting():
     dates = pd.date_range(start='2023-01-01', end='2024-01-01', freq='D')
     portfolio_value = [100000]
     for i in range(1, len(dates)):
-        daily_return = np.random.normal(0.001, 0.02)  # Random daily returns
+        daily_return = np.random.normal(0.001, 0.02)
         new_value = portfolio_value[-1] * (1 + daily_return)
         portfolio_value.append(new_value)
     
@@ -1073,7 +1070,7 @@ def show_backtesting():
     # Add benchmark (buy & hold)
     benchmark_value = [100000]
     for i in range(1, len(dates)):
-        daily_return = np.random.normal(0.0008, 0.015)  # Slightly lower returns for benchmark
+        daily_return = np.random.normal(0.0008, 0.015)
         new_value = benchmark_value[-1] * (1 + daily_return)
         benchmark_value.append(new_value)
     
