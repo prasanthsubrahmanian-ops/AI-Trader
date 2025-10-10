@@ -517,10 +517,136 @@ if section == "Home":
                 if dividend_yield != 'N/A':
                     dividend_yield = f"{dividend_yield*100:.2f}%"
                 
-                # Compact metrics grid
-                st.markdown(f"""
+                # Fixed compact metrics grid - properly formatted f-string
+                metrics_html = f"""
                 <div class="compact-metrics">
                     <div class="metric-box">
                         <div class="metric-label">Current Price</div>
                         <div class="metric-value">₹{current_price:.2f}</div>
-                        <div class="metric-change
+                        <div class="metric-change {'negative' if price_change < 0 else ''}">
+                            {price_change:+.2f} ({price_change_pct:+.2f}%)
+                        </div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Previous Close</div>
+                        <div class="metric-value">₹{prev_price:.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Open</div>
+                        <div class="metric-value">₹{float(df['Open'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Day High</div>
+                        <div class="metric-value">₹{float(df['High'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Day Low</div>
+                        <div class="metric-value">₹{float(df['Low'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Volume</div>
+                        <div class="metric-value">{int(df['Volume'].iloc[-1]):,}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">P/E Ratio</div>
+                        <div class="metric-value">{pe_ratio if pe_ratio != 'N/A' else 'N/A'}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Market Cap</div>
+                        <div class="metric-value">{market_cap}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Div Yield</div>
+                        <div class="metric-value">{dividend_yield}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">52W Range</div>
+                        <div class="metric-value">₹{float(df['Low'].min()):.0f}-₹{float(df['High'].max()):.0f}</div>
+                    </div>
+                </div>
+                """
+                st.markdown(metrics_html, unsafe_allow_html=True)
+                
+                # Price Chart
+                st.subheader("Price Chart")
+                df["SMA20"] = df["Close"].rolling(20).mean()
+                df["SMA50"] = df["Close"].rolling(50).mean()
+                
+                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50']].copy()
+                base = alt.Chart(chart_data).encode(x='Date:T').properties(height=400)
+                close_line = base.mark_line(color='#00ffcc').encode(y='Close:Q', tooltip=['Date:T', 'Close:Q'])
+                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q')
+                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q')
+                chart = close_line + sma20_line + sma50_line
+                st.altair_chart(chart, use_container_width=True)
+                
+        except Exception as e:
+            st.error(f"Error fetching data: {str(e)}")
+
+# ----------------------- RESEARCH REPORTS SECTION -----------------------
+elif section == "Research Reports":
+    
+    # If a specific report is selected, show its details
+    if st.session_state.current_report:
+        show_report_details()
+    else:
+        show_research_main_page()
+
+# ----------------------- OTHER SECTIONS -----------------------
+elif section == "Options Trading":
+    st.markdown(
+        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Options content
+    st.subheader("Options Overview")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("IV Rank", "65%", "High")
+    with col2:
+        st.metric("Put/Call Ratio", "0.85", "Bullish")
+    with col3:
+        st.metric("Open Interest", "2.5M", "+15%")
+    with col4:
+        st.metric("Volume", "1.8M", "+22%")
+
+elif section == "Chart Analysis":
+    st.markdown(
+        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Chart analysis content
+    st.subheader("Technical Indicators")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("RSI", "54.2", "Neutral")
+    with col2:
+        st.metric("MACD", "Bullish", "↑")
+    with col3:
+        st.metric("Support", "₹1,350", "Strong")
+    with col4:
+        st.metric("Resistance", "₹1,480", "Moderate")
+
+elif section == "AI Predictions":
+    st.markdown(
+        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # AI predictions content
+    st.subheader("AI Analysis")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("AI Signal", "BUY", "Strong")
+    with col2:
+        st.metric("Confidence", "85%", "High")
+    with col3:
+        st.metric("1W Target", "₹1,420", "+3.1%")
+    with col4:
+        st.metric("1M Target", "₹1,520", "+10.4%")
+
+# ----------------------- FOOTER -----------------------
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
