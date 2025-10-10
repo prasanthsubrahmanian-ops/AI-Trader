@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="Smart Trade with Prasanth Subrahamanian", 
+    page_title="Smart Trade with Prasanth Subrahmanian", 
     layout="wide"
 )
 
@@ -21,11 +21,12 @@ header {visibility: hidden;}
 body, .main, .block-container {
     background-color: #000 !important;
     color: #fff !important;
+    padding-top: 0.5rem !important;
 }
 
 .main-header {
-    margin-top: -2rem;
-    margin-bottom: 0rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
     font-size: 2.8rem;
     font-weight: 700;
     color: #00ffcc;
@@ -38,7 +39,7 @@ body, .main, .block-container {
     display: flex;
     justify-content: center;
     gap: 0.8rem;
-    margin: 0.5rem 0 1rem 0;
+    margin: 0.2rem 0 1.5rem 0;
     flex-wrap: wrap;
 }
 
@@ -78,13 +79,13 @@ body, .main, .block-container {
     background-color: #111;
     padding: 2rem 2.5rem;
     border-radius: 12px;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
     box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
 }
 
 .section-header {
     color: #00ffcc !important;
-    margin-top: 0.5rem !important;
+    margin-top: 0.2rem !important;
     margin-bottom: 1rem !important;
 }
 
@@ -167,7 +168,7 @@ function setSection(section) {
 ), unsafe_allow_html=True)
 
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahamanian</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
@@ -206,7 +207,7 @@ section = st.session_state.current_section
 
 # ----------------------- HOME SECTION -----------------------
 if section == "Home":
-    st.markdown('<div class="section-header">Real-Time Market Data</div>', unsafe_allow_html=True)
+    st.markdown("### Real-Time Market Data")
     
     with st.spinner(f"Fetching {stock_name} data..."):
         try:
@@ -453,4 +454,4 @@ elif section == "AI Predictions":
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahamanian • Real-time Market Data</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
