@@ -886,4 +886,4 @@ elif section == "Chart Analysis":
             
             <p><strong>Available Tools:</strong></p>
             <ul>
-                <li><strong>Multiple Timeframes:</strong>
+                <li><strong>Multiple Timeframes:</strong> Daily, weekly,
