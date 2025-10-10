@@ -211,35 +211,6 @@ body, .main, .block-container {
     margin-bottom: 1rem;
 }
 
-/* Timeframe Selector */
-.timeframe-selector {
-    display: flex;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    flex-wrap: wrap;
-}
-
-.timeframe-btn {
-    padding: 0.5rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.timeframe-btn.active {
-    background: #00ffcc;
-    color: #000;
-    border-color: #00ffcc;
-}
-
-.timeframe-btn:hover {
-    background: rgba(0, 255, 204, 0.2);
-    border-color: #00ffcc;
-}
-
 @media (max-width: 768px) {
     .compact-metrics {
         grid-template-columns: repeat(3, 1fr);
@@ -812,4 +783,25 @@ def show_ai_predictions():
         st.metric("Primary Signal", "BUY", "92% Confidence")
     with signal_cols[1]:
         st.metric("Risk Level", "LOW", "Stable Trend")
-    with signal
+    with signal_cols[2]:
+        st.metric("Momentum", "ACCELERATING", "Rising")
+    with signal_cols[3]:
+        st.metric("Volatility", "MEDIUM", "Expected: 18%")
+    
+    # Sentiment Analysis
+    st.markdown("### 😊 Market Sentiment Analysis")
+    
+    sentiment_cols = st.columns(3)
+    with sentiment_cols[0]:
+        st.metric("News Sentiment", "Bullish", "72% Positive")
+    with sentiment_cols[1]:
+        st.metric("Social Media", "Neutral", "55% Positive")
+    with sentiment_cols[2]:
+        st.metric("Analyst Ratings", "Very Bullish", "88% Buy")
+    
+    # Model Insights
+    st.markdown("### 💡 Model Insights & Explanation")
+    
+    with st.expander("View AI Model Reasoning", expanded=True):
+        st.write("""
+        **LSTM Neural Network Analysis
