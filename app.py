@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 st.set_page_config(
     page_title="PRASANTH AI Trading Insights", 
     layout="wide",
-    initial_sidebar_state="collapsed"  # Hide the default sidebar completely
+    initial_sidebar_state="collapsed"
 )
 
 # ----------------------- CUSTOM STYLE -----------------------
@@ -19,7 +19,7 @@ custom_css = """
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* Completely hide the default sidebar */
+/* Hide the default sidebar completely */
 section[data-testid="stSidebar"] {
     display: none !important;
 }
@@ -76,6 +76,8 @@ body, .main, .block-container {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .nav-button:hover {
@@ -99,12 +101,18 @@ body, .main, .block-container {
     border: 1px solid #333;
 }
 
-.stock-selector select, .stock-selector input {
+.stock-selector select {
     background: #000;
     color: #fff;
     border: 1px solid #00ffcc;
     border-radius: 20px;
     padding: 0.3rem 1rem;
+}
+
+.period-display {
+    color: #00ffcc;
+    font-size: 0.9rem;
+    min-width: 80px;
 }
 
 .main-header {
@@ -140,6 +148,15 @@ div[data-testid="stDataFrame"] {
     border-radius: 8px;
     border-left: 4px solid #00ffcc;
     margin: 0.5rem 0;
+}
+
+/* Hide Streamlit form elements */
+.stForm {
+    border: none !important;
+}
+
+.stForm > div {
+    background: transparent !important;
 }
 
 @media (max-width: 768px) {
@@ -179,63 +196,55 @@ st.markdown(f"""
     <div class="nav-brand">PRASANTH AI TRADING INSIGHTS</div>
     
     <div class="nav-section">
-        <button class="nav-button {'active' if st.session_state.current_section == 'Home' else ''}" 
-                onclick="setSection('Home')">🏠 Home</button>
-        <button class="nav-button {'active' if st.session_state.current_section == 'Research Reports' else ''}" 
-                onclick="setSection('Research Reports')">📑 Research</button>
-        <button class="nav-button {'active' if st.session_state.current_section == 'Options Trading' else ''}" 
-                onclick="setSection('Options Trading')">💹 Options</button>
-        <button class="nav-button {'active' if st.session_state.current_section == 'Chart Analysis' else ''}" 
-                onclick="setSection('Chart Analysis')">📈 Charts</button>
-        <button class="nav-button {'active' if st.session_state.current_section == 'AI Predictions' else ''}" 
-                onclick="setSection('AI Predictions')">🤖 AI Predictions</button>
+        <a href="?section=Home" class="nav-button {'active' if st.session_state.current_section == 'Home' else ''}">🏠 Home</a>
+        <a href="?section=Research Reports" class="nav-button {'active' if st.session_state.current_section == 'Research Reports' else ''}">📑 Research</a>
+        <a href="?section=Options Trading" class="nav-button {'active' if st.session_state.current_section == 'Options Trading' else ''}">💹 Options</a>
+        <a href="?section=Chart Analysis" class="nav-button {'active' if st.session_state.current_section == 'Chart Analysis' else ''}">📈 Charts</a>
+        <a href="?section=AI Predictions" class="nav-button {'active' if st.session_state.current_section == 'AI Predictions' else ''}">🤖 AI Predictions</a>
     </div>
     
     <div class="stock-selector">
-        <select id="stockSelect" onchange="setStock(this.value)">
-            <option value="RELIANCE" {'selected' if st.session_state.stock_name == 'RELIANCE' else ''}>RELIANCE</option>
-            <option value="TCS" {'selected' if st.session_state.stock_name == 'TCS' else ''}>TCS</option>
-            <option value="INFY" {'selected' if st.session_state.stock_name == 'INFY' else ''}>INFY</option>
-            <option value="HDFC BANK" {'selected' if st.session_state.stock_name == 'HDFC BANK' else ''}>HDFC BANK</option>
-            <option value="ICICI BANK" {'selected' if st.session_state.stock_name == 'ICICI BANK' else ''}>ICICI BANK</option>
-            <option value="NIFTY 50" {'selected' if st.session_state.stock_name == 'NIFTY 50' else ''}>NIFTY 50</option>
-            <option value="BANK NIFTY" {'selected' if st.session_state.stock_name == 'BANK NIFTY' else ''}>BANK NIFTY</option>
-            <option value="AAPL" {'selected' if st.session_state.stock_name == 'AAPL' else ''}>AAPL</option>
-            <option value="TSLA" {'selected' if st.session_state.stock_name == 'TSLA' else ''}>TSLA</option>
-        </select>
+        <form id="stockForm">
+            <select name="stock" onchange="this.form.submit()">
+                <option value="RELIANCE" {'selected' if st.session_state.stock_name == 'RELIANCE' else ''}>RELIANCE</option>
+                <option value="TCS" {'selected' if st.session_state.stock_name == 'TCS' else ''}>TCS</option>
+                <option value="INFY" {'selected' if st.session_state.stock_name == 'INFY' else ''}>INFY</option>
+                <option value="HDFC BANK" {'selected' if st.session_state.stock_name == 'HDFC BANK' else ''}>HDFC BANK</option>
+                <option value="ICICI BANK" {'selected' if st.session_state.stock_name == 'ICICI BANK' else ''}>ICICI BANK</option>
+                <option value="NIFTY 50" {'selected' if st.session_state.stock_name == 'NIFTY 50' else ''}>NIFTY 50</option>
+                <option value="BANK NIFTY" {'selected' if st.session_state.stock_name == 'BANK NIFTY' else ''}>BANK NIFTY</option>
+                <option value="AAPL" {'selected' if st.session_state.stock_name == 'AAPL' else ''}>AAPL</option>
+                <option value="TSLA" {'selected' if st.session_state.stock_name == 'TSLA' else ''}>TSLA</option>
+            </select>
+        </form>
         
-        <input type="range" id="periodSlider" min="10" max="365" value="{st.session_state.period}" 
-               onchange="setPeriod(this.value)" style="width: 120px;">
-        <span style="color: #00ffcc; font-size: 0.9rem;">{st.session_state.period} days</span>
+        <form id="periodForm">
+            <input type="range" name="period" min="10" max="365" value="{st.session_state.period}" 
+                   onchange="updatePeriodDisplay(this.value); this.form.submit()" style="width: 120px;">
+        </form>
+        <div class="period-display">{st.session_state.period} days</div>
     </div>
 </div>
 
 <script>
-function setSection(section) {{
-    fetch('/set_section?section=' + section, {{method: 'POST'}})
-    .then(() => window.location.reload());
-}}
-
-function setStock(stock) {{
-    fetch('/set_stock?stock=' + stock, {{method: 'POST'}})
-    .then(() => window.location.reload());
-}}
-
-function setPeriod(period) {{
-    fetch('/set_period?period=' + period, {{method: 'POST'}})
-    .then(() => window.location.reload());
+function updatePeriodDisplay(value) {{
+    document.querySelector('.period-display').textContent = value + ' days';
 }}
 </script>
 """, unsafe_allow_html=True)
 
-# ----------------------- URL PARAMETERS HANDLING -----------------------
-# Since Streamlit doesn't support direct fetch, we'll use query parameters
+# ----------------------- QUERY PARAMETERS HANDLING -----------------------
 params = st.experimental_get_query_params()
 
+# Handle section changes
 if 'section' in params:
     st.session_state.current_section = params['section'][0]
+
+# Handle stock changes
 if 'stock' in params:
     st.session_state.stock_name = params['stock'][0]
+
+# Handle period changes  
 if 'period' in params:
     st.session_state.period = int(params['period'][0])
 
@@ -358,7 +367,6 @@ elif section == "Research Reports":
         unsafe_allow_html=True,
     )
     
-    # Display current stock info
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
@@ -368,13 +376,11 @@ elif section == "Research Reports":
         pass
     
     col1, col2 = st.columns(2)
-    
     with col1:
         st.subheader("Fundamental Analysis")
         st.metric("P/E Ratio", "22.5", "1.2")
         st.metric("EPS", "85.20", "5.0")
         st.metric("Market Cap", "12.5T", "2.3")
-        
     with col2:
         st.subheader("Technical Ratings")
         st.metric("RSI Signal", "Neutral")
@@ -388,7 +394,6 @@ elif section == "Options Trading":
         unsafe_allow_html=True,
     )
     
-    # Display current stock info
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
@@ -407,7 +412,6 @@ elif section == "Chart Analysis":
         unsafe_allow_html=True,
     )
     
-    # Display current stock info
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
@@ -425,7 +429,6 @@ elif section == "AI Predictions":
         unsafe_allow_html=True,
     )
     
-    # Display current stock info
     try:
         df = get_stock_data(ticker, 30)
         if not df.empty:
@@ -439,25 +442,3 @@ elif section == "AI Predictions":
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
 st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
-
-# ----------------------- SET QUERY PARAMETERS -----------------------
-# Set query parameters when navigation is clicked
-if st.button("Set Home", key="home_btn"):
-    st.experimental_set_query_params(section="Home")
-    st.rerun()
-
-if st.button("Set Research", key="research_btn"):
-    st.experimental_set_query_params(section="Research Reports")
-    st.rerun()
-
-if st.button("Set Options", key="options_btn"):
-    st.experimental_set_query_params(section="Options Trading")
-    st.rerun()
-
-if st.button("Set Charts", key="charts_btn"):
-    st.experimental_set_query_params(section="Chart Analysis")
-    st.rerun()
-
-if st.button("Set AI", key="ai_btn"):
-    st.experimental_set_query_params(section="AI Predictions")
-    st.rerun()
