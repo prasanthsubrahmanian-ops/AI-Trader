@@ -191,6 +191,164 @@ def get_stock_info(ticker):
     except:
         return {}
 
+# ----------------------- SESSION STATE -----------------------
+if 'current_section' not in st.session_state:
+    st.session_state.current_section = "Home"
+if 'stock_name' not in st.session_state:
+    st.session_state.stock_name = "RELIANCE"
+if 'period' not in st.session_state:
+    st.session_state.period = 60
+if 'current_report' not in st.session_state:
+    st.session_state.current_report = None
+if 'current_ticker' not in st.session_state:
+    st.session_state.current_ticker = "RELIANCE.NS"
+
+# ----------------------- HEADER -----------------------
+st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
+
+# ----------------------- SIMPLE NAVIGATION -----------------------
+nav_options = ["🏠 Home", "📑 Research Reports", "💹 Options Trading", "📈 Chart Analysis", "🤖 AI Predictions"]
+nav_labels = [option.split(" ")[-1] for option in nav_options]
+
+nav_cols = st.columns(5)
+for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
+    with col:
+        if st.button(option, use_container_width=True, 
+                    type="primary" if st.session_state.current_section == nav_labels[i] else "secondary"):
+            st.session_state.current_section = nav_labels[i]
+            st.rerun()
+
+# ----------------------- STOCK SELECTION -----------------------
+stocks = {
+    "RELIANCE": "RELIANCE.NS", 
+    "TCS": "TCS.NS", 
+    "INFY": "INFY.NS", 
+    "HDFC BANK": "HDFCBANK.NS",
+    "ICICI BANK": "ICICIBANK.NS",
+    "NIFTY 50": "^NSEI",
+    "BANK NIFTY": "^NSEBANK",
+    "AAPL": "AAPL",
+    "TSLA": "TSLA"
+}
+
+col1, col2, col3 = st.columns([1, 1, 1])
+with col1:
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
+                             index=list(stocks.keys()).index(st.session_state.stock_name))
+with col2:
+    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
+with col3:
+    st.write("")
+    st.write(f"**Current:** {stock_name} | {period} days")
+
+st.session_state.stock_name = stock_name
+st.session_state.period = period
+ticker = stocks[stock_name]
+st.session_state.current_ticker = ticker
+section = st.session_state.current_section
+
+# ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
+def show_research_main_page():
+    """Show the main research reports page"""
+    st.markdown(
+        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current Stock Info
+    try:
+        df = get_stock_data(st.session_state.current_ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current Analysis for {st.session_state.stock_name}: ₹{current_price:.2f}**")
+    except:
+        pass
+    
+    # RESEARCH REPORT SECTIONS
+    st.markdown("### 📋 Research Report Sections")
+    
+    research_sections = [
+        {
+            "icon": "📊",
+            "title": "Executive Summary",
+            "description": "High-level overview and investment recommendation",
+            "page": "executive_summary"
+        },
+        {
+            "icon": "🔍",
+            "title": "Company Overview", 
+            "description": "Business model, management, and competitive positioning",
+            "page": "company_overview"
+        },
+        {
+            "icon": "💹",
+            "title": "Financial Analysis",
+            "description": "Income statement, balance sheet, and cash flow analysis",
+            "page": "financial_analysis"
+        },
+        {
+            "icon": "📈",
+            "title": "Valuation Analysis",
+            "description": "DCF, comparable companies, and intrinsic value calculation",
+            "page": "valuation_analysis"
+        },
+        {
+            "icon": "⚡", 
+            "title": "Technical Analysis",
+            "description": "Chart patterns, indicators, and price targets",
+            "page": "technical_analysis"
+        },
+        {
+            "icon": "🔄",
+            "title": "Industry Analysis",
+            "description": "Market trends, competition, and growth prospects", 
+            "page": "industry_analysis"
+        },
+        {
+            "icon": "⚠️",
+            "title": "Risk Assessment",
+            "description": "Key risks and mitigation strategies",
+            "page": "risk_assessment"
+        },
+        {
+            "icon": "🎯",
+            "title": "Investment Thesis",
+            "description": "Bull and bear cases with probability assessment",
+            "page": "investment_thesis"
+        }
+    ]
+    
+    # Create research cards in 2 columns
+    col1, col2 = st.columns(2)
+    
+    for idx, research in enumerate(research_sections):
+        with col1 if idx % 2 == 0 else col2:
+            st.markdown(f"""
+            <div class="research-card">
+                <div class="research-icon">{research['icon']}</div>
+                <div class="research-title">{research['title']}</div>
+                <div class="research-desc">{research['description']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"View {research['title']}", key=research['page'], use_container_width=True):
+                st.session_state.current_report = research['page']
+                st.rerun()
+    
+    # Quick Stats
+    st.markdown("---")
+    st.subheader("📊 Quick Stats")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Analyst Rating", "BUY", "4.2/5")
+    with col2:
+        st.metric("Price Target", "₹1,650", "+12%")
+    with col3:
+        st.metric("Upside Potential", "15%", "+2%")
+    with col4:
+        st.metric("Risk Level", "Medium", "Stable")
+
 # ----------------------- REPORT DETAILS FUNCTION -----------------------
 def show_report_details():
     """Display detailed report content"""
@@ -202,10 +360,10 @@ def show_report_details():
     
     report_name = st.session_state.current_report
     
-    st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {stock_name}</h2>', unsafe_allow_html=True)
+    st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {st.session_state.stock_name}</h2>', unsafe_allow_html=True)
     
     try:
-        df = get_stock_data(ticker, 365)
+        df = get_stock_data(st.session_state.current_ticker, 365)
         current_price = float(df['Close'].iloc[-1]) if not df.empty else 0
     except:
         current_price = 0
@@ -310,7 +468,7 @@ def show_report_details():
         st.markdown(f"""
         <div class="report-content">
             <h3>📋 {report_name.replace('_', ' ').title()} Analysis</h3>
-            <p>Detailed analysis for {stock_name} is currently being generated by our AI algorithms.</p>
+            <p>Detailed analysis for {st.session_state.stock_name} is currently being generated by our AI algorithms.</p>
             
             <h4>Key Points:</h4>
             <ul>
@@ -326,164 +484,6 @@ def show_report_details():
         """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
-
-# ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
-def show_research_main_page():
-    """Show the main research reports page"""
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Current Stock Info
-    try:
-        df = get_stock_data(ticker, 30)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current Analysis for {stock_name}: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    # RESEARCH REPORT SECTIONS
-    st.markdown("### 📋 Research Report Sections")
-    
-    research_sections = [
-        {
-            "icon": "📊",
-            "title": "Executive Summary",
-            "description": "High-level overview and investment recommendation",
-            "page": "executive_summary"
-        },
-        {
-            "icon": "🔍",
-            "title": "Company Overview", 
-            "description": "Business model, management, and competitive positioning",
-            "page": "company_overview"
-        },
-        {
-            "icon": "💹",
-            "title": "Financial Analysis",
-            "description": "Income statement, balance sheet, and cash flow analysis",
-            "page": "financial_analysis"
-        },
-        {
-            "icon": "📈",
-            "title": "Valuation Analysis",
-            "description": "DCF, comparable companies, and intrinsic value calculation",
-            "page": "valuation_analysis"
-        },
-        {
-            "icon": "⚡", 
-            "title": "Technical Analysis",
-            "description": "Chart patterns, indicators, and price targets",
-            "page": "technical_analysis"
-        },
-        {
-            "icon": "🔄",
-            "title": "Industry Analysis",
-            "description": "Market trends, competition, and growth prospects", 
-            "page": "industry_analysis"
-        },
-        {
-            "icon": "⚠️",
-            "title": "Risk Assessment",
-            "description": "Key risks and mitigation strategies",
-            "page": "risk_assessment"
-        },
-        {
-            "icon": "🎯",
-            "title": "Investment Thesis",
-            "description": "Bull and bear cases with probability assessment",
-            "page": "investment_thesis"
-        }
-    ]
-    
-    # Create research cards in 2 columns
-    col1, col2 = st.columns(2)
-    
-    for idx, research in enumerate(research_sections):
-        with col1 if idx % 2 == 0 else col2:
-            st.markdown(f"""
-            <div class="research-card">
-                <div class="research-icon">{research['icon']}</div>
-                <div class="research-title">{research['title']}</div>
-                <div class="research-desc">{research['description']}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button(f"View {research['title']}", key=research['page'], use_container_width=True):
-                st.session_state.current_report = research['page']
-                st.rerun()
-    
-    # Quick Stats
-    st.markdown("---")
-    st.subheader("📊 Quick Stats")
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Analyst Rating", "BUY", "4.2/5")
-    with col2:
-        st.metric("Price Target", "₹1,650", "+12%")
-    with col3:
-        st.metric("Upside Potential", "15%", "+2%")
-    with col4:
-        st.metric("Risk Level", "Medium", "Stable")
-
-# ----------------------- SESSION STATE -----------------------
-if 'current_section' not in st.session_state:
-    st.session_state.current_section = "Home"
-if 'stock_name' not in st.session_state:
-    st.session_state.stock_name = "RELIANCE"
-if 'period' not in st.session_state:
-    st.session_state.period = 60
-if 'current_report' not in st.session_state:
-    st.session_state.current_report = None
-
-# ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
-
-# ----------------------- SIMPLE NAVIGATION -----------------------
-# Create navigation using radio buttons instead of complex JavaScript
-nav_options = ["🏠 Home", "📑 Research Reports", "💹 Options Trading", "📈 Chart Analysis", "🤖 AI Predictions"]
-nav_labels = [option.split(" ")[-1] for option in nav_options]
-
-# Create columns for navigation
-nav_cols = st.columns(5)
-for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
-    with col:
-        if st.button(option, use_container_width=True, 
-                    type="primary" if st.session_state.current_section == nav_labels[i] else "secondary"):
-            st.session_state.current_section = nav_labels[i]
-            st.rerun()
-
-# ----------------------- STOCK SELECTION -----------------------
-stocks = {
-    "RELIANCE": "RELIANCE.NS", 
-    "TCS": "TCS.NS", 
-    "INFY": "INFY.NS", 
-    "HDFC BANK": "HDFCBANK.NS",
-    "ICICI BANK": "ICICIBANK.NS",
-    "NIFTY 50": "^NSEI",
-    "BANK NIFTY": "^NSEBANK",
-    "AAPL": "AAPL",
-    "TSLA": "TSLA"
-}
-
-# Stock selection
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
-                             index=list(stocks.keys()).index(st.session_state.stock_name))
-with col2:
-    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
-with col3:
-    st.write("")
-    st.write(f"**Current:** {stock_name} | {period} days")
-
-st.session_state.stock_name = stock_name
-st.session_state.period = period
-ticker = stocks[stock_name]
-section = st.session_state.current_section
 
 # ----------------------- HOME SECTION -----------------------
 if section == "Home":
@@ -503,4 +503,24 @@ if section == "Home":
                 st.markdown("#### 📊 Key Metrics")
                 
                 current_price = float(df['Close'].iloc[-1])
-                prev_price = float(df['Close'].iloc
+                prev_price = float(df['Close'].iloc[-2])
+                price_change = current_price - prev_price
+                price_change_pct = (price_change / prev_price) * 100
+                
+                # Get additional metrics from stock info
+                pe_ratio = stock_info.get('trailingPE', 'N/A')
+                market_cap = stock_info.get('marketCap', 'N/A')
+                if market_cap != 'N/A':
+                    market_cap = f"${market_cap/1e9:.1f}B" if market_cap > 1e9 else f"${market_cap/1e6:.1f}M"
+                
+                dividend_yield = stock_info.get('dividendYield', 'N/A')
+                if dividend_yield != 'N/A':
+                    dividend_yield = f"{dividend_yield*100:.2f}%"
+                
+                # Compact metrics grid
+                st.markdown(f"""
+                <div class="compact-metrics">
+                    <div class="metric-box">
+                        <div class="metric-label">Current Price</div>
+                        <div class="metric-value">₹{current_price:.2f}</div>
+                        <div class="metric-change
