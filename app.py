@@ -40,12 +40,11 @@ body, .main, .block-container {
 .main-subtitle {
     font-size: 1.1rem;
     text-align: center;
-    background: linear-gradient(45deg, #ff6b6b, #ffa726);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #666666;
     margin-top: -0.5rem;
     margin-bottom: 1rem;
     font-weight: 600;
+    font-style: italic;
 }
 
 /* Top Navigation */
@@ -146,6 +145,17 @@ body, .main, .block-container {
     margin-bottom: 1rem;
 }
 
+.risk-badge {
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
     .main-header { font-size: 1.8rem; }
     .nav-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
@@ -163,8 +173,17 @@ def get_stock_data(ticker, period="1y"):
             return pd.DataFrame()
         return data
     except Exception as e:
-        st.error(f"Error fetching data for {ticker}: {str(e)}")
         return pd.DataFrame()
+
+@st.cache_data(ttl=3600)
+def get_stock_info(ticker):
+    """Get fundamental data for stocks"""
+    try:
+        stock = yf.Ticker(ticker)
+        info = stock.info
+        return info
+    except:
+        return {}
 
 @st.cache_data(ttl=3600)
 def get_market_data():
@@ -206,7 +225,7 @@ if 'current_ticker' not in st.session_state:
 
 # ----------------------- HEADER -----------------------
 st.markdown('<div class="main-header">SMART TRADE</div>', unsafe_allow_html=True)
-st.markdown('<div class="main-subtitle">by Prasanth Subrahmanian</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-subtitle">by <em>Prasanth Subrahmanian</em></div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
 nav_options = ["🏠 Home", "📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
@@ -425,6 +444,40 @@ def show_market_trends():
     else:
         st.info("Market data loading...")
     
+    # Fundamental Data for Stocks (not indices)
+    if stock_name not in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]:
+        st.markdown("### 📊 Fundamental Analysis")
+        
+        stock_info = get_stock_info(ticker)
+        if stock_info:
+            fund_cols = st.columns(4)
+            with fund_cols[0]:
+                pe_ratio = stock_info.get('trailingPE', 'N/A')
+                st.metric("P/E Ratio", f"{pe_ratio}" if pe_ratio != 'N/A' else "N/A")
+            
+            with fund_cols[1]:
+                dividend_yield = stock_info.get('dividendYield', 'N/A')
+                if dividend_yield != 'N/A' and dividend_yield is not None:
+                    st.metric("Dividend Yield", f"{dividend_yield*100:.2f}%")
+                else:
+                    st.metric("Dividend Yield", "N/A")
+            
+            with fund_cols[2]:
+                market_cap = stock_info.get('marketCap', 'N/A')
+                if market_cap != 'N/A' and market_cap is not None:
+                    if market_cap > 1e12:
+                        st.metric("Market Cap", f"₹{market_cap/1e12:.2f}T")
+                    elif market_cap > 1e9:
+                        st.metric("Market Cap", f"₹{market_cap/1e9:.2f}B")
+                    else:
+                        st.metric("Market Cap", f"₹{market_cap/1e6:.2f}M")
+                else:
+                    st.metric("Market Cap", "N/A")
+            
+            with fund_cols[3]:
+                beta = stock_info.get('beta', 'N/A')
+                st.metric("Beta", f"{beta}" if beta != 'N/A' else "N/A")
+    
     # Advanced Charting
     st.markdown(f"### 📊 {stock_name} Advanced Chart")
     
@@ -442,7 +495,9 @@ def show_market_trends():
         selected_period = period_map.get(timeframe, "1mo")
         df = get_stock_data(ticker, selected_period)
         
-        if not df.empty and len(df) > 1:
+        # FIXED: Proper check for DataFrame emptiness and data availability
+        if df is not None and not df.empty and len(df) > 1:
+            # Convert to scalar values explicitly
             current_price = float(df['Close'].iloc[-1])
             prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
             price_change = current_price - prev_price
@@ -465,24 +520,28 @@ def show_market_trends():
             
             # Add moving averages if enough data
             if len(df) > 20:
-                df['MA20'] = df['Close'].rolling(window=20).mean()
-                fig.add_trace(go.Scatter(
-                    x=df.index, 
-                    y=df['MA20'], 
-                    mode='lines', 
-                    name='MA20',
-                    line=dict(color='#ff4444', width=1, dash='dash')
-                ))
+                ma20 = df['Close'].rolling(window=20).mean()
+                # FIXED: Check if MA20 has valid data
+                if not ma20.isna().all():
+                    fig.add_trace(go.Scatter(
+                        x=df.index, 
+                        y=ma20, 
+                        mode='lines', 
+                        name='MA20',
+                        line=dict(color='#ff4444', width=1, dash='dash')
+                    ))
             
             if len(df) > 50:
-                df['MA50'] = df['Close'].rolling(window=50).mean()
-                fig.add_trace(go.Scatter(
-                    x=df.index, 
-                    y=df['MA50'], 
-                    mode='lines', 
-                    name='MA50',
-                    line=dict(color='#0099ff', width=1, dash='dash')
-                ))
+                ma50 = df['Close'].rolling(window=50).mean()
+                # FIXED: Check if MA50 has valid data
+                if not ma50.isna().all():
+                    fig.add_trace(go.Scatter(
+                        x=df.index, 
+                        y=ma50, 
+                        mode='lines', 
+                        name='MA50',
+                        line=dict(color='#0099ff', width=1, dash='dash')
+                    ))
             
             # Determine title and y-axis label
             is_index = stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]
@@ -522,8 +581,8 @@ def show_market_trends():
                 
             with tech_cols[2]:
                 if 'Volume' in df.columns and not df['Volume'].isna().all():
-                    volume_avg = df['Volume'].mean()
-                    current_volume = df['Volume'].iloc[-1]
+                    volume_avg = float(df['Volume'].mean())  # FIXED: Convert to float
+                    current_volume = float(df['Volume'].iloc[-1])  # FIXED: Convert to float
                     volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
                     st.metric("Volume Ratio", f"{volume_ratio:.1f}x", "High" if volume_ratio > 1.5 else "Normal")
                 else:
@@ -531,8 +590,13 @@ def show_market_trends():
                 
             with tech_cols[3]:
                 if len(df) > 1:
-                    volatility = df['Close'].pct_change().std() * np.sqrt(252) * 100  # Annualized volatility
-                    st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                    # FIXED: Convert volatility calculation to scalar
+                    returns = df['Close'].pct_change().dropna()
+                    if not returns.empty:
+                        volatility = float(returns.std() * np.sqrt(252) * 100)  # Annualized volatility
+                        st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                    else:
+                        st.metric("Volatility", "N/A", "")
                 else:
                     st.metric("Volatility", "N/A", "")
                     
@@ -573,8 +637,8 @@ def show_ai_predictions():
     current_price = 2500
     try:
         df = get_stock_data(ticker, "1mo")
-        if not df.empty and len(df) > 0:
-            current_price = float(df['Close'].iloc[-1])
+        if df is not None and not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])  # FIXED: Convert to float
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
         current_price = 2500
@@ -606,6 +670,80 @@ def show_ai_predictions():
         st.metric("Risk Level", "LOW", "-15%")
         st.progress(25, text="Drawdown Risk: 25%")
         st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Stop Loss and Risk Management
+    st.markdown("### 🛡️ Risk Management")
+    
+    risk_cols = st.columns(4)
+    with risk_cols[0]:
+        stop_loss = current_price * 0.95
+        st.metric("Stop Loss", f"₹{stop_loss:.2f}", "-5.0%")
+    
+    with risk_cols[1]:
+        target_1 = current_price * 1.08
+        st.metric("Target 1", f"₹{target_1:.2f}", "+8.0%")
+    
+    with risk_cols[2]:
+        target_2 = current_price * 1.15
+        st.metric("Target 2", f"₹{target_2:.2f}", "+15.0%")
+    
+    with risk_cols[3]:
+        risk_reward = (target_1 - current_price) / (current_price - stop_loss)
+        st.metric("Risk/Reward", f"{risk_reward:.2f}:1", "Good" if risk_reward > 1.5 else "Fair")
+    
+    # Prediction Chart
+    st.markdown("### 📈 AI Prediction Chart")
+    
+    try:
+        # Create prediction chart
+        dates = pd.date_range(start=datetime.now(), periods=30, freq='D')
+        # Mock prediction data
+        base_price = current_price
+        predictions = [base_price * (1 + 0.002 * i + np.random.normal(0, 0.01)) for i in range(30)]
+        
+        fig = go.Figure()
+        
+        # Current price line
+        fig.add_trace(go.Scatter(
+            x=[dates[0]], 
+            y=[current_price],
+            mode='markers',
+            name='Current Price',
+            marker=dict(color='#00ffcc', size=10)
+        ))
+        
+        # Prediction line
+        fig.add_trace(go.Scatter(
+            x=dates, 
+            y=predictions,
+            mode='lines+markers',
+            name='AI Prediction',
+            line=dict(color='#ffa726', width=3, dash='dot')
+        ))
+        
+        # Stop loss line
+        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#ff4444", 
+                     annotation_text="Stop Loss", annotation_position="bottom right")
+        
+        # Target lines
+        fig.add_hline(y=target_1, line_dash="dash", line_color="#00ffcc",
+                     annotation_text="Target 1", annotation_position="top right")
+        fig.add_hline(y=target_2, line_dash="dash", line_color="#0099ff",
+                     annotation_text="Target 2", annotation_position="top right")
+        
+        fig.update_layout(
+            title=f"AI Price Prediction for {stock_name} (Next 30 Days)",
+            template="plotly_dark",
+            height=400,
+            showlegend=True,
+            xaxis_title="Date",
+            yaxis_title="Price (₹)"
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+    except Exception as e:
+        st.error(f"Error generating prediction chart: {str(e)}")
 
 # ----------------------- OPTIONS TRADING PAGE -----------------------
 def show_options_trading():
@@ -622,8 +760,8 @@ def show_options_trading():
     current_price = 2500
     try:
         df = get_stock_data(ticker, "1d")
-        if not df.empty and len(df) > 0:
-            current_price = float(df['Close'].iloc[-1])
+        if df is not None and not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])  # FIXED: Convert to float
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
         current_price = 2500
@@ -670,106 +808,4 @@ def show_options_trading():
 def show_portfolio_insights():
     """Portfolio Insights - User or sample portfolio charts"""
     st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
-        '<h2>📊 Portfolio Insights</h2>'
-        '<p>Portfolio analysis and performance tracking</p>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Sample Portfolio
-    st.markdown("### 💼 Sample Portfolio")
-    
-    portfolio_data = {
-        "Stock": ["RELIANCE", "TCS", "HDFC BANK", "INFOSYS", "ICICI BANK"],
-        "Quantity": [50, 100, 75, 120, 80],
-        "Avg Price": [2450, 3200, 1650, 1850, 920],
-        "Current Price": [2580, 3350, 1680, 1920, 950],
-        "P&L (%)": ["+5.3%", "+4.7%", "+1.8%", "+3.8%", "+3.3%"]
-    }
-    
-    portfolio_df = pd.DataFrame(portfolio_data)
-    portfolio_df['Investment'] = portfolio_df['Quantity'] * portfolio_df['Avg Price']
-    portfolio_df['Current Value'] = portfolio_df['Quantity'] * portfolio_df['Current Price']
-    portfolio_df['P&L'] = portfolio_df['Current Value'] - portfolio_df['Investment']
-    
-    # Portfolio Summary
-    total_investment = portfolio_df['Investment'].sum()
-    total_value = portfolio_df['Current Value'].sum()
-    total_pnl = total_value - total_investment
-    total_pnl_pct = (total_pnl / total_investment) * 100
-    
-    summary_cols = st.columns(4)
-    with summary_cols[0]:
-        st.metric("Total Investment", f"₹{total_investment:,.0f}")
-    with summary_cols[1]:
-        st.metric("Current Value", f"₹{total_value:,.0f}")
-    with summary_cols[2]:
-        st.metric("Total P&L", f"₹{total_pnl:,.0f}", f"{total_pnl_pct:+.1f}%")
-    with summary_cols[3]:
-        st.metric("Portfolio Beta", "0.92", "Low Risk")
-    
-    # Display portfolio table
-    st.dataframe(portfolio_df, use_container_width=True)
-
-# ----------------------- BACKTESTING PAGE -----------------------
-def show_backtesting():
-    """Backtesting - Test strategies on past data"""
-    st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
-        '<h2>🔍 Strategy Backtesting</h2>'
-        '<p>Test trading strategies on historical data</p>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Strategy Configuration
-    st.markdown("### ⚙ Strategy Configuration")
-    
-    config_cols = st.columns(3)
-    with config_cols[0]:
-        strategy = st.selectbox("Trading Strategy", 
-                              ["Moving Average Crossover", "RSI Strategy", "MACD Strategy", "Bollinger Bands"])
-    with config_cols[1]:
-        capital = st.number_input("Initial Capital (₹)", value=100000, step=10000)
-    with config_cols[2]:
-        period = st.selectbox("Backtest Period", ["3 Months", "6 Months", "1 Year", "2 Years"])
-    
-    if st.button("Run Backtest", type="primary", use_container_width=True):
-        st.success("Backtest completed successfully!")
-        
-        # Backtest Results
-        st.markdown("### 📈 Backtest Results")
-        
-        result_cols = st.columns(4)
-        with result_cols[0]:
-            st.metric("Final Value", "₹1,245,000", "+24.5%")
-        with result_cols[1]:
-            st.metric("Total Trades", "156")
-        with result_cols[2]:
-            st.metric("Win Rate", "62.8%", "+2.3%")
-        with result_cols[3]:
-            st.metric("Max Drawdown", "-8.2%", "Moderate")
-
-# ----------------------- MAIN PAGE ROUTING -----------------------
-if section == "Home":
-    show_home()
-elif section == "Market Trends":
-    show_market_trends()
-elif section == "AI Predictions":
-    show_ai_predictions()
-elif section == "Options Trading":
-    show_options_trading()
-elif section == "Portfolio Insights":
-    show_portfolio_insights()
-elif section == "Backtesting":
-    show_backtesting()
-
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #666;'>"
-    "Smart Trade by <span style='background: linear-gradient(45deg, #ff6b6b, #ffa726); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>Prasanth Subrahmanian</span> • Advanced Trading Analytics • Powered by AI"
-    "</div>", 
-    unsafe_allow_html=True
-)
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1
