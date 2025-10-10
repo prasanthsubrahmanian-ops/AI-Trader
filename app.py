@@ -19,7 +19,7 @@ custom_css = """
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-body, .main, .block-container, .sidebar .sidebar-content {
+body, .main, .block-container {
     background-color: #000 !important;
     color: #fff !important;
 }
@@ -63,11 +63,6 @@ div[data-testid="stDataFrame"] {
 /* Sidebar styling */
 section[data-testid="stSidebar"] {
     background-color: #111 !important;
-    border-right: 1px solid #333;
-}
-
-section[data-testid="stSidebar"] > div {
-    background-color: #111 !important;
 }
 
 section[data-testid="stSidebar"] .stRadio label {
@@ -80,6 +75,10 @@ section[data-testid="stSidebar"] .stSelectbox label {
 
 section[data-testid="stSidebar"] .stSlider label {
     color: white !important;
+}
+
+section[data-testid="stSidebar"] h3 {
+    color: #00ffcc !important;
 }
 
 @media (max-width: 768px) {
@@ -130,30 +129,33 @@ stocks = {
 }
 
 # ----------------------- SIDEBAR NAVIGATION -----------------------
-with st.sidebar:
-    st.markdown("### 📊 Navigation")
-    st.markdown("---")
-    
-    section = st.radio(
-        "Choose Section",
-        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"),
-        key="nav_radio"
-    )
-    
-    st.markdown("---")
-    st.markdown("### 🔍 Stock Selection")
-    
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), key="stock_select")
-    period = st.slider("Period (Days)", 10, 365, 60, key="period_slider")
-    
-    st.markdown("---")
-    st.markdown("### ℹ️ Info")
-    st.markdown("""
-    <div style='color: #888; font-size: 0.9rem;'>
-    Real-time market data and AI-powered trading insights. 
-    Select a stock and navigate through different sections for detailed analysis.
-    </div>
-    """, unsafe_allow_html=True)
+# First, let's add the navigation directly in the sidebar
+st.sidebar.title("📊 PRASANTH AI")
+
+# Navigation section
+st.sidebar.markdown("### 🧭 Navigation")
+section = st.sidebar.radio(
+    "Choose Section:",
+    ["Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"]
+)
+
+st.sidebar.markdown("---")
+
+# Stock selection section
+st.sidebar.markdown("### 🔍 Stock Selection")
+stock_name = st.sidebar.selectbox("Select Stock:", list(stocks.keys()))
+period = st.sidebar.slider("Period (Days):", 10, 365, 60)
+
+st.sidebar.markdown("---")
+
+# Info section
+st.sidebar.markdown("### ℹ️ About")
+st.sidebar.info("""
+Real-time market data and 
+AI-powered trading insights.
+Select a stock and navigate 
+through sections for analysis.
+""")
 
 ticker = stocks[stock_name]
 
