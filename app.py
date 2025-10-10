@@ -291,7 +291,7 @@ def get_stock_info(ticker):
 
 # ----------------------- SESSION STATE -----------------------
 if 'current_section' not in st.session_state:
-    st.session_state.current_section = "Market Trends"
+    st.session_state.current_section = "Home"
 if 'stock_name' not in st.session_state:
     st.session_state.stock_name = "RELIANCE"
 if 'current_ticker' not in st.session_state:
@@ -325,23 +325,25 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-# Stock selection available on all pages
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    stock_name = st.selectbox("Select Stock/Index", list(stocks.keys()), 
-                             index=list(stocks.keys()).index(st.session_state.stock_name))
-with col2:
-    if st.session_state.current_section == "Market Trends":
-        timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=0)
-    else:
-        timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=2)
-with col3:
-    st.write("")
-    st.write(f"*Current:* {stock_name} | {timeframe}")
+# Stock selection available on all pages except Home
+if st.session_state.current_section != "Home":
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        stock_name = st.selectbox("Select Stock/Index", list(stocks.keys()), 
+                                 index=list(stocks.keys()).index(st.session_state.stock_name))
+    with col2:
+        if st.session_state.current_section == "Market Trends":
+            timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=0)
+        else:
+            timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=2)
+    with col3:
+        st.write("")
+        st.write(f"*Current:* {stock_name} | {timeframe}")
 
-st.session_state.stock_name = stock_name
-ticker = stocks[st.session_state.stock_name]
-st.session_state.current_ticker = ticker
+    st.session_state.stock_name = stock_name
+    ticker = stocks[st.session_state.stock_name]
+    st.session_state.current_ticker = ticker
+
 section = st.session_state.current_section
 
 # ----------------------- HOME PAGE -----------------------
@@ -359,15 +361,18 @@ def show_home():
     st.markdown("### 📊 Quick Market Overview")
     
     market_data = get_market_data()
-    cols = st.columns(4)
-    
-    for i, (idx_name, idx_data) in enumerate(market_data.items()):
-        with cols[i % 4]:
-            st.metric(
-                idx_name,
-                f"₹{idx_data['current']:.2f}",
-                f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
-            )
+    if market_data:
+        cols = st.columns(4)
+        
+        for i, (idx_name, idx_data) in enumerate(market_data.items()):
+            with cols[i % 4]:
+                st.metric(
+                    idx_name,
+                    f"₹{idx_data['current']:.2f}",
+                    f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
+                )
+    else:
+        st.warning("Could not load market data at the moment")
     
     # Feature Cards
     st.markdown("### 🚀 Features")
@@ -828,7 +833,4 @@ elif section == "Portfolio Insights":
 elif section == "Backtesting":
     show_backtesting()
 
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #666;'>"
+# -----------------
