@@ -164,6 +164,27 @@ body, .main, .block-container {
     margin: 1.5rem 0;
 }
 
+/* Description Column */
+.description-box {
+    background: #1a1a1a;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #00ffcc;
+    margin: 1rem 0;
+}
+
+.description-header {
+    color: #00ffcc;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.description-content {
+    color: #ccc;
+    line-height: 1.6;
+}
+
 @media (max-width: 768px) {
     .compact-metrics {
         grid-template-columns: repeat(3, 1fr);
@@ -200,8 +221,8 @@ if 'current_section' not in st.session_state:
     st.session_state.current_section = "Home"
 if 'stock_name' not in st.session_state:
     st.session_state.stock_name = "RELIANCE"
-if 'period' not in st.session_state:
-    st.session_state.period = 60
+if 'chart_period' not in st.session_state:
+    st.session_state.chart_period = "1Y"
 if 'current_report' not in st.session_state:
     st.session_state.current_report = None
 if 'current_ticker' not in st.session_state:
@@ -222,7 +243,7 @@ for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
             st.session_state.current_section = nav_labels[i]
             st.rerun()
 
-# ----------------------- STOCK SELECTION -----------------------
+# ----------------------- STOCK SELECTION (Only on Home Page) -----------------------
 stocks = {
     "RELIANCE": "RELIANCE.NS", 
     "TCS": "TCS.NS", 
@@ -235,21 +256,26 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
-                             index=list(stocks.keys()).index(st.session_state.stock_name))
-with col2:
-    # Changed to selectbox for better user experience
-    chart_period = st.selectbox("Chart Period", 
-                               ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
-                               index=3)
-with col3:
-    st.write("")
-    st.write(f"**Current:** {stock_name} | {chart_period}")
+# Only show stock selection on Home page
+if st.session_state.current_section == "Home":
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
+                                 index=list(stocks.keys()).index(st.session_state.stock_name))
+    with col2:
+        # Chart period selection only on Home page
+        chart_period = st.selectbox("Chart Period", 
+                                   ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
+                                   index=3)
+    with col3:
+        st.write("")
+        st.write(f"**Current:** {stock_name} | {chart_period}")
 
-st.session_state.stock_name = stock_name
-ticker = stocks[stock_name]
+    st.session_state.stock_name = stock_name
+    st.session_state.chart_period = chart_period
+
+# Always update ticker based on selected stock
+ticker = stocks[st.session_state.stock_name]
 st.session_state.current_ticker = ticker
 section = st.session_state.current_section
 
@@ -355,8 +381,29 @@ def show_research_main_page():
                 st.session_state.current_report = research['page']
                 st.rerun()
     
-    # Quick Stats
+    # Description Column
     st.markdown("---")
+    st.markdown("""
+    <div class="description-box">
+        <div class="description-header">About Research Reports</div>
+        <div class="description-content">
+            <p>Our comprehensive research reports provide in-depth analysis of stocks and market trends using advanced AI algorithms and fundamental research methodologies.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li><strong>AI-Powered Analysis:</strong> Machine learning algorithms process vast amounts of data to generate accurate predictions</li>
+                <li><strong>Fundamental Research:</strong> Deep dive into company financials, management, and competitive positioning</li>
+                <li><strong>Technical Analysis:</strong> Chart patterns, indicators, and price action analysis</li>
+                <li><strong>Risk Assessment:</strong> Comprehensive evaluation of investment risks and mitigation strategies</li>
+                <li><strong>Valuation Models:</strong> Multiple valuation approaches including DCF, comparable companies, and intrinsic value</li>
+            </ul>
+            
+            <p><strong>Methodology:</strong> Each report combines quantitative data analysis with qualitative insights from our team of experienced analysts and AI systems.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Quick Stats
     st.subheader("📊 Quick Stats")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -413,6 +460,27 @@ def show_report_details():
         </div>
         """.format(current_price, change_pct), unsafe_allow_html=True)
         
+        # Description Column
+        st.markdown("""
+        <div class="description-box">
+            <div class="description-header">Executive Summary Overview</div>
+            <div class="description-content">
+                <p>The Executive Summary provides a comprehensive overview of our investment thesis, highlighting key findings from our detailed analysis across all research areas.</p>
+                
+                <p><strong>What's Included:</strong></p>
+                <ul>
+                    <li>Investment recommendation and rationale</li>
+                    <li>Key financial and operational metrics</li>
+                    <li>Risk-reward assessment</li>
+                    <li>Price targets and time horizon</li>
+                    <li>Catalysts and key monitoring points</li>
+                </ul>
+                
+                <p>This summary synthesizes insights from our fundamental, technical, and qualitative analysis to provide a clear investment framework.</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         # Executive metrics
         st.subheader("Key Metrics")
         col1, col2, col3 = st.columns(3)
@@ -447,6 +515,27 @@ def show_report_details():
         </div>
         """.format(current_price, change_pct), unsafe_allow_html=True)
         
+        # Description Column
+        st.markdown("""
+        <div class="description-box">
+            <div class="description-header">Financial Analysis Methodology</div>
+            <div class="description-content">
+                <p>Our Financial Analysis examines the company's financial health, performance trends, and sustainability of growth through comprehensive ratio analysis and trend evaluation.</p>
+                
+                <p><strong>Analysis Components:</strong></p>
+                <ul>
+                    <li><strong>Profitability Analysis:</strong> Margins, returns, and efficiency ratios</li>
+                    <li><strong>Liquidity Assessment:</strong> Working capital and cash flow analysis</li>
+                    <li><strong>Solvency Evaluation:</strong> Debt levels and coverage ratios</li>
+                    <li><strong>Growth Metrics:</strong> Revenue, earnings, and cash flow growth trends</li>
+                    <li><strong>Comparative Analysis:</strong> Performance vs. industry peers</li>
+                </ul>
+                
+                <p>We use both historical trends and forward-looking projections to assess financial sustainability.</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         # Financial metrics
         st.subheader("Financial Metrics")
         col1, col2, col3 = st.columns(3)
@@ -479,6 +568,27 @@ def show_report_details():
             </ul>
         </div>
         """.format(current_price, change_pct), unsafe_allow_html=True)
+        
+        # Description Column
+        st.markdown("""
+        <div class="description-box">
+            <div class="description-header">Technical Analysis Approach</div>
+            <div class="description-content">
+                <p>Our Technical Analysis combines classical chart patterns with modern quantitative indicators to identify trends, support/resistance levels, and potential entry/exit points.</p>
+                
+                <p><strong>Technical Tools Used:</strong></p>
+                <ul>
+                    <li><strong>Trend Analysis:</strong> Moving averages, trendlines, and chart patterns</li>
+                    <li><strong>Momentum Indicators:</strong> RSI, MACD, Stochastic oscillators</li>
+                    <li><strong>Volume Analysis:</strong> Volume trends and on-balance volume</li>
+                    <li><strong>Support/Resistance:</strong> Key price levels and Fibonacci retracements</li>
+                    <li><strong>Volatility Measures:</strong> Bollinger Bands, ATR for risk assessment</li>
+                </ul>
+                
+                <p>We combine multiple timeframes (daily, weekly, monthly) for comprehensive trend analysis.</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Technical metrics
         st.subheader("Technical Indicators")
@@ -514,17 +624,37 @@ def show_report_details():
             st.session_state.stock_name,
             datetime.now().strftime('%Y-%m-%d %H:%M')
         ), unsafe_allow_html=True)
+        
+        # Default description
+        st.markdown(f"""
+        <div class="description-box">
+            <div class="description-header">{report_name.replace('_', ' ').title()} Analysis</div>
+            <div class="description-content">
+                <p>This section provides comprehensive analysis of {report_name.replace('_', ' ').lower()} aspects for {st.session_state.stock_name}.</p>
+                <p>Our AI systems are currently processing the latest data to generate detailed insights and recommendations.</p>
+                <p><strong>Expected Analysis Components:</strong></p>
+                <ul>
+                    <li>Detailed quantitative and qualitative assessment</li>
+                    <li>Comparative analysis with industry peers</li>
+                    <li>Risk factors and opportunity assessment</li>
+                    <li>Strategic implications and recommendations</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ----------------------- HOME SECTION -----------------------
 if section == "Home":
+    # Stock selection is already shown above for Home page
+    
     st.markdown("### Real-Time Market Data")
     
-    with st.spinner(f"Fetching {stock_name} data..."):
+    with st.spinner(f"Fetching {st.session_state.stock_name} data..."):
         try:
             # Get daily data for the selected period
-            df = get_stock_data(ticker, period_map[chart_period])
+            df = get_stock_data(ticker, period_map[st.session_state.chart_period])
             stock_info = get_stock_info(ticker)
             
             if df.empty:
@@ -564,7 +694,7 @@ if section == "Home":
                 col1, col2, col3 = st.columns([2, 1, 1])
                 with col1:
                     st.metric(
-                        f"{stock_name} Current Price",
+                        f"{st.session_state.stock_name} Current Price",
                         f"₹{current_price:.2f}",
                         f"{price_change:+.2f} ({price_change_pct:+.2f}%)"
                     )
@@ -625,7 +755,7 @@ if section == "Home":
                 st.markdown(metrics_html, unsafe_allow_html=True)
                 
                 # Daily Price Chart
-                st.subheader(f"📈 {chart_period} Price Chart - {stock_name}")
+                st.subheader(f"📈 {st.session_state.chart_period} Price Chart - {st.session_state.stock_name}")
                 
                 # Calculate moving averages
                 df["SMA20"] = df["Close"].rolling(20).mean()
@@ -638,7 +768,7 @@ if section == "Home":
                     x=alt.X('Date:T', title='Date')
                 ).properties(
                     height=400,
-                    title=f"{stock_name} Price Chart ({chart_period})"
+                    title=f"{st.session_state.stock_name} Price Chart ({st.session_state.chart_period})"
                 )
                 
                 # Create layers for different lines
@@ -668,29 +798,13 @@ if section == "Home":
                 st.altair_chart(chart, use_container_width=True)
                 st.caption("Close Price (Green) | 20-Day SMA (Orange) | 50-Day SMA (Pink)")
                 
-                # Recent Price Data Table
-                st.subheader("Recent Price Action")
-                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(10).copy()
-                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
-                display_df["Change"] = display_df["Close"].diff()
-                display_df["Change %"] = (display_df["Change"] / display_df["Close"].shift(1)) * 100
-                
-                # Format the display
-                display_df["Open"] = display_df["Open"].apply(lambda x: f"₹{x:.2f}")
-                display_df["High"] = display_df["High"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Low"] = display_df["Low"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Close"] = display_df["Close"].apply(lambda x: f"₹{x:.2f}")
-                display_df["Volume"] = display_df["Volume"].apply(lambda x: f"{x:,.0f}")
-                display_df["Change"] = display_df["Change"].apply(lambda x: f"{x:+.2f}" if not pd.isna(x) else "")
-                display_df["Change %"] = display_df["Change %"].apply(lambda x: f"{x:+.2f}%" if not pd.isna(x) else "")
-                
-                st.dataframe(display_df, use_container_width=True)
-                
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
 
 # ----------------------- RESEARCH REPORTS SECTION -----------------------
 elif section == "Research Reports":
+    # Show current stock info
+    st.write(f"**Currently Analyzing:** {st.session_state.stock_name}")
     
     # If a specific report is selected, show its details
     if st.session_state.current_report:
@@ -698,7 +812,7 @@ elif section == "Research Reports":
     else:
         show_research_main_page()
 
-# ----------------------- OTHER SECTIONS -----------------------
+# ----------------------- OPTIONS TRADING SECTION -----------------------
 elif section == "Options Trading":
     st.markdown(
         '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
@@ -710,9 +824,30 @@ elif section == "Options Trading":
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         pass
+    
+    # Description Column
+    st.markdown("""
+    <div class="description-box">
+        <div class="description-header">Options Trading Platform</div>
+        <div class="description-content">
+            <p>Our Options Trading platform provides comprehensive tools for options strategy analysis, volatility assessment, and risk management.</p>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li><strong>Options Chain Analysis:</strong> Real-time options data with Greeks calculation</li>
+                <li><strong>Volatility Analysis:</strong> IV Rank, IV Percentile, and volatility skew</li>
+                <li><strong>Strategy Builder:</strong> Multi-leg options strategies with risk analysis</li>
+                <li><strong>Probability Analysis:</strong> Probability of profit and expected returns</li>
+                <li><strong>Risk Management:</strong> Position sizing and risk assessment tools</li>
+            </ul>
+            
+            <p>All analysis is based on real-time market data and advanced options pricing models.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Options content
     st.subheader("Options Overview")
@@ -726,6 +861,7 @@ elif section == "Options Trading":
     with col4:
         st.metric("Volume", "1.8M", "+22%")
 
+# ----------------------- CHART ANALYSIS SECTION -----------------------
 elif section == "Chart Analysis":
     st.markdown(
         '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
@@ -737,49 +873,17 @@ elif section == "Chart Analysis":
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         pass
     
-    # Chart analysis content
-    st.subheader("Technical Indicators")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("RSI", "54.2", "Neutral")
-    with col2:
-        st.metric("MACD", "Bullish", "↑")
-    with col3:
-        st.metric("Support", "₹1,350", "Strong")
-    with col4:
-        st.metric("Resistance", "₹1,480", "Moderate")
-
-elif section == "AI Predictions":
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Current price display
-    try:
-        df = get_daily_data(ticker, 1)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    # AI predictions content
-    st.subheader("AI Analysis")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("AI Signal", "BUY", "Strong")
-    with col2:
-        st.metric("Confidence", "85%", "High")
-    with col3:
-        st.metric("1W Target", "₹1,420", "+3.1%")
-    with col4:
-        st.metric("1M Target", "₹1,520", "+10.4%")
-
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
+    # Description Column
+    st.markdown("""
+    <div class="description-box">
+        <div class="description-header">Advanced Chart Analysis</div>
+        <div class="description-content">
+            <p>Our Chart Analysis platform provides professional-grade technical analysis tools with multiple timeframes, indicators, and drawing capabilities.</p>
+            
+            <p><strong>Available Tools:</strong></p>
+            <ul>
+                <li><strong>Multiple Timeframes:</strong>
