@@ -792,4 +792,66 @@ def show_portfolio_insights():
     
     fig = go.Figure(data=[go.Pie(
         labels=portfolio_df['Stock'],
-        values
+        values=portfolio_df['Current Value'],
+        hole=0.4,
+        marker_colors=['#00ffcc', '#0099ff', '#ff4444', '#ffaa00', '#ff00ff']
+    )])
+    fig.update_layout(
+        template="plotly_dark", 
+        height=400,
+        title="Portfolio Allocation by Stock"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Performance Chart
+    st.markdown("### 📊 Performance Trend")
+    
+    # Mock performance data
+    dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
+    performance = 1000000 + np.cumsum(np.random.normal(5000, 20000, len(dates)))
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=dates, y=performance, mode='lines', name='Portfolio Value', line=dict(color='#00ffcc')))
+    fig.update_layout(
+        title="Portfolio Value Over Time",
+        template="plotly_dark",
+        height=300,
+        xaxis_title="Date",
+        yaxis_title="Portfolio Value (₹)"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# ----------------------- BACKTESTING PAGE -----------------------
+def show_backtesting():
+    """Backtesting - Test strategies on past data"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>🔍 Strategy Backtesting</h2>'
+        '<p>Test trading strategies on historical data</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Strategy Configuration
+    st.markdown("### ⚙️ Strategy Configuration")
+    
+    config_cols = st.columns(3)
+    with config_cols[0]:
+        strategy = st.selectbox("Trading Strategy", 
+                              ["Moving Average Crossover", "RSI Strategy", "MACD Strategy", "Bollinger Bands"])
+    with config_cols[1]:
+        capital = st.number_input("Initial Capital (₹)", value=100000, step=10000)
+    with config_cols[2]:
+        period = st.selectbox("Backtest Period", ["3 Months", "6 Months", "1 Year", "2 Years"])
+    
+    # Parameters
+    st.markdown("### 📊 Strategy Parameters")
+    param_cols = st.columns(4)
+    with param_cols[0]:
+        ma_fast = st.slider("MA Fast Period", 5, 50, 20)
+    with param_cols[1]:
+        ma_slow = st.slider("MA Slow Period", 20, 200, 50)
+    with param_cols[2]:
+        rsi_upper = st.slider("RSI Upper", 60, 90, 70)
+    with param_cols[3]:
+        rsi_lower = st.slider("RSI Lower", 10,
