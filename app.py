@@ -20,7 +20,7 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 
 body, .main, .block-container {
-    background: linear-gradient(135deg, #0a0f2d 0%, #1a1f3d 50%, #0a0f2d 100%) !important;
+    background: linear-gradient(135deg, #050817 0%, #0a1025 25%, #0a0f2d 50%, #071022 75%, #050817 100%) !important;
     color: #e0e0ff !important;
     padding-top: 0.5rem !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -42,7 +42,7 @@ body, .main, .block-container {
 .main-subtitle {
     font-size: 1rem;
     text-align: center;
-    color: #88aaff;
+    color: #6688cc;
     margin-top: -0.5rem;
     margin-bottom: 1.5rem;
     font-weight: 500;
@@ -60,9 +60,9 @@ body, .main, .block-container {
 }
 
 .nav-btn {
-    background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 80, 200, 0.25) 100%);
-    border: 1px solid rgba(0, 180, 255, 0.4);
-    color: #66ccff;
+    background: linear-gradient(135deg, rgba(0, 100, 200, 0.2) 0%, rgba(0, 60, 150, 0.3) 100%);
+    border: 1px solid rgba(0, 140, 255, 0.4);
+    color: #66aaff;
     padding: 0.5rem 1.2rem;
     border-radius: 12px;
     cursor: pointer;
@@ -70,50 +70,50 @@ body, .main, .block-container {
     font-size: 0.9rem;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 100, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 80, 200, 0.25);
 }
 
 .nav-btn:hover {
-    background: linear-gradient(135deg, rgba(0, 180, 255, 0.3) 0%, rgba(0, 120, 255, 0.4) 100%);
-    border-color: #00d4ff;
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.3) 0%, rgba(0, 100, 200, 0.4) 100%);
+    border-color: #00b4ff;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 180, 255, 0.4);
     color: #ffffff;
 }
 
 .nav-btn.active {
-    background: linear-gradient(45deg, #00d4ff, #0099ff);
-    color: #0a0f2d;
-    border-color: #00d4ff;
-    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.6);
+    background: linear-gradient(45deg, #00b4ff, #0088ff);
+    color: #050817;
+    border-color: #00b4ff;
+    box-shadow: 0 4px 20px rgba(0, 180, 255, 0.6);
 }
 
 /* Cards */
 .feature-card {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%);
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 22, 55, 0.7) 100%);
     padding: 1.2rem;
     border-radius: 14px;
-    border: 1px solid rgba(0, 180, 255, 0.2);
+    border: 1px solid rgba(0, 120, 255, 0.25);
     margin-bottom: 1.2rem;
     transition: all 0.3s ease;
     backdrop-filter: blur(15px);
-    box-shadow: 0 6px 25px rgba(0, 50, 150, 0.1);
+    box-shadow: 0 6px 25px rgba(0, 40, 120, 0.15);
 }
 
 .feature-card:hover {
-    border-color: #00d4ff;
+    border-color: #00b4ff;
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
-    background: linear-gradient(135deg, rgba(20, 26, 64, 0.9) 0%, rgba(30, 36, 85, 0.7) 100%);
+    box-shadow: 0 10px 30px rgba(0, 180, 255, 0.25);
+    background: linear-gradient(135deg, rgba(12, 18, 45, 0.95) 0%, rgba(18, 25, 60, 0.8) 100%);
 }
 
 .feature-icon {
     font-size: 1.8rem;
     margin-bottom: 0.8rem;
-    background: linear-gradient(45deg, #00d4ff, #0099ff);
+    background: linear-gradient(45deg, #00b4ff, #0088ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 6px rgba(0, 212, 255, 0.3));
+    filter: drop-shadow(0 2px 6px rgba(0, 180, 255, 0.3));
 }
 
 .feature-title {
@@ -121,63 +121,63 @@ body, .main, .block-container {
     font-weight: 700;
     margin-bottom: 0.6rem;
     color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .feature-desc {
     font-size: 0.9rem;
-    color: #aabbff;
+    color: #99aaff;
     margin-bottom: 0.8rem;
     line-height: 1.4;
 }
 
 /* Chart Container */
 .chart-container {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.9) 0%, rgba(26, 32, 75, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(15, 22, 55, 0.8) 100%);
     padding: 1.5rem;
     border-radius: 16px;
     margin: 1.2rem 0;
-    border: 1px solid rgba(0, 180, 255, 0.25);
+    border: 1px solid rgba(0, 120, 255, 0.3);
     backdrop-filter: blur(15px);
-    box-shadow: 0 6px 30px rgba(0, 50, 150, 0.15);
+    box-shadow: 0 6px 30px rgba(0, 40, 120, 0.2);
 }
 
 .chart-header {
-    color: #00d4ff;
+    color: #00b4ff;
     margin-bottom: 1.2rem;
     font-size: 1.3rem;
     font-weight: 700;
-    text-shadow: 0 2px 6px rgba(0, 212, 255, 0.3);
+    text-shadow: 0 2px 6px rgba(0, 180, 255, 0.3);
 }
 
 .prediction-badge {
-    background: linear-gradient(45deg, #00d4ff, #0099ff);
-    color: #0a0f2d;
+    background: linear-gradient(45deg, #00b4ff, #0088ff);
+    color: #050817;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 700;
     display: inline-block;
     margin-bottom: 0.8rem;
-    box-shadow: 0 3px 12px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 3px 12px rgba(0, 180, 255, 0.3);
 }
 
 .risk-badge {
-    background: linear-gradient(45deg, #ff6b6b, #ffa726);
-    color: #0a0f2d;
+    background: linear-gradient(45deg, #ff5555, #ff8844);
+    color: #050817;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 700;
     display: inline-block;
     margin-bottom: 0.8rem;
-    box-shadow: 0 3px 12px rgba(255, 107, 107, 0.3);
+    box-shadow: 0 3px 12px rgba(255, 85, 85, 0.3);
 }
 
 /* Metric Cards */
 [data-testid="metric-container"] {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%) !important;
-    border: 1px solid rgba(0, 180, 255, 0.2) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 22, 55, 0.7) 100%) !important;
+    border: 1px solid rgba(0, 120, 255, 0.25) !important;
     border-radius: 12px !important;
     padding: 1.2rem !important;
     backdrop-filter: blur(10px);
@@ -185,69 +185,103 @@ body, .main, .block-container {
 
 /* Select Box Styling */
 .stSelectbox > div > div {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.9) 0%, rgba(26, 32, 75, 0.7) 100%) !important;
-    border: 1px solid rgba(0, 180, 255, 0.3) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(15, 22, 55, 0.8) 100%) !important;
+    border: 1px solid rgba(0, 120, 255, 0.35) !important;
     border-radius: 10px !important;
-    color: #e0e0ff !important;
+    color: #ccddff !important;
 }
 
 .stSelectbox > div > div:hover {
-    border-color: #00d4ff !important;
+    border-color: #00b4ff !important;
 }
 
 /* Button Styling */
 .stButton > button {
-    background: linear-gradient(135deg, rgba(0, 150, 255, 0.2) 0%, rgba(0, 80, 200, 0.3) 100%) !important;
-    border: 1px solid rgba(0, 180, 255, 0.4) !important;
-    color: #66ccff !important;
+    background: linear-gradient(135deg, rgba(0, 100, 200, 0.25) 0%, rgba(0, 60, 150, 0.35) 100%) !important;
+    border: 1px solid rgba(0, 140, 255, 0.4) !important;
+    color: #66aaff !important;
     border-radius: 10px !important;
     transition: all 0.3s ease !important;
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, rgba(0, 180, 255, 0.3) 0%, rgba(0, 120, 255, 0.4) 100%) !important;
-    border-color: #00d4ff !important;
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.35) 0%, rgba(0, 100, 200, 0.45) 100%) !important;
+    border-color: #00b4ff !important;
     color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 3px 12px rgba(0, 212, 255, 0.3) !important;
+    box-shadow: 0 3px 12px rgba(0, 180, 255, 0.3) !important;
 }
 
 /* Progress Bar */
 .stProgress > div > div {
-    background: linear-gradient(45deg, #00d4ff, #0099ff) !important;
+    background: linear-gradient(45deg, #00b4ff, #0088ff) !important;
 }
 
 /* Dataframe Styling */
 .dataframe {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%) !important;
-    border: 1px solid rgba(0, 180, 255, 0.2) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 22, 55, 0.7) 100%) !important;
+    border: 1px solid rgba(0, 120, 255, 0.25) !important;
     border-radius: 10px !important;
 }
 
 /* Compact Header Boxes */
 .compact-header {
-    background: linear-gradient(135deg, rgba(16,22,58,0.9) 0%, rgba(26,32,75,0.7) 100%) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(15, 22, 55, 0.8) 100%) !important;
     padding: 1.2rem 1.5rem !important;
     border-radius: 14px !important;
     margin: 1rem 0 !important;
-    border: 1px solid rgba(0,180,255,0.3) !important;
+    border: 1px solid rgba(0, 120, 255, 0.35) !important;
     backdrop-filter: blur(10px);
+    box-shadow: 0 6px 25px rgba(0, 40, 120, 0.15);
 }
 
 .compact-header h2 {
-    color: #00d4ff !important;
+    color: #00b4ff !important;
     text-align: center !important;
     margin-bottom: 0.5rem !important;
     font-size: 1.4rem !important;
     font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .compact-header p {
-    color: #aabbff !important;
+    color: #99aaff !important;
     text-align: center !important;
     font-size: 0.95rem !important;
     margin-bottom: 0 !important;
     line-height: 1.3 !important;
+}
+
+/* Info and Warning Boxes */
+.stAlert {
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 22, 55, 0.7) 100%) !important;
+    border: 1px solid rgba(0, 120, 255, 0.3) !important;
+    border-radius: 12px !important;
+}
+
+/* Success Messages */
+.stSuccess {
+    background: linear-gradient(135deg, rgba(0, 100, 50, 0.2) 0%, rgba(0, 150, 80, 0.3) 100%) !important;
+    border: 1px solid rgba(0, 255, 150, 0.4) !important;
+}
+
+/* Error Messages */
+.stError {
+    background: linear-gradient(135deg, rgba(100, 0, 0, 0.2) 0%, rgba(150, 0, 0, 0.3) 100%) !important;
+    border: 1px solid rgba(255, 100, 100, 0.4) !important;
+}
+
+/* Plotly Chart Background */
+.js-plotly-plot .plotly .modebar {
+    background: rgba(10, 15, 40, 0.9) !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn {
+    color: #66aaff !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn:hover {
+    background: rgba(0, 120, 255, 0.3) !important;
 }
 
 @media (max-width: 768px) {
@@ -421,10 +455,10 @@ def show_home():
         for i, (idx_name, idx_data) in enumerate(market_data.items()):
             with cols[i % 4]:
                 change_value = float(idx_data['change'])
-                change_color = "#00ffcc" if change_value >= 0 else "#ff6b6b"
+                change_color = "#00ffaa" if change_value >= 0 else "#ff5555"
                 st.markdown(f"""
                 <div class="feature-card">
-                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #66ccff; font-size: 0.95rem;">{idx_name}</div>
+                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #66aaff; font-size: 0.95rem;">{idx_name}</div>
                     <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #ffffff;">₹{idx_data['current']:.2f}</div>
                     <div style="color: {change_color}; font-weight: 600; font-size: 0.9rem;">
                         {idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)
@@ -443,10 +477,10 @@ def show_home():
         cols = st.columns(4)
         for i, (idx_name, idx_data) in enumerate(fallback_data.items()):
             with cols[i % 4]:
-                change_color = "#00ffcc" if idx_data['change'] >= 0 else "#ff6b6b"
+                change_color = "#00ffaa" if idx_data['change'] >= 0 else "#ff5555"
                 st.markdown(f"""
                 <div class="feature-card">
-                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #66ccff; font-size: 0.95rem;">{idx_name}</div>
+                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #66aaff; font-size: 0.95rem;">{idx_name}</div>
                     <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #ffffff;">₹{idx_data['current']:,.2f}</div>
                     <div style="color: {change_color}; font-weight: 600; font-size: 0.9rem;">
                         {idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)
@@ -494,10 +528,10 @@ def show_home():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">📈 Today's Top Movers</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• RELIANCE: +2.8%</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• TCS: +1.9%</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• HDFC BANK: +1.5%</div>
-            <div style="color: #ff6b6b; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• INFY: -0.8%</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• RELIANCE: +2.8%</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• TCS: +1.9%</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• HDFC BANK: +1.5%</div>
+            <div style="color: #ff5555; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• INFY: -0.8%</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -505,10 +539,10 @@ def show_home():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">🎯 Trading Signals</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Overall: BULLISH 📈</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volume: HIGH 🔥</div>
-            <div style="color: #ffa726; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volatility: MEDIUM ⚡</div>
-            <div style="color: #00ffcc; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Momentum: STRONG 💪</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Overall: BULLISH 📈</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volume: HIGH 🔥</div>
+            <div style="color: #ffaa44; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volatility: MEDIUM ⚡</div>
+            <div style="color: #00ffaa; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Momentum: STRONG 💪</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -556,12 +590,12 @@ def show_market_trends():
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="font-size: 1rem; color: #88aaff; margin-bottom: 0.4rem;">{stock_name}</div>
-                        <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(45deg, #00d4ff, #0099ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.4rem;">
+                        <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(45deg, #00b4ff, #0088ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.4rem;">
                             ₹{current_price:,.2f}
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: {'#00ffcc' if price_change >= 0 else '#ff6b6b'};">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: {'#00ffaa' if price_change >= 0 else '#ff5555'};">
                             {price_change:+.2f} ({price_change_pct:+.2f}%)
                         </div>
                         <div style="font-size: 0.9rem; color: #88aaff; margin-top: 0.3rem;">
@@ -646,7 +680,7 @@ def show_market_trends():
                 y=df_chart['Close'], 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00d4ff', width=3)
+                line=dict(color='#00b4ff', width=3)
             ))
             
             # Simple moving average calculation
@@ -660,7 +694,7 @@ def show_market_trends():
                             y=ma20, 
                             mode='lines', 
                             name='MA20',
-                            line=dict(color='#ff6b6b', width=2, dash='dash')
+                            line=dict(color='#ff5555', width=2, dash='dash')
                         ))
                 except:
                     pass
@@ -671,15 +705,15 @@ def show_market_trends():
             y_axis_title = "Index Value" if is_index else "Price (₹)"
             
             fig.update_layout(
-                title=dict(text=chart_title, font=dict(color='#00d4ff', size=18)),
+                title=dict(text=chart_title, font=dict(color='#00b4ff', size=18)),
                 template="plotly_dark",
                 height=450,
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
                 yaxis_title=y_axis_title,
-                plot_bgcolor='rgba(16,22,58,0.8)',
-                paper_bgcolor='rgba(16,22,58,0.8)',
+                plot_bgcolor='rgba(10, 15, 40, 0.9)',
+                paper_bgcolor='rgba(10, 15, 40, 0.9)',
                 font=dict(color='#e0e0ff')
             )
             
@@ -768,11 +802,11 @@ def show_market_trends():
                 y=prices, 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00d4ff', width=3)
+                line=dict(color='#00b4ff', width=3)
             ))
             
             fig.update_layout(
-                title=dict(text=f"{stock_name} - Sample Chart (Demo Data)", font=dict(color='#00d4ff')),
+                title=dict(text=f"{stock_name} - Sample Chart (Demo Data)", font=dict(color='#00b4ff')),
                 template="plotly_dark",
                 height=400,
                 showlegend=True,
@@ -884,7 +918,7 @@ def show_ai_predictions():
             y=[current_price],
             mode='markers',
             name='Current Price',
-            marker=dict(color='#00d4ff', size=10)
+            marker=dict(color='#00b4ff', size=10)
         ))
         
         # Prediction line
@@ -893,21 +927,21 @@ def show_ai_predictions():
             y=predictions,
             mode='lines+markers',
             name='AI Prediction',
-            line=dict(color='#ffa726', width=2.5, dash='dot')
+            line=dict(color='#ffaa44', width=2.5, dash='dot')
         ))
         
         # Stop loss line
-        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#ff6b6b", 
+        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#ff5555", 
                      annotation_text="Stop Loss", annotation_position="bottom right")
         
         # Target lines
-        fig.add_hline(y=target_1, line_dash="dash", line_color="#00d4ff",
+        fig.add_hline(y=target_1, line_dash="dash", line_color="#00b4ff",
                      annotation_text="Target 1", annotation_position="top right")
-        fig.add_hline(y=target_2, line_dash="dash", line_color="#0099ff",
+        fig.add_hline(y=target_2, line_dash="dash", line_color="#0088ff",
                      annotation_text="Target 2", annotation_position="top right")
         
         fig.update_layout(
-            title=dict(text=f"AI Price Prediction for {stock_name} (Next 30 Days)", font=dict(color='#00d4ff')),
+            title=dict(text=f"AI Price Prediction for {stock_name} (Next 30 Days)", font=dict(color='#00b4ff')),
             template="plotly_dark",
             height=350,
             showlegend=True,
@@ -1034,10 +1068,10 @@ def show_portfolio_insights():
             labels=portfolio_df['Stock'],
             values=portfolio_df['Current Value'],
             hole=0.4,
-            marker_colors=['#00d4ff', '#0099ff', '#ff6b6b', '#ffa726', '#9966ff']
+            marker_colors=['#00b4ff', '#0088ff', '#ff5555', '#ffaa44', '#9966ff']
         )])
         fig_pie.update_layout(
-            title=dict(text="Portfolio Allocation", font=dict(color='#00d4ff')),
+            title=dict(text="Portfolio Allocation", font=dict(color='#00b4ff')),
             template="plotly_dark",
             height=350
         )
@@ -1049,12 +1083,12 @@ def show_portfolio_insights():
         fig_bar.add_trace(go.Bar(
             x=portfolio_df['Stock'],
             y=portfolio_df['P&L %'],
-            marker_color=['#00d4ff' if x >= 0 else '#ff6b6b' for x in portfolio_df['P&L %']],
+            marker_color=['#00b4ff' if x >= 0 else '#ff5555' for x in portfolio_df['P&L %']],
             text=portfolio_df['P&L %'].round(2).astype(str) + '%',
             textposition='auto',
         ))
         fig_bar.update_layout(
-            title=dict(text="Stock Performance (%)", font=dict(color='#00d4ff')),
+            title=dict(text="Stock Performance (%)", font=dict(color='#00b4ff')),
             template="plotly_dark",
             height=350,
             xaxis_title="Stocks",
@@ -1165,7 +1199,7 @@ def show_backtesting():
         y=portfolio_value,
         mode='lines',
         name='Strategy',
-        line=dict(color='#00d4ff', width=2.5)
+        line=dict(color='#00b4ff', width=2.5)
     ))
     
     # Add benchmark (buy & hold)
@@ -1180,11 +1214,11 @@ def show_backtesting():
         y=benchmark_value,
         mode='lines',
         name='Buy & Hold',
-        line=dict(color='#ff6b6b', width=2, dash='dash')
+        line=dict(color='#ff5555', width=2, dash='dash')
     ))
     
     fig.update_layout(
-        title=dict(text="Strategy vs Buy & Hold Performance", font=dict(color='#00d4ff')),
+        title=dict(text="Strategy vs Buy & Hold Performance", font=dict(color='#00b4ff')),
         template="plotly_dark",
         height=350,
         xaxis_title="Date",
