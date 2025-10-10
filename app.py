@@ -20,7 +20,7 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 
 body, .main, .block-container {
-    background: linear-gradient(135deg, #0a0f2d 0%, #1a1f3d 50%, #0a0f2d 100%) !important;
+    background: linear-gradient(135deg, #050820 0%, #0a1028 50%, #050820 100%) !important;
     color: #e0e0ff !important;
     padding-top: 0.5rem !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -90,7 +90,7 @@ body, .main, .block-container {
 
 /* Cards */
 .feature-card {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%);
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 20, 50, 0.7) 100%);
     padding: 1.2rem;
     border-radius: 14px;
     border: 1px solid rgba(0, 180, 255, 0.2);
@@ -104,7 +104,7 @@ body, .main, .block-container {
     border-color: #00d4ff;
     transform: translateY(-3px);
     box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
-    background: linear-gradient(135deg, rgba(20, 26, 64, 0.9) 0%, rgba(30, 36, 85, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(12, 18, 45, 0.95) 0%, rgba(18, 24, 55, 0.8) 100%);
 }
 
 .feature-icon {
@@ -133,7 +133,7 @@ body, .main, .block-container {
 
 /* Chart Container */
 .chart-container {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.9) 0%, rgba(26, 32, 75, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(15, 20, 50, 0.8) 100%);
     padding: 1.5rem;
     border-radius: 16px;
     margin: 1.2rem 0;
@@ -176,7 +176,7 @@ body, .main, .block-container {
 
 /* Metric Cards */
 [data-testid="metric-container"] {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 20, 50, 0.7) 100%) !important;
     border: 1px solid rgba(0, 180, 255, 0.2) !important;
     border-radius: 12px !important;
     padding: 1.2rem !important;
@@ -185,7 +185,7 @@ body, .main, .block-container {
 
 /* Select Box Styling */
 .stSelectbox > div > div {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.9) 0%, rgba(26, 32, 75, 0.7) 100%) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.95) 0%, rgba(15, 20, 50, 0.8) 100%) !important;
     border: 1px solid rgba(0, 180, 255, 0.3) !important;
     border-radius: 10px !important;
     color: #e0e0ff !important;
@@ -219,14 +219,14 @@ body, .main, .block-container {
 
 /* Dataframe Styling */
 .dataframe {
-    background: linear-gradient(135deg, rgba(16, 22, 58, 0.8) 0%, rgba(26, 32, 75, 0.6) 100%) !important;
+    background: linear-gradient(135deg, rgba(10, 15, 40, 0.9) 0%, rgba(15, 20, 50, 0.7) 100%) !important;
     border: 1px solid rgba(0, 180, 255, 0.2) !important;
     border-radius: 10px !important;
 }
 
 /* Compact Header Boxes */
 .compact-header {
-    background: linear-gradient(135deg, rgba(16,22,58,0.9) 0%, rgba(26,32,75,0.7) 100%) !important;
+    background: linear-gradient(135deg, rgba(10,15,40,0.95) 0%, rgba(15,20,50,0.8) 100%) !important;
     padding: 1.2rem 1.5rem !important;
     border-radius: 14px !important;
     margin: 1rem 0 !important;
