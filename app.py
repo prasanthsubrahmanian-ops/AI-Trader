@@ -5,8 +5,6 @@ import yfinance as yf
 import altair as alt
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import requests
-import json
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
@@ -804,4 +802,5 @@ def show_ai_predictions():
     
     with st.expander("View AI Model Reasoning", expanded=True):
         st.write("""
-        **LSTM Neural Network Analysis
+        **LSTM Neural Network Analysis:**
+        - Pattern recognition indicates
