@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="Smart Trade with Prasanth Subrahmanian", 
+    page_title="Smart Trade by Prasanth Subrahmanian", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -39,11 +39,13 @@ body, .main, .block-container {
 
 .main-subtitle {
     font-size: 1.1rem;
-    font-style: italic;
     text-align: center;
-    color: #888;
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-top: -0.5rem;
     margin-bottom: 1rem;
+    font-weight: 600;
 }
 
 /* Top Navigation */
@@ -161,6 +163,7 @@ def get_stock_data(ticker, period="1y"):
             return pd.DataFrame()
         return data
     except Exception as e:
+        st.error(f"Error fetching data for {ticker}: {str(e)}")
         return pd.DataFrame()
 
 @st.cache_data(ttl=3600)
@@ -203,7 +206,7 @@ if 'current_ticker' not in st.session_state:
 
 # ----------------------- HEADER -----------------------
 st.markdown('<div class="main-header">SMART TRADE</div>', unsafe_allow_html=True)
-st.markdown('<div class="main-subtitle">with <em>prasanth subrahmanian</em></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-subtitle">by Prasanth Subrahmanian</div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
 nav_options = ["🏠 Home", "📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
@@ -426,20 +429,29 @@ def show_market_trends():
     st.markdown(f"### 📊 {stock_name} Advanced Chart")
     
     try:
-        # Get stock data
-        period_map = {"1D": "1d", "1W": "5d", "1M": "1mo", "3M": "3mo", "6M": "6mo", "1Y": "1y"}
-        df = get_stock_data(ticker, period_map.get(timeframe, "1mo"))
+        # Get stock data with proper period mapping
+        period_map = {
+            "1D": "1d",
+            "1W": "5d", 
+            "1M": "1mo",
+            "3M": "3mo",
+            "6M": "6mo",
+            "1Y": "1y"
+        }
+        
+        selected_period = period_map.get(timeframe, "1mo")
+        df = get_stock_data(ticker, selected_period)
         
         if not df.empty and len(df) > 1:
             current_price = float(df['Close'].iloc[-1])
-            prev_price = float(df['Close'].iloc[-2])
+            prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
             price_change = current_price - prev_price
-            price_change_pct = (price_change / prev_price) * 100
+            price_change_pct = (price_change / prev_price) * 100 if prev_price != 0 else 0
             
             # Advanced Chart with multiple indicators
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
-            # Create chart based on whether it's an index or stock
+            # Create chart
             fig = go.Figure()
             
             # Price line
@@ -451,7 +463,7 @@ def show_market_trends():
                 line=dict(color='#00ffcc', width=2)
             ))
             
-            # Add moving averages for better analysis
+            # Add moving averages if enough data
             if len(df) > 20:
                 df['MA20'] = df['Close'].rolling(window=20).mean()
                 fig.add_trace(go.Scatter(
@@ -472,8 +484,12 @@ def show_market_trends():
                     line=dict(color='#0099ff', width=1, dash='dash')
                 ))
             
+            # Determine title and y-axis label
+            is_index = stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]
             chart_title = f"{stock_name} - {timeframe}"
-            if stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]:
+            y_axis_title = "Index Value" if is_index else "Price (₹)"
+            
+            if is_index:
                 chart_title += f" | Index: {current_price:.2f} ({price_change_pct:+.2f}%)"
             else:
                 chart_title += f" | Price: ₹{current_price:.2f} ({price_change_pct:+.2f}%)"
@@ -485,8 +501,9 @@ def show_market_trends():
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
-                yaxis_title="Price (₹)" if stock_name not in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"] else "Index Value"
+                yaxis_title=y_axis_title
             )
+            
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
@@ -504,7 +521,7 @@ def show_market_trends():
                 st.metric("MACD", f"{macd}", "Bullish")
                 
             with tech_cols[2]:
-                if 'Volume' in df.columns:
+                if 'Volume' in df.columns and not df['Volume'].isna().all():
                     volume_avg = df['Volume'].mean()
                     current_volume = df['Volume'].iloc[-1]
                     volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
@@ -513,14 +530,33 @@ def show_market_trends():
                     st.metric("Volume", "N/A", "")
                 
             with tech_cols[3]:
-                volatility = df['Close'].pct_change().std() * np.sqrt(252) * 100  # Annualized volatility
-                st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
-                
+                if len(df) > 1:
+                    volatility = df['Close'].pct_change().std() * np.sqrt(252) * 100  # Annualized volatility
+                    st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                else:
+                    st.metric("Volatility", "N/A", "")
+                    
         else:
             st.warning(f"Insufficient data for {stock_name}. Please try a different timeframe or stock.")
+            # Show fallback chart for demonstration
+            st.markdown("""
+            <div class="chart-container">
+                <p style="text-align: center; color: #888; padding: 2rem;">
+                    Chart data loading... Please wait or try a different stock/timeframe.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
             
     except Exception as e:
         st.error(f"Error loading market data: {str(e)}")
+        # Show fallback chart
+        st.markdown("""
+        <div class="chart-container">
+            <p style="text-align: center; color: #ff4444; padding: 2rem;">
+                Unable to load chart data. Please check your internet connection and try again.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ----------------------- AI PREDICTIONS PAGE -----------------------
 def show_ai_predictions():
@@ -733,7 +769,7 @@ elif section == "Backtesting":
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: #666;'>"
-    "Smart Trade with <em>prasanth subrahmanian</em> • Advanced Trading Analytics • Powered by AI"
+    "Smart Trade by <span style='background: linear-gradient(45deg, #ff6b6b, #ffa726); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>Prasanth Subrahmanian</span> • Advanced Trading Analytics • Powered by AI"
     "</div>", 
     unsafe_allow_html=True
 )
