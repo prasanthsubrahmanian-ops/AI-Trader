@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="Smart Trade Analytics", 
+    page_title="Prasanth Subrahmanian", 
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -71,6 +71,26 @@ body, .main, .block-container {
     background: linear-gradient(45deg, #00ffcc, #0099ff);
     color: #000;
     border-color: #00ffcc;
+}
+
+.home-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #000;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.home-btn:hover {
+    background: linear-gradient(45deg, #ff5252, #ff9800);
+    border-color: #ff6b6b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
 /* Compact Metrics */
@@ -204,15 +224,37 @@ st.markdown(custom_css, unsafe_allow_html=True)
 # ----------------------- CACHED FUNCTIONS -----------------------
 @st.cache_data(ttl=300)
 def get_stock_data(ticker, period="1y"):
-    return yf.download(ticker, period=period)
+    try:
+        data = yf.download(ticker, period=period)
+        if data.empty:
+            st.error(f"No data found for {ticker}")
+            return pd.DataFrame()
+        return data
+    except Exception as e:
+        st.error(f"Error fetching data: {str(e)}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def get_daily_data(ticker, days=60):
-    return yf.download(ticker, period=f"{days}d")
+    try:
+        data = yf.download(ticker, period=f"{days}d")
+        if data.empty:
+            return pd.DataFrame()
+        return data
+    except Exception as e:
+        st.error(f"Error fetching daily data: {str(e)}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def get_intraday_data(ticker, interval="5m", days=1):
-    return yf.download(ticker, period=f"{days}d", interval=interval)
+    try:
+        data = yf.download(ticker, period=f"{days}d", interval=interval)
+        if data.empty:
+            return pd.DataFrame()
+        return data
+    except Exception as e:
+        st.error(f"Error fetching intraday data: {str(e)}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=3600)
 def get_market_data():
@@ -227,14 +269,15 @@ def get_market_data():
     data = {}
     for name, ticker in indices.items():
         try:
-            df = yf.download(ticker, period='1d')
-            if not df.empty:
+            df = yf.download(ticker, period='1d', progress=False)
+            if not df.empty and len(df) > 1:
                 data[name] = {
                     'current': df['Close'].iloc[-1],
                     'change': df['Close'].iloc[-1] - df['Close'].iloc[-2],
                     'change_pct': ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
                 }
-        except:
+        except Exception as e:
+            st.warning(f"Could not fetch data for {name}: {str(e)}")
             continue
     return data
 
@@ -255,17 +298,17 @@ if 'current_ticker' not in st.session_state:
     st.session_state.current_ticker = "RELIANCE.NS"
 
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE ANALYTICS</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">PRASANTH SUBRAHMANIAN</div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
-nav_options = ["📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
-nav_labels = ["Market Trends", "AI Predictions", "Options Trading", "Portfolio Insights", "Backtesting"]
+nav_options = ["🏠 Home", "📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
+nav_labels = ["Home", "Market Trends", "AI Predictions", "Options Trading", "Portfolio Insights", "Backtesting"]
 
-nav_cols = st.columns(5)
+nav_cols = st.columns(6)
 for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
     with col:
-        if st.button(option, use_container_width=True, 
-                    type="primary" if st.session_state.current_section == nav_labels[i] else "secondary"):
+        btn_type = "primary" if st.session_state.current_section == nav_labels[i] else "secondary"
+        if st.button(option, use_container_width=True, type=btn_type):
             st.session_state.current_section = nav_labels[i]
             st.rerun()
 
@@ -301,6 +344,87 @@ ticker = stocks[st.session_state.stock_name]
 st.session_state.current_ticker = ticker
 section = st.session_state.current_section
 
+# ----------------------- HOME PAGE -----------------------
+def show_home():
+    """Home page with overview and quick access"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>🏠 Welcome to Trading Analytics</h2>'
+        '<p>Comprehensive market analysis, AI predictions, and portfolio management tools</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Quick Stats
+    st.markdown("### 📊 Quick Market Overview")
+    
+    market_data = get_market_data()
+    cols = st.columns(4)
+    
+    for i, (idx_name, idx_data) in enumerate(market_data.items()):
+        with cols[i % 4]:
+            st.metric(
+                idx_name,
+                f"₹{idx_data['current']:.2f}",
+                f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
+            )
+    
+    # Feature Cards
+    st.markdown("### 🚀 Features")
+    
+    features_cols = st.columns(3)
+    
+    with features_cols[0]:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <div class="feature-title">Market Trends</div>
+            <div class="feature-desc">Real-time market data, indices, and sector performance analysis</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with features_cols[1]:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">AI Predictions</div>
+            <div class="feature-desc">Machine learning forecasts for stock prices and trading signals</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with features_cols[2]:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-icon">💹</div>
+            <div class="feature-title">Options Trading</div>
+            <div class="feature-desc">Options chain analysis and strategy builder with P&L charts</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Recent Activity
+    st.markdown("### 📈 Recent Activity")
+    activity_cols = st.columns(2)
+    
+    with activity_cols[0]:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">Top Gainers Today</div>
+            <div style="color: #00ffcc;">RELIANCE: +2.3%</div>
+            <div style="color: #00ffcc;">TCS: +1.8%</div>
+            <div style="color: #00ffcc;">INFY: +1.5%</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with activity_cols[1]:
+        st.markdown("""
+        <div class="feature-card">
+            <div class="feature-title">Market Sentiment</div>
+            <div style="color: #00ffcc;">Overall: Bullish 📈</div>
+            <div style="color: #00ffcc;">Volume: High</div>
+            <div style="color: #00ffcc;">Volatility: Medium</div>
+        </div>
+        """, unsafe_allow_html=True)
+
 # ----------------------- MARKET TRENDS PAGE -----------------------
 def show_market_trends():
     """Market Trends - Shows NIFTY, sectors, gainers, losers"""
@@ -316,27 +440,30 @@ def show_market_trends():
     st.markdown("### 📊 Market Indices")
     
     market_data = get_market_data()
-    cols = st.columns(4)
-    
-    for i, (idx_name, idx_data) in enumerate(market_data.items()):
-        with cols[i % 4]:
-            st.metric(
-                idx_name,
-                f"₹{idx_data['current']:.2f}",
-                f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
-            )
+    if market_data:
+        cols = st.columns(4)
+        
+        for i, (idx_name, idx_data) in enumerate(market_data.items()):
+            with cols[i % 4]:
+                st.metric(
+                    idx_name,
+                    f"₹{idx_data['current']:.2f}",
+                    f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
+                )
+    else:
+        st.warning("Could not load market indices data")
     
     # Individual Stock Analysis
     st.markdown(f"### 🔍 {stock_name} Analysis")
     
     try:
         # Get stock data
-        period_map = {"1D": "1d", "1W": "5d", "1M": "1mo", "3M": "3mo", "6M": "6mo", "1Y": "1y"}
+        period_map = {"1D": "5d", "1W": "1mo", "1M": "3mo", "3M": "6mo", "6M": "1y", "1Y": "2y"}
         df = get_stock_data(ticker, period_map.get(timeframe, "1mo"))
         
-        if not df.empty:
+        if not df.empty and len(df) > 1:
             current_price = float(df['Close'].iloc[-1])
-            prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
+            prev_price = float(df['Close'].iloc[-2])
             price_change = current_price - prev_price
             price_change_pct = (price_change / prev_price) * 100
             
@@ -371,10 +498,14 @@ def show_market_trends():
                 template="plotly_dark",
                 height=400,
                 showlegend=True,
-                xaxis_rangeslider_visible=False
+                xaxis_rangeslider_visible=False,
+                xaxis_title="Date",
+                yaxis_title="Price (₹)"
             )
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.warning(f"Insufficient data for {stock_name}. Please try a different timeframe or stock.")
             
     except Exception as e:
         st.error(f"Error loading market data: {str(e)}")
@@ -413,13 +544,14 @@ def show_ai_predictions():
     )
     
     # Current price
+    current_price = 0
     try:
         df = get_daily_data(ticker, 30)
-        if not df.empty:
+        if not df.empty and len(df) > 0:
             current_price = float(df['Close'].iloc[-1])
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
-        current_price = 0
+        current_price = 2500  # Fallback price
     
     # AI Predictions
     st.markdown("### 📈 Price Forecasts")
@@ -484,9 +616,10 @@ def show_options_trading():
     )
     
     # Current price
+    current_price = 2500
     try:
         df = get_daily_data(ticker, 1)
-        if not df.empty:
+        if not df.empty and len(df) > 0:
             current_price = float(df['Close'].iloc[-1])
             st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
     except:
@@ -682,7 +815,9 @@ def show_backtesting():
         st.plotly_chart(fig, use_container_width=True)
 
 # ----------------------- MAIN PAGE ROUTING -----------------------
-if section == "Market Trends":
+if section == "Home":
+    show_home()
+elif section == "Market Trends":
     show_market_trends()
 elif section == "AI Predictions":
     show_ai_predictions()
@@ -697,7 +832,3 @@ elif section == "Backtesting":
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: #666;'>"
-    "Smart Trade Analytics • Real-time Market Data • Powered by AI"
-    "</div>", 
-    unsafe_allow_html=True
-)
