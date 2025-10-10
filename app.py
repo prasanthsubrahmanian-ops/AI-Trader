@@ -225,6 +225,143 @@ def get_stock_info(ticker):
     except:
         return {}
 
+# ----------------------- REPORT DETAILS FUNCTION -----------------------
+def show_report_details(report_name, stock_name, ticker):
+    """Display detailed report content"""
+    
+    # Back button
+    if st.button("← Back to Research Reports"):
+        st.session_state.current_report = None
+        st.rerun()
+    
+    st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {stock_name}</h2>', unsafe_allow_html=True)
+    
+    try:
+        df = get_stock_data(ticker, 365)
+        current_price = float(df['Close'].iloc[-1]) if not df.empty else 0
+    except:
+        current_price = 0
+    
+    # Report-specific content
+    if report_name == "executive_summary":
+        st.markdown("""
+        <div class="report-content">
+            <h3>🎯 Investment Recommendation: STRONG BUY</h3>
+            <p><strong>Target Price:</strong> ₹1,650 (15% Upside)</p>
+            <p><strong>Time Horizon:</strong> 12-18 Months</p>
+            <p><strong>Risk Rating:</strong> Medium</p>
+            
+            <h4>Key Highlights:</h4>
+            <ul>
+                <li>Strong revenue growth of 18% YoY</li>
+                <li>Market leadership in core segments</li>
+                <li>Robust balance sheet with low debt</li>
+                <li>Favorable industry tailwinds</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Executive metrics
+        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Upside Potential", "15%", "2.1%")
+        with col2:
+            st.metric("Dividend Yield", "1.8%", "0.2%")
+        with col3:
+            st.metric("EPS Growth", "12%", "1.5%")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    elif report_name == "financial_analysis":
+        st.markdown("""
+        <div class="report-content">
+            <h3>💰 Financial Performance</h3>
+            
+            <h4>Income Statement Highlights (Last Quarter):</h4>
+            <ul>
+                <li><strong>Revenue:</strong> ₹25,400 Cr (+18% YoY)</li>
+                <li><strong>Net Profit:</strong> ₹4,200 Cr (+22% YoY)</li>
+                <li><strong>Operating Margin:</strong> 24.5% (+1.2%)</li>
+                <li><strong>EPS:</strong> ₹62.5 (+20% YoY)</li>
+            </ul>
+            
+            <h4>Balance Sheet Strength:</h4>
+            <ul>
+                <li><strong>Debt-to-Equity:</strong> 0.35 (Conservative)</li>
+                <li><strong>Current Ratio:</strong> 2.1 (Healthy)</li>
+                <li><strong>ROE:</strong> 18.5% (Above Industry)</li>
+                <li><strong>ROCE:</strong> 22.1% (Strong)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Financial metrics
+        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Revenue Growth", "18%", "2.1%")
+        with col2:
+            st.metric("Profit Margin", "16.5%", "0.8%")
+        with col3:
+            st.metric("ROE", "18.5%", "1.2%")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    elif report_name == "technical_analysis":
+        st.markdown("""
+        <div class="report-content">
+            <h3>📈 Technical Outlook</h3>
+            
+            <h4>Key Technical Levels:</h4>
+            <ul>
+                <li><strong>Current Price:</strong> ₹1,435</li>
+                <li><strong>Support:</strong> ₹1,350 (Strong), ₹1,280 (Major)</li>
+                <li><strong>Resistance:</strong> ₹1,480 (Immediate), ₹1,550 (Major)</li>
+                <li><strong>Trend:</strong> Bullish (Higher Highs & Higher Lows)</li>
+            </ul>
+            
+            <h4>Indicator Analysis:</h4>
+            <ul>
+                <li><strong>RSI:</strong> 58 (Neutral-Bullish)</li>
+                <li><strong>MACD:</strong> Bullish Crossover</li>
+                <li><strong>Moving Averages:</strong> Price above 50 & 200 DMA</li>
+                <li><strong>Volume:</strong> Increasing on up moves</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Technical metrics
+        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("RSI", "58", "Neutral")
+        with col2:
+            st.metric("Trend", "Bullish", "Strong")
+        with col3:
+            st.metric("Volume Trend", "Positive", "12%")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    else:
+        # Default content for other reports
+        st.markdown(f"""
+        <div class="report-content">
+            <h3>📋 {report_name.replace('_', ' ').title()} Analysis</h3>
+            <p>Detailed analysis for {stock_name} is currently being generated by our AI algorithms.</p>
+            
+            <h4>Key Points:</h4>
+            <ul>
+                <li>Comprehensive analysis in progress</li>
+                <li>Real-time data integration active</li>
+                <li>AI-powered insights being calculated</li>
+                <li>Full report available shortly</li>
+            </ul>
+            
+            <p><strong>Current Price:</strong> ₹{current_price:.2f}</p>
+            <p><strong>Analysis Last Updated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # ----------------------- SESSION STATE -----------------------
 if 'current_section' not in st.session_state:
     st.session_state.current_section = "Home"
@@ -502,143 +639,6 @@ elif section == "Research Reports":
         with col4:
             st.metric("Risk Level", "Medium", "Stable")
 
-# ----------------------- REPORT DETAILS FUNCTION -----------------------
-def show_report_details(report_name, stock_name, ticker):
-    """Display detailed report content"""
-    
-    # Back button
-    if st.button("← Back to Research Reports"):
-        st.session_state.current_report = None
-        st.rerun()
-    
-    st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {stock_name}</h2>', unsafe_allow_html=True)
-    
-    try:
-        df = get_stock_data(ticker, 365)
-        current_price = float(df['Close'].iloc[-1]) if not df.empty else 0
-    except:
-        current_price = 0
-    
-    # Report-specific content
-    if report_name == "executive_summary":
-        st.markdown("""
-        <div class="report-content">
-            <h3>🎯 Investment Recommendation: STRONG BUY</h3>
-            <p><strong>Target Price:</strong> ₹1,650 (15% Upside)</p>
-            <p><strong>Time Horizon:</strong> 12-18 Months</p>
-            <p><strong>Risk Rating:</strong> Medium</p>
-            
-            <h4>Key Highlights:</h4>
-            <ul>
-                <li>Strong revenue growth of 18% YoY</li>
-                <li>Market leadership in core segments</li>
-                <li>Robust balance sheet with low debt</li>
-                <li>Favorable industry tailwinds</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Executive metrics
-        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Upside Potential", "15%", "2.1%")
-        with col2:
-            st.metric("Dividend Yield", "1.8%", "0.2%")
-        with col3:
-            st.metric("EPS Growth", "12%", "1.5%")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-    elif report_name == "financial_analysis":
-        st.markdown("""
-        <div class="report-content">
-            <h3>💰 Financial Performance</h3>
-            
-            <h4>Income Statement Highlights (Last Quarter):</h4>
-            <ul>
-                <li><strong>Revenue:</strong> ₹25,400 Cr (+18% YoY)</li>
-                <li><strong>Net Profit:</strong> ₹4,200 Cr (+22% YoY)</li>
-                <li><strong>Operating Margin:</strong> 24.5% (+1.2%)</li>
-                <li><strong>EPS:</strong> ₹62.5 (+20% YoY)</li>
-            </ul>
-            
-            <h4>Balance Sheet Strength:</h4>
-            <ul>
-                <li><strong>Debt-to-Equity:</strong> 0.35 (Conservative)</li>
-                <li><strong>Current Ratio:</strong> 2.1 (Healthy)</li>
-                <li><strong>ROE:</strong> 18.5% (Above Industry)</li>
-                <li><strong>ROCE:</strong> 22.1% (Strong)</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Financial metrics
-        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Revenue Growth", "18%", "2.1%")
-        with col2:
-            st.metric("Profit Margin", "16.5%", "0.8%")
-        with col3:
-            st.metric("ROE", "18.5%", "1.2%")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-    elif report_name == "technical_analysis":
-        st.markdown("""
-        <div class="report-content">
-            <h3>📈 Technical Outlook</h3>
-            
-            <h4>Key Technical Levels:</h4>
-            <ul>
-                <li><strong>Current Price:</strong> ₹1,435</li>
-                <li><strong>Support:</strong> ₹1,350 (Strong), ₹1,280 (Major)</li>
-                <li><strong>Resistance:</strong> ₹1,480 (Immediate), ₹1,550 (Major)</li>
-                <li><strong>Trend:</strong> Bullish (Higher Highs & Higher Lows)</li>
-            </ul>
-            
-            <h4>Indicator Analysis:</h4>
-            <ul>
-                <li><strong>RSI:</strong> 58 (Neutral-Bullish)</li>
-                <li><strong>MACD:</strong> Bullish Crossover</li>
-                <li><strong>Moving Averages:</strong> Price above 50 & 200 DMA</li>
-                <li><strong>Volume:</strong> Increasing on up moves</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Technical metrics
-        st.markdown('<div class="report-metrics">', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("RSI", "58", "Neutral")
-        with col2:
-            st.metric("Trend", "Bullish", "Strong")
-        with col3:
-            st.metric("Volume Trend", "Positive", "12%")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-    else:
-        # Default content for other reports
-        st.markdown(f"""
-        <div class="report-content">
-            <h3>📋 {report_name.replace('_', ' ').title()} Analysis</h3>
-            <p>Detailed analysis for {stock_name} is currently being generated by our AI algorithms.</p>
-            
-            <h4>Key Points:</h4>
-            <ul>
-                <li>Comprehensive analysis in progress</li>
-                <li>Real-time data integration active</li>
-                <li>AI-powered insights being calculated</li>
-                <li>Full report available shortly</li>
-            </ul>
-            
-            <p><strong>Current Price:</strong> ₹{current_price:.2f}</p>
-            <p><strong>Analysis Last Updated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # ----------------------- OTHER SECTIONS -----------------------
 elif section == "Options Trading":
     st.markdown(
@@ -646,7 +646,37 @@ elif section == "Options Trading":
         unsafe_allow_html=True,
     )
     
-    # Options content here...
+    # Compact metrics for options
+    st.markdown("#### Options Key Metrics")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">IV Rank</div>
+            <div class="metric-value">65%</div>
+            <div class="metric-change">High</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Put/Call Ratio</div>
+            <div class="metric-value">0.85</div>
+            <div class="metric-change">Bullish</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Open Interest</div>
+            <div class="metric-value">2.5M</div>
+            <div class="metric-change">+15%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Volume</div>
+            <div class="metric-value">1.8M</div>
+            <div class="metric-change">+22%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">VIX</div>
+            <div class="metric-value">18.2</div>
+            <div class="metric-change negative">-0.5</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 elif section == "Chart Analysis":
     st.markdown(
@@ -654,7 +684,37 @@ elif section == "Chart Analysis":
         unsafe_allow_html=True,
     )
     
-    # Chart analysis content here...
+    # Compact metrics for technical analysis
+    st.markdown("#### Technical Indicators")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">RSI</div>
+            <div class="metric-value">54.2</div>
+            <div class="metric-change">Neutral</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">MACD</div>
+            <div class="metric-value">Bullish</div>
+            <div class="metric-change">↑</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Support</div>
+            <div class="metric-value">₹1,350</div>
+            <div class="metric-change">Strong</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Resistance</div>
+            <div class="metric-value">₹1,480</div>
+            <div class="metric-change">Moderate</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Trend</div>
+            <div class="metric-value">Uptrend</div>
+            <div class="metric-change">Strong</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 elif section == "AI Predictions":
     st.markdown(
@@ -662,7 +722,37 @@ elif section == "AI Predictions":
         unsafe_allow_html=True,
     )
     
-    # AI predictions content here...
+    # Compact metrics for AI predictions
+    st.markdown("#### AI Analysis Metrics")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">AI Signal</div>
+            <div class="metric-value">BUY</div>
+            <div class="metric-change">Strong</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Confidence</div>
+            <div class="metric-value">85%</div>
+            <div class="metric-change">High</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">1W Target</div>
+            <div class="metric-value">₹1,420</div>
+            <div class="metric-change">+3.1%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">1M Target</div>
+            <div class="metric-value">₹1,520</div>
+            <div class="metric-change">+10.4%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Stop Loss</div>
+            <div class="metric-value">₹1,320</div>
+            <div class="metric-change negative">-4.2%</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
