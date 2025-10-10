@@ -250,6 +250,14 @@ body, .main, .block-container {
     line-height: 1.3 !important;
 }
 
+/* Confidence Text Color */
+.confidence-text {
+    color: #ffd700 !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    text-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
+}
+
 @media (max-width: 768px) {
     .main-header { font-size: 1.8rem; }
     .nav-btn { padding: 0.4rem 1rem; font-size: 0.85rem; }
@@ -491,7 +499,7 @@ def show_home():
                 </div>
                 """, unsafe_allow_html=True)
     
-    # Trading Tools Section - UPDATED
+    # Trading Tools Section - UPDATED with images
     st.markdown("### ⚡ Trading Tools")
     
     tools_cols = st.columns(3)
@@ -499,9 +507,17 @@ def show_home():
     with tools_cols[0]:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <div class="feature-title">Market Intelligence</div>
-            <div class="feature-desc">Comprehensive market analysis, sector performance, and institutional flow data</div>
+            <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+                <div class="feature-icon">📈</div>
+                <div style="margin-left: 0.8rem;">
+                    <div class="feature-title">Market Intelligence</div>
+                    <div class="feature-desc">Comprehensive market analysis and institutional insights</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin: 1rem 0;">
+                <div style="font-size: 3rem; color: #00d4ff; opacity: 0.7;">📊</div>
+                <div style="color: #88aaff; font-size: 0.8rem; margin-top: 0.5rem;">Advanced Analytics</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Open Market Intelligence", key="market_intel", use_container_width=True):
@@ -511,9 +527,17 @@ def show_home():
     with tools_cols[1]:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">📰</div>
-            <div class="feature-title">Market News</div>
-            <div class="feature-desc">Latest financial news, earnings reports, and market-moving events</div>
+            <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+                <div class="feature-icon">📰</div>
+                <div style="margin-left: 0.8rem;">
+                    <div class="feature-title">Market News</div>
+                    <div class="feature-desc">Latest financial news and market-moving events</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin: 1rem 0;">
+                <div style="font-size: 3rem; color: #00d4ff; opacity: 0.7;">📰</div>
+                <div style="color: #88aaff; font-size: 0.8rem; margin-top: 0.5rem;">Real-time Updates</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("View Market News", key="market_news", use_container_width=True):
@@ -523,14 +547,60 @@ def show_home():
     with tools_cols[2]:
         st.markdown("""
         <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI Signals</div>
-            <div class="feature-desc">Machine learning based buy/sell signals and automated trading recommendations</div>
+            <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+                <div class="feature-icon">🤖</div>
+                <div style="margin-left: 0.8rem;">
+                    <div class="feature-title">AI Signals</div>
+                    <div class="feature-desc">Machine learning based trading recommendations</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin: 1rem 0;">
+                <div style="font-size: 3rem; color: #00d4ff; opacity: 0.7;">🤖</div>
+                <div style="color: #88aaff; font-size: 0.8rem; margin-top: 0.5rem;">Smart Predictions</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Check AI Signals", key="ai_signals", use_container_width=True):
             st.session_state.current_tool = "AI Signals"
             st.rerun()
+    
+    # Market Analysis Section with Finance Graphs
+    st.markdown("### 📊 Trading Analysis & Finance Graphs")
+    
+    analysis_cols = st.columns(3)
+    
+    with analysis_cols[0]:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📈</div>
+                <div class="feature-title">Technical Analysis</div>
+                <div class="feature-desc">Advanced chart patterns, indicators, and trend analysis for precise market timing</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with analysis_cols[1]:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💹</div>
+                <div class="feature-title">Options Flow</div>
+                <div class="feature-desc">Real-time options chain analysis and institutional money flow tracking</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with analysis_cols[2]:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                <div class="feature-title">Portfolio Analytics</div>
+                <div class="feature-desc">Comprehensive portfolio performance metrics and risk assessment tools</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Market Sentiment
     st.markdown("### 🌡 Market Sentiment")
@@ -1072,7 +1142,8 @@ def show_ai_predictions():
         st.markdown('<div class="feature-icon">📅</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">Next Week</div>', unsafe_allow_html=True)
         st.metric("Target Price", f"₹{current_price * 1.025:.2f}", "+2.5%")
-        st.progress(78, text="Confidence: 78%")
+        st.markdown('<div class="confidence-text">Confidence: 78%</div>', unsafe_allow_html=True)
+        st.progress(78)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with pred_cols[1]:
@@ -1080,7 +1151,8 @@ def show_ai_predictions():
         st.markdown('<div class="feature-icon">📊</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">Next Month</div>', unsafe_allow_html=True)
         st.metric("Target Price", f"₹{current_price * 1.068:.2f}", "+6.8%")
-        st.progress(72, text="Confidence: 72%")
+        st.markdown('<div class="confidence-text">Confidence: 72%</div>', unsafe_allow_html=True)
+        st.progress(72)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with pred_cols[2]:
@@ -1088,7 +1160,8 @@ def show_ai_predictions():
         st.markdown('<div class="feature-icon">🎯</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-title">Risk Assessment</div>', unsafe_allow_html=True)
         st.metric("Risk Level", "LOW", "-15%")
-        st.progress(25, text="Drawdown Risk: 25%")
+        st.markdown('<div class="confidence-text">Drawdown Risk: 25%</div>', unsafe_allow_html=True)
+        st.progress(25)
         st.markdown('</div>', unsafe_allow_html=True)
     
     # Stop Loss and Risk Management
