@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="Smart Trade with Prasanth Subrahamanian", 
+    page_title="PRASANTH AI Trading Insights", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -19,27 +19,20 @@ custom_css = """
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-body, .main, .block-container, .sidebar .sidebar-content {
+body, .main, .block-container {
     background-color: #000 !important;
     color: #fff !important;
 }
 
-.header-text {
-    margin-top: 2rem;
+.main-header {
+    margin-top: 0rem;
     margin-bottom: 2rem;
     font-size: 2.5rem;
     font-weight: 700;
     color: #00ffcc;
     text-align: center;
-}
-
-.subheader-text {
-    margin-top: -2rem;
-    margin-bottom: 2rem;
-    font-size: 1.2rem;
-    font-weight: 400;
-    color: #00ffcc;
-    text-align: center;
+    padding: 1rem 0;
+    border-bottom: 2px solid #00ffcc;
 }
 
 .landing-box {
@@ -90,7 +83,7 @@ section[data-testid="stSidebar"] h3 {
 
 @media (max-width: 768px) {
     .landing-box { padding: 1.5rem; }
-    .header-text { font-size: 2rem; text-align: center; }
+    .main-header { font-size: 2rem; text-align: center; }
     .stDataFrame { font-size: 12px; }
     .stMetric { margin: 0.2rem; }
 }
@@ -119,9 +112,8 @@ def calculate_macd(prices, fast=12, slow=26, signal=9):
     histogram = macd - signal_line
     return macd, signal_line, histogram
 
-# ----------------------- MAIN HEADER -----------------------
-st.markdown('<div class="header-text">SMART TRADE</div>', unsafe_allow_html=True)
-st.markdown('<div class="subheader-text">with Prasanth Subrahamanian</div>', unsafe_allow_html=True)
+# ----------------------- MAIN HEADER AT TOP -----------------------
+st.markdown('<div class="main-header">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
@@ -137,29 +129,33 @@ stocks = {
 }
 
 # ----------------------- SIDEBAR NAVIGATION -----------------------
-with st.sidebar:
-    st.markdown("### 📊 Navigation")
-    st.markdown("---")
-    
-    section = st.radio(
-        "Choose Section",
-        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
-    )
-    
-    st.markdown("---")
-    st.markdown("### 🔍 Stock Selection")
-    
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()))
-    period = st.slider("Period (Days)", 10, 365, 60)
-    
-    st.markdown("---")
-    st.markdown("### ℹ️ Info")
-    st.markdown("""
-    <div style='color: #888; font-size: 0.9rem;'>
-    Real-time market data and AI-powered trading insights. 
-    Select a stock and navigate through different sections for detailed analysis.
-    </div>
-    """, unsafe_allow_html=True)
+# First, let's add the navigation directly in the sidebar
+st.sidebar.title("📊 PRASANTH AI")
+
+# Navigation section
+st.sidebar.markdown("### 🧭 Navigation")
+section = st.sidebar.radio(
+    "Choose Section:",
+    ["Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"]
+)
+
+st.sidebar.markdown("---")
+
+# Stock selection section
+st.sidebar.markdown("### 🔍 Stock Selection")
+stock_name = st.sidebar.selectbox("Select Stock:", list(stocks.keys()))
+period = st.sidebar.slider("Period (Days):", 10, 365, 60)
+
+st.sidebar.markdown("---")
+
+# Info section
+st.sidebar.markdown("### ℹ️ About")
+st.sidebar.info("""
+Real-time market data and 
+AI-powered trading insights.
+Select a stock and navigate 
+through sections for analysis.
+""")
 
 ticker = stocks[stock_name]
 
@@ -573,4 +569,4 @@ elif section == "AI Predictions":
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahamanian • Real-time Market Data</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
