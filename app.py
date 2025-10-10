@@ -19,7 +19,7 @@ custom_css = """
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* Hide the default sidebar collapse button */
+/* Completely remove the default sidebar collapse buttons */
 button[title="Hide sidebar"] {
     display: none !important;
 }
@@ -44,7 +44,8 @@ body, .main, .block-container {
     border-bottom: 2px solid #00ffcc;
 }
 
-.sidebar-toggle {
+/* Custom toggle button that's always visible */
+.custom-toggle-btn {
     position: fixed;
     top: 20px;
     left: 20px;
@@ -58,9 +59,12 @@ body, .main, .block-container {
     font-size: 1.5rem;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 255, 204, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.sidebar-toggle:hover {
+.custom-toggle-btn:hover {
     background-color: #00e6b8;
     transform: scale(1.1);
 }
@@ -132,58 +136,17 @@ section[data-testid="stSidebar"] .stButton button:hover {
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# ----------------------- SIDEBAR TOGGLE BUTTON -----------------------
-st.markdown("""
-<script>
-// Add a permanent sidebar toggle button
-function addSidebarToggle() {
-    const toggleBtn = document.createElement('button');
-    toggleBtn.innerHTML = '☰';
-    toggleBtn.className = 'sidebar-toggle';
-    toggleBtn.title = 'Toggle Sidebar';
-    toggleBtn.onclick = function() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            const isHidden = sidebar.style.transform === 'translateX(-100%)';
-            sidebar.style.transform = isHidden ? 'translateX(0)' : 'translateX(-100%)';
-        }
-    };
-    document.body.appendChild(toggleBtn);
-}
-
-// Run after page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addSidebarToggle);
-} else {
-    addSidebarToggle();
-}
-</script>
-""", unsafe_allow_html=True)
-
-# ----------------------- CACHED FUNCTIONS -----------------------
-@st.cache_data(ttl=300)
-def get_stock_data(ticker, period):
-    return yf.download(ticker, period=f"{period}d")
-
-def calculate_rsi(prices, window=14):
-    delta = prices.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-def calculate_macd(prices, fast=12, slow=26, signal=9):
-    ema_fast = prices.ewm(span=fast).mean()
-    ema_slow = prices.ewm(span=slow).mean()
-    macd = ema_fast - ema_slow
-    signal_line = macd.ewm(span=signal).mean()
-    histogram = macd - signal_line
-    return macd, signal_line, histogram
-
 # ----------------------- SESSION STATE FOR SIDEBAR -----------------------
 if 'sidebar_visible' not in st.session_state:
     st.session_state.sidebar_visible = True
+
+# ----------------------- CUSTOM TOGGLE BUTTON -----------------------
+# Create a custom toggle button using Streamlit components
+col1, col2, col3 = st.columns([1, 2, 1])
+with col1:
+    if st.button("☰", key="sidebar_toggle", help="Toggle Sidebar"):
+        st.session_state.sidebar_visible = not st.session_state.sidebar_visible
+        st.rerun()
 
 # ----------------------- MAIN HEADER AT TOP -----------------------
 st.markdown('<div class="main-header">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
@@ -202,46 +165,77 @@ stocks = {
 }
 
 # ----------------------- SIDEBAR NAVIGATION -----------------------
-with st.sidebar:
-    st.title("📊 PRASANTH AI")
+# Only show sidebar if it's supposed to be visible
+if st.session_state.sidebar_visible:
+    with st.sidebar:
+        st.title("📊 PRASANTH AI")
+        
+        # Manual sidebar toggle button inside sidebar
+        if st.button("📱 Close Sidebar"):
+            st.session_state.sidebar_visible = False
+            st.rerun()
+        
+        st.markdown("### 🧭 Navigation")
+        section = st.radio(
+            "Choose Section:",
+            ["Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"],
+            key="nav_radio"
+        )
+        
+        st.markdown("---")
+        
+        # Stock selection section
+        st.markdown("### 🔍 Stock Selection")
+        stock_name = st.selectbox("Select Stock:", list(stocks.keys()), key="stock_select")
+        period = st.slider("Period (Days):", 10, 365, 60, key="period_slider")
+        
+        st.markdown("---")
+        
+        # Info section
+        st.markdown("### ℹ️ About")
+        st.info("""
+        Real-time market data and 
+        AI-powered trading insights.
+        Select a stock and navigate 
+        through sections for analysis.
+        """)
+        
+        # Additional help text
+        st.markdown("---")
+        st.markdown("""
+        <div style='color: #888; font-size: 0.8rem; text-align: center;'>
+        💡 Use the ☰ button to show sidebar
+        </div>
+        """, unsafe_allow_html=True)
+else:
+    # If sidebar is hidden, we still need to get the section and stock selection
+    # So we'll use session state to remember the values
+    if 'section' not in st.session_state:
+        st.session_state.section = "Home"
+    if 'stock_name' not in st.session_state:
+        st.session_state.stock_name = "RELIANCE"
+    if 'period' not in st.session_state:
+        st.session_state.period = 60
     
-    # Manual sidebar toggle button inside sidebar
-    if st.button("📱 Toggle Sidebar"):
-        st.session_state.sidebar_visible = not st.session_state.sidebar_visible
-        st.rerun()
+    section = st.session_state.section
+    stock_name = st.session_state.stock_name
+    period = st.session_state.period
     
-    st.markdown("### 🧭 Navigation")
-    section = st.radio(
-        "Choose Section:",
-        ["Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"],
-        key="nav_radio"
-    )
-    
-    st.markdown("---")
-    
-    # Stock selection section
-    st.markdown("### 🔍 Stock Selection")
-    stock_name = st.selectbox("Select Stock:", list(stocks.keys()), key="stock_select")
-    period = st.slider("Period (Days):", 10, 365, 60, key="period_slider")
-    
-    st.markdown("---")
-    
-    # Info section
-    st.markdown("### ℹ️ About")
-    st.info("""
-    Real-time market data and 
-    AI-powered trading insights.
-    Select a stock and navigate 
-    through sections for analysis.
-    """)
-    
-    # Additional help text
-    st.markdown("---")
-    st.markdown("""
-    <div style='color: #888; font-size: 0.8rem; text-align: center;'>
-    💡 Use the ☰ button in the top-left to show/hide sidebar
-    </div>
-    """, unsafe_allow_html=True)
+    # Show a message about the sidebar being hidden
+    st.info("💡 Sidebar is hidden. Click the ☰ button in the top-left to show navigation.")
+
+# Update session state with current selections
+if 'section' in locals():
+    st.session_state.section = section
+if 'stock_name' in locals():
+    st.session_state.stock_name = stock_name
+if 'period' in locals():
+    st.session_state.period = period
+
+# Use the values from session state
+section = st.session_state.section
+stock_name = st.session_state.stock_name
+period = st.session_state.period
 
 ticker = stocks[stock_name]
 
@@ -344,12 +338,109 @@ if section == "Home":
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
 
-# ----------------------- OTHER SECTIONS (Research Reports, Options Trading, etc.) -----------------------
-# [Keep all the other sections exactly as they were in the previous code]
-# Research Reports, Options Trading, Chart Analysis, AI Predictions sections remain the same...
+# ----------------------- OTHER SECTIONS -----------------------
+elif section == "Research Reports":
+    st.markdown(
+        '<div class="landing-box"><h2>📑 Research Reports</h2><p>Access AI-powered fundamental & technical analysis reports here.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Fundamental Analysis")
+        st.metric("P/E Ratio", "22.5", "1.2")
+        st.metric("EPS", "85.20", "5.0")
+        st.metric("Market Cap", "12.5T", "2.3")
+        
+    with col2:
+        st.subheader("Technical Ratings")
+        st.metric("RSI Signal", "Neutral")
+        st.metric("Moving Avg", "Bullish")
+        st.metric("Volatility", "Medium")
 
-# For brevity, I'm showing only the Home section. The other sections should be copied from the previous code.
+elif section == "Options Trading":
+    st.markdown(
+        '<div class="landing-box"><h2>💹 Options Trading</h2><p>Monitor open interest, volatility, and strategy payoffs.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    st.subheader("Options Chain")
+    st.info("Options data feature will be available soon.")
+
+elif section == "Chart Analysis":
+    st.markdown(
+        '<div class="landing-box"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    st.info("Advanced chart analysis features coming soon.")
+
+elif section == "AI Predictions":
+    st.markdown(
+        '<div class="landing-box"><h2>🤖 AI Predictions</h2><p>AI-powered price predictions and trading signals.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    st.info("AI prediction models will be deployed soon.")
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
 st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
+
+# ----------------------- CACHED FUNCTIONS -----------------------
+@st.cache_data(ttl=300)
+def get_stock_data(ticker, period):
+    return yf.download(ticker, period=f"{period}d")
+
+def calculate_rsi(prices, window=14):
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def calculate_macd(prices, fast=12, slow=26, signal=9):
+    ema_fast = prices.ewm(span=fast).mean()
+    ema_slow = prices.ewm(span=slow).mean()
+    macd = ema_fast - ema_slow
+    signal_line = macd.ewm(span=signal).mean()
+    histogram = macd - signal_line
+    return macd, signal_line, histogram
