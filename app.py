@@ -180,8 +180,12 @@ st.markdown(custom_css, unsafe_allow_html=True)
 
 # ----------------------- CACHED FUNCTIONS -----------------------
 @st.cache_data(ttl=300)
-def get_stock_data(ticker, period):
-    return yf.download(ticker, period=f"{period}d")
+def get_stock_data(ticker, period="1y"):
+    return yf.download(ticker, period=period)
+
+@st.cache_data(ttl=300)
+def get_daily_data(ticker, days=60):
+    return yf.download(ticker, period=f"{days}d")
 
 def get_stock_info(ticker):
     try:
@@ -236,16 +240,28 @@ with col1:
     stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
                              index=list(stocks.keys()).index(st.session_state.stock_name))
 with col2:
-    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
+    # Changed to selectbox for better user experience
+    chart_period = st.selectbox("Chart Period", 
+                               ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
+                               index=3)
 with col3:
     st.write("")
-    st.write(f"**Current:** {stock_name} | {period} days")
+    st.write(f"**Current:** {stock_name} | {chart_period}")
 
 st.session_state.stock_name = stock_name
-st.session_state.period = period
 ticker = stocks[stock_name]
 st.session_state.current_ticker = ticker
 section = st.session_state.current_section
+
+# Map period selection to yfinance period
+period_map = {
+    "1M": "1mo",
+    "3M": "3mo", 
+    "6M": "6mo",
+    "1Y": "1y",
+    "2Y": "2y",
+    "5Y": "5y"
+}
 
 # ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
 def show_research_main_page():
@@ -257,10 +273,14 @@ def show_research_main_page():
     
     # Current Stock Info
     try:
-        df = get_stock_data(st.session_state.current_ticker, 30)
+        df = get_daily_data(st.session_state.current_ticker, 30)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current Analysis for {st.session_state.stock_name}: ₹{current_price:.2f}**")
+            prev_close = float(df['Close'].iloc[-2])
+            change = current_price - prev_close
+            change_pct = (change / prev_close) * 100
+            
+            st.info(f"**{st.session_state.stock_name}: ₹{current_price:.2f} | {change:+.2f} ({change_pct:+.2f}%)**")
     except:
         pass
     
@@ -363,16 +383,22 @@ def show_report_details():
     st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {st.session_state.stock_name}</h2>', unsafe_allow_html=True)
     
     try:
-        df = get_stock_data(st.session_state.current_ticker, 365)
+        df = get_stock_data(st.session_state.current_ticker, "1y")
         current_price = float(df['Close'].iloc[-1]) if not df.empty else 0
+        prev_close = float(df['Close'].iloc[-2])
+        change = current_price - prev_close
+        change_pct = (change / prev_close) * 100
     except:
         current_price = 0
+        change = 0
+        change_pct = 0
     
     # Report-specific content
     if report_name == "executive_summary":
         st.markdown("""
         <div class="report-content">
             <h3>🎯 Investment Recommendation: STRONG BUY</h3>
+            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
             <p><strong>Target Price:</strong> ₹1,650 (15% Upside)</p>
             <p><strong>Time Horizon:</strong> 12-18 Months</p>
             <p><strong>Risk Rating:</strong> Medium</p>
@@ -385,7 +411,7 @@ def show_report_details():
                 <li>Favorable industry tailwinds</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(current_price, change_pct), unsafe_allow_html=True)
         
         # Executive metrics
         st.subheader("Key Metrics")
@@ -401,6 +427,7 @@ def show_report_details():
         st.markdown("""
         <div class="report-content">
             <h3>💰 Financial Performance</h3>
+            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
             
             <h4>Income Statement Highlights (Last Quarter):</h4>
             <ul>
@@ -418,7 +445,7 @@ def show_report_details():
                 <li><strong>ROCE:</strong> 22.1% (Strong)</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(current_price, change_pct), unsafe_allow_html=True)
         
         # Financial metrics
         st.subheader("Financial Metrics")
@@ -434,10 +461,10 @@ def show_report_details():
         st.markdown("""
         <div class="report-content">
             <h3>📈 Technical Outlook</h3>
+            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
             
             <h4>Key Technical Levels:</h4>
             <ul>
-                <li><strong>Current Price:</strong> ₹1,435</li>
                 <li><strong>Support:</strong> ₹1,350 (Strong), ₹1,280 (Major)</li>
                 <li><strong>Resistance:</strong> ₹1,480 (Immediate), ₹1,550 (Major)</li>
                 <li><strong>Trend:</strong> Bullish (Higher Highs & Higher Lows)</li>
@@ -451,7 +478,7 @@ def show_report_details():
                 <li><strong>Volume:</strong> Increasing on up moves</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(current_price, change_pct), unsafe_allow_html=True)
         
         # Technical metrics
         st.subheader("Technical Indicators")
@@ -465,10 +492,11 @@ def show_report_details():
         
     else:
         # Default content for other reports
-        st.markdown(f"""
+        st.markdown("""
         <div class="report-content">
-            <h3>📋 {report_name.replace('_', ' ').title()} Analysis</h3>
-            <p>Detailed analysis for {st.session_state.stock_name} is currently being generated by our AI algorithms.</p>
+            <h3>📋 {} Analysis</h3>
+            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
+            <p>Detailed analysis for {} is currently being generated by our AI algorithms.</p>
             
             <h4>Key Points:</h4>
             <ul>
@@ -478,10 +506,14 @@ def show_report_details():
                 <li>Full report available shortly</li>
             </ul>
             
-            <p><strong>Current Price:</strong> ₹{current_price:.2f}</p>
-            <p><strong>Analysis Last Updated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+            <p><strong>Analysis Last Updated:</strong> {}</p>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(
+            report_name.replace('_', ' ').title(),
+            current_price, change_pct,
+            st.session_state.stock_name,
+            datetime.now().strftime('%Y-%m-%d %H:%M')
+        ), unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -491,7 +523,8 @@ if section == "Home":
     
     with st.spinner(f"Fetching {stock_name} data..."):
         try:
-            df = get_stock_data(ticker, period)
+            # Get daily data for the selected period
+            df = get_stock_data(ticker, period_map[chart_period])
             stock_info = get_stock_info(ticker)
             
             if df.empty:
@@ -499,13 +532,16 @@ if section == "Home":
             else:
                 df.reset_index(inplace=True)
                 
-                # COMPACT KEY METRICS SECTION
-                st.markdown("#### 📊 Key Metrics")
-                
+                # Calculate current values
                 current_price = float(df['Close'].iloc[-1])
-                prev_price = float(df['Close'].iloc[-2])
+                prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
                 price_change = current_price - prev_price
-                price_change_pct = (price_change / prev_price) * 100
+                price_change_pct = (price_change / prev_price) * 100 if prev_price > 0 else 0
+                
+                day_high = float(df['High'].iloc[-1])
+                day_low = float(df['Low'].iloc[-1])
+                day_open = float(df['Open'].iloc[-1])
+                volume = int(df['Volume'].iloc[-1])
                 
                 # Get additional metrics from stock info
                 pe_ratio = stock_info.get('trailingPE', 'N/A')
@@ -517,35 +553,40 @@ if section == "Home":
                 if dividend_yield != 'N/A':
                     dividend_yield = f"{dividend_yield*100:.2f}%"
                 
-                # Fixed compact metrics grid - properly formatted f-string
+                # 52-week range from the data
+                high_52w = float(df['High'].max())
+                low_52w = float(df['Low'].min())
+                
+                # COMPACT KEY METRICS SECTION
+                st.markdown("#### 📊 Current Market Data")
+                
+                # Current price with large display
+                col1, col2, col3 = st.columns([2, 1, 1])
+                with col1:
+                    st.metric(
+                        f"{stock_name} Current Price",
+                        f"₹{current_price:.2f}",
+                        f"{price_change:+.2f} ({price_change_pct:+.2f}%)"
+                    )
+                with col2:
+                    st.metric("Day High", f"₹{day_high:.2f}")
+                with col3:
+                    st.metric("Day Low", f"₹{day_low:.2f}")
+                
+                # Compact metrics grid
                 metrics_html = f"""
                 <div class="compact-metrics">
                     <div class="metric-box">
-                        <div class="metric-label">Current Price</div>
-                        <div class="metric-value">₹{current_price:.2f}</div>
-                        <div class="metric-change {'negative' if price_change < 0 else ''}">
-                            {price_change:+.2f} ({price_change_pct:+.2f}%)
-                        </div>
+                        <div class="metric-label">Open</div>
+                        <div class="metric-value">₹{day_open:.2f}</div>
                     </div>
                     <div class="metric-box">
                         <div class="metric-label">Previous Close</div>
                         <div class="metric-value">₹{prev_price:.2f}</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label">Open</div>
-                        <div class="metric-value">₹{float(df['Open'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Day High</div>
-                        <div class="metric-value">₹{float(df['High'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Day Low</div>
-                        <div class="metric-value">₹{float(df['Low'].iloc[-1]):.2f}</div>
-                    </div>
-                    <div class="metric-box">
                         <div class="metric-label">Volume</div>
-                        <div class="metric-value">{int(df['Volume'].iloc[-1]):,}</div>
+                        <div class="metric-value">{volume:,}</div>
                     </div>
                     <div class="metric-box">
                         <div class="metric-label">P/E Ratio</div>
@@ -560,25 +601,90 @@ if section == "Home":
                         <div class="metric-value">{dividend_yield}</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-label">52W Range</div>
-                        <div class="metric-value">₹{float(df['Low'].min()):.0f}-₹{float(df['High'].max()):.0f}</div>
+                        <div class="metric-label">52W High</div>
+                        <div class="metric-value">₹{high_52w:.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">52W Low</div>
+                        <div class="metric-value">₹{low_52w:.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Change</div>
+                        <div class="metric-value {'negative' if price_change < 0 else ''}">
+                            {price_change:+.2f}
+                        </div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Change %</div>
+                        <div class="metric-value {'negative' if price_change_pct < 0 else ''}">
+                            {price_change_pct:+.2f}%
+                        </div>
                     </div>
                 </div>
                 """
                 st.markdown(metrics_html, unsafe_allow_html=True)
                 
-                # Price Chart
-                st.subheader("Price Chart")
+                # Daily Price Chart
+                st.subheader(f"📈 {chart_period} Price Chart - {stock_name}")
+                
+                # Calculate moving averages
                 df["SMA20"] = df["Close"].rolling(20).mean()
                 df["SMA50"] = df["Close"].rolling(50).mean()
                 
+                # Create interactive chart
                 chart_data = df[['Date', 'Close', 'SMA20', 'SMA50']].copy()
-                base = alt.Chart(chart_data).encode(x='Date:T').properties(height=400)
-                close_line = base.mark_line(color='#00ffcc').encode(y='Close:Q', tooltip=['Date:T', 'Close:Q'])
-                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q')
-                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q')
-                chart = close_line + sma20_line + sma50_line
+                
+                base = alt.Chart(chart_data).encode(
+                    x=alt.X('Date:T', title='Date')
+                ).properties(
+                    height=400,
+                    title=f"{stock_name} Price Chart ({chart_period})"
+                )
+                
+                # Create layers for different lines
+                close_line = base.mark_line(color='#00ffcc', strokeWidth=2).encode(
+                    y=alt.Y('Close:Q', title='Price (₹)', scale=alt.Scale(zero=False)),
+                    tooltip=['Date:T', 'Close:Q', 'SMA20:Q', 'SMA50:Q']
+                )
+                
+                sma20_line = base.mark_line(color='#ffaa00', strokeWidth=1.5, strokeDash=[5,5]).encode(
+                    y='SMA20:Q'
+                )
+                
+                sma50_line = base.mark_line(color='#ff00ff', strokeWidth=1.5, strokeDash=[5,5]).encode(
+                    y='SMA50:Q'
+                )
+                
+                # Combine all layers
+                chart = alt.layer(close_line, sma20_line, sma50_line).configure(
+                    background='#000000',
+                    axis=alt.Axis(
+                        labelColor='#ffffff',
+                        titleColor='#ffffff'
+                    ),
+                    title=alt.TitleConfig(color='#ffffff')
+                )
+                
                 st.altair_chart(chart, use_container_width=True)
+                st.caption("Close Price (Green) | 20-Day SMA (Orange) | 50-Day SMA (Pink)")
+                
+                # Recent Price Data Table
+                st.subheader("Recent Price Action")
+                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(10).copy()
+                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+                display_df["Change"] = display_df["Close"].diff()
+                display_df["Change %"] = (display_df["Change"] / display_df["Close"].shift(1)) * 100
+                
+                # Format the display
+                display_df["Open"] = display_df["Open"].apply(lambda x: f"₹{x:.2f}")
+                display_df["High"] = display_df["High"].apply(lambda x: f"₹{x:.2f}")
+                display_df["Low"] = display_df["Low"].apply(lambda x: f"₹{x:.2f}")
+                display_df["Close"] = display_df["Close"].apply(lambda x: f"₹{x:.2f}")
+                display_df["Volume"] = display_df["Volume"].apply(lambda x: f"{x:,.0f}")
+                display_df["Change"] = display_df["Change"].apply(lambda x: f"{x:+.2f}" if not pd.isna(x) else "")
+                display_df["Change %"] = display_df["Change %"].apply(lambda x: f"{x:+.2f}%" if not pd.isna(x) else "")
+                
+                st.dataframe(display_df, use_container_width=True)
                 
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
@@ -599,6 +705,15 @@ elif section == "Options Trading":
         unsafe_allow_html=True,
     )
     
+    # Current price display
+    try:
+        df = get_daily_data(ticker, 1)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+    except:
+        pass
+    
     # Options content
     st.subheader("Options Overview")
     col1, col2, col3, col4 = st.columns(4)
@@ -617,6 +732,15 @@ elif section == "Chart Analysis":
         unsafe_allow_html=True,
     )
     
+    # Current price display
+    try:
+        df = get_daily_data(ticker, 1)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+    except:
+        pass
+    
     # Chart analysis content
     st.subheader("Technical Indicators")
     col1, col2, col3, col4 = st.columns(4)
@@ -634,6 +758,15 @@ elif section == "AI Predictions":
         '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
         unsafe_allow_html=True,
     )
+    
+    # Current price display
+    try:
+        df = get_daily_data(ticker, 1)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
+    except:
+        pass
     
     # AI predictions content
     st.subheader("AI Analysis")
