@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="PRASANTH AI Trading Insights", 
+    page_title="Smart Trade with Prasanth Subrahamanian", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -18,7 +18,6 @@ custom_css = """
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-.css-1v3fvcr.egzxvld0 {visibility: hidden;}  /* user profile icon */
 
 body, .main, .block-container, .sidebar .sidebar-content {
     background-color: #000 !important;
@@ -30,6 +29,15 @@ body, .main, .block-container, .sidebar .sidebar-content {
     margin-bottom: 2rem;
     font-size: 2.5rem;
     font-weight: 700;
+    color: #00ffcc;
+    text-align: center;
+}
+
+.subheader-text {
+    margin-top: -2rem;
+    margin-bottom: 2rem;
+    font-size: 1.2rem;
+    font-weight: 400;
     color: #00ffcc;
     text-align: center;
 }
@@ -60,42 +68,24 @@ div[data-testid="stDataFrame"] {
 }
 
 /* Sidebar styling */
-.css-1d391kg, .css-1lcbmhc, .css-1outpf7 {
+section[data-testid="stSidebar"] {
     background-color: #111 !important;
 }
 
-.css-1d391kg {
-    border-right: 1px solid #333;
+section[data-testid="stSidebar"] .stRadio label {
+    color: white !important;
 }
 
-/* Hide the sidebar collapse button */
-.css-1v0mbdj, .css-15zrgzn { 
-    display: none !important; 
+section[data-testid="stSidebar"] .stSelectbox label {
+    color: white !important;
 }
 
-/* Custom toggle button */
-.sidebar-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 9999;
-    background-color: #00ffcc;
-    color: #000;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 255, 204, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+section[data-testid="stSidebar"] .stSlider label {
+    color: white !important;
 }
 
-.sidebar-toggle:hover {
-    background-color: #00e6b8;
-    transform: scale(1.1);
+section[data-testid="stSidebar"] h3 {
+    color: #00ffcc !important;
 }
 
 @media (max-width: 768px) {
@@ -129,39 +119,9 @@ def calculate_macd(prices, fast=12, slow=26, signal=9):
     histogram = macd - signal_line
     return macd, signal_line, histogram
 
-# ----------------------- SIDEBAR TOGGLE SCRIPT -----------------------
-st.markdown("""
-<script>
-// Add a permanent sidebar toggle button
-function addSidebarToggle() {
-    // Remove existing toggle button if any
-    const existingToggle = document.querySelector('.sidebar-toggle');
-    if (existingToggle) {
-        existingToggle.remove();
-    }
-    
-    const toggleBtn = document.createElement('button');
-    toggleBtn.innerHTML = '☰';
-    toggleBtn.className = 'sidebar-toggle';
-    toggleBtn.title = 'Toggle Sidebar';
-    toggleBtn.onclick = function() {
-        // Simply reload the page to reset sidebar state
-        window.location.reload();
-    };
-    document.body.appendChild(toggleBtn);
-}
-
-// Run after page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addSidebarToggle);
-} else {
-    addSidebarToggle();
-}
-</script>
-""", unsafe_allow_html=True)
-
 # ----------------------- MAIN HEADER -----------------------
-st.markdown('<div class="header-text">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-text">SMART TRADE</div>', unsafe_allow_html=True)
+st.markdown('<div class="subheader-text">with Prasanth Subrahamanian</div>', unsafe_allow_html=True)
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
@@ -183,15 +143,14 @@ with st.sidebar:
     
     section = st.radio(
         "Choose Section",
-        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"),
-        key="nav_radio"
+        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
     )
     
     st.markdown("---")
     st.markdown("### 🔍 Stock Selection")
     
-    stock_name = st.selectbox("Select Stock", list(stocks.keys()), key="stock_select")
-    period = st.slider("Period (Days)", 10, 365, 60, key="period_slider")
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()))
+    period = st.slider("Period (Days)", 10, 365, 60)
     
     st.markdown("---")
     st.markdown("### ℹ️ Info")
@@ -614,4 +573,4 @@ elif section == "AI Predictions":
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>PRASANTH AI TRADING INSIGHTS • Real-time Market Data</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahamanian • Real-time Market Data</div>", unsafe_allow_html=True)
