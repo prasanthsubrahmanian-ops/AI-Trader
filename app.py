@@ -418,7 +418,7 @@ def show_home():
 
 # ----------------------- MARKET TRENDS PAGE -----------------------
 def show_market_trends():
-    """Market Trends - Shows NIFTY, sectors, gainers, losers"""
+    """Market Trends - Shows stock/index charts and analysis"""
     st.markdown(
         '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
         '<h2>📈 Advanced Market Analysis</h2>'
@@ -427,22 +427,42 @@ def show_market_trends():
         unsafe_allow_html=True,
     )
     
-    # Market Indices
-    st.markdown("### 📊 Live Indices")
-    
-    market_data = get_market_data()
-    if market_data:
-        cols = st.columns(4)
-        
-        for i, (idx_name, idx_data) in enumerate(market_data.items()):
-            with cols[i % 4]:
-                st.metric(
-                    idx_name,
-                    f"₹{idx_data['current']:.2f}",
-                    f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
-                )
-    else:
-        st.info("Market data loading...")
+    # Current Price Overview
+    try:
+        df = get_stock_data(ticker, "1d")
+        if df is not None and not df.empty and len(df) > 0:
+            current_price = float(df['Close'].iloc[-1])
+            if len(df) > 1:
+                prev_price = float(df['Close'].iloc[-2])
+                price_change = current_price - prev_price
+                price_change_pct = (price_change / prev_price) * 100
+            else:
+                price_change = 0
+                price_change_pct = 0
+            
+            # Display current price prominently
+            st.markdown(f"""
+            <div class="feature-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.1rem; color: #888; margin-bottom: 0.5rem;">{stock_name}</div>
+                        <div style="font-size: 2.5rem; font-weight: 700; color: #00ffcc;">
+                            ₹{current_price:,.2f}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: {'#00ffcc' if price_change >= 0 else '#ff4444'};">
+                            {price_change:+.2f} ({price_change_pct:+.2f}%)
+                        </div>
+                        <div style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">
+                            {timeframe} View
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    except:
+        st.info(f"Loading data for {stock_name}...")
     
     # Fundamental Data for Stocks (not indices)
     if stock_name not in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]:
@@ -509,13 +529,14 @@ def show_market_trends():
             # Create chart
             fig = go.Figure()
             
-            # Price line
-            fig.add_trace(go.Scatter(
-                x=df.index, 
-                y=df['Close'], 
-                mode='lines', 
-                name='Price',
-                line=dict(color='#00ffcc', width=2)
+            # Candlestick chart
+            fig.add_trace(go.Candlestick(
+                x=df.index,
+                open=df['Open'],
+                high=df['High'],
+                low=df['Low'],
+                close=df['Close'],
+                name='Price'
             ))
             
             # Add moving averages if enough data
@@ -528,7 +549,7 @@ def show_market_trends():
                         y=ma20, 
                         mode='lines', 
                         name='MA20',
-                        line=dict(color='#ff4444', width=1, dash='dash')
+                        line=dict(color='#ff4444', width=2)
                     ))
             
             if len(df) > 50:
@@ -540,27 +561,23 @@ def show_market_trends():
                         y=ma50, 
                         mode='lines', 
                         name='MA50',
-                        line=dict(color='#0099ff', width=1, dash='dash')
+                        line=dict(color='#0099ff', width=2)
                     ))
             
             # Determine title and y-axis label
             is_index = stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]
-            chart_title = f"{stock_name} - {timeframe}"
+            chart_title = f"{stock_name} - {timeframe} Chart"
             y_axis_title = "Index Value" if is_index else "Price (₹)"
-            
-            if is_index:
-                chart_title += f" | Index: {current_price:.2f} ({price_change_pct:+.2f}%)"
-            else:
-                chart_title += f" | Price: ₹{current_price:.2f} ({price_change_pct:+.2f}%)"
             
             fig.update_layout(
                 title=chart_title,
                 template="plotly_dark",
-                height=500,
+                height=600,
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
-                yaxis_title=y_axis_title
+                yaxis_title=y_axis_title,
+                margin=dict(l=50, r=50, t=80, b=50)
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -572,12 +589,33 @@ def show_market_trends():
             tech_cols = st.columns(4)
             
             with tech_cols[0]:
-                rsi = 65.2  # Mock RSI
-                st.metric("RSI (14)", f"{rsi}", "Neutral")
+                # Calculate actual RSI
+                if len(df) > 14:
+                    delta = df['Close'].diff()
+                    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                    rs = gain / loss
+                    rsi = 100 - (100 / (1 + rs))
+                    current_rsi = rsi.iloc[-1] if not rsi.isna().all() else 50
+                else:
+                    current_rsi = 50
+                
+                rsi_status = "Overbought" if current_rsi > 70 else "Oversold" if current_rsi < 30 else "Neutral"
+                st.metric("RSI (14)", f"{current_rsi:.1f}", rsi_status)
                 
             with tech_cols[1]:
-                macd = 2.5  # Mock MACD
-                st.metric("MACD", f"{macd}", "Bullish")
+                # Simple MACD calculation
+                if len(df) > 26:
+                    exp12 = df['Close'].ewm(span=12, adjust=False).mean()
+                    exp26 = df['Close'].ewm(span=26, adjust=False).mean()
+                    macd = exp12 - exp26
+                    signal = macd.ewm(span=9, adjust=False).mean()
+                    current_macd = macd.iloc[-1] if not macd.isna().all() else 0
+                else:
+                    current_macd = 0
+                
+                macd_status = "Bullish" if current_macd > 0 else "Bearish"
+                st.metric("MACD", f"{current_macd:.2f}", macd_status)
                 
             with tech_cols[2]:
                 if 'Volume' in df.columns and not df['Volume'].isna().all():
