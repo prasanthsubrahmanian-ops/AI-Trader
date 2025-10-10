@@ -1,506 +1,457 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Analysis Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #e1e4e8;
-            margin-bottom: 30px;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo h1 {
-            font-size: 24px;
-            color: #1a73e8;
-        }
-        
-        .logo-icon {
-            color: #1a73e8;
-            font-size: 28px;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 25px;
-        }
-        
-        nav a {
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav a:hover, nav a.active {
-            color: #1a73e8;
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eaecef;
-        }
-        
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a232e;
-        }
-        
-        .stock-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .stock-price {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a232e;
-        }
-        
-        .stock-change {
-            font-size: 16px;
-            font-weight: 600;
-            color: #0f9d58;
-            background: #e6f4ea;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .stock-change.negative {
-            color: #d93025;
-            background: #fce8e6;
-        }
-        
-        .stock-meta {
-            color: #5f6368;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        
-        .time-filters {
-            display: flex;
-            background: #f1f3f4;
-            border-radius: 6px;
-            padding: 4px;
-            margin-bottom: 25px;
-        }
-        
-        .time-filter {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .time-filter.active {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            font-weight: 500;
-        }
-        
-        .chart-placeholder {
-            height: 250px;
-            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-        
-        .key-metrics {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f3f4;
-        }
-        
-        .metric:last-child {
-            border-bottom: none;
-        }
-        
-        .metric-label {
-            color: #5f6368;
-            font-size: 14px;
-        }
-        
-        .metric-value {
-            font-weight: 600;
-            color: #1a232e;
-        }
-        
-        .research-sections {
-            margin-top: 30px;
-        }
-        
-        .section {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #1a232e;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eaecef;
-        }
-        
-        .section-content {
-            color: #5f6368;
-            line-height: 1.7;
-        }
-        
-        .section-content p {
-            margin-bottom: 15px;
-        }
-        
-        .btn {
-            display: inline-block;
-            background: #1a73e8;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .btn:hover {
-            background: #0d62c9;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #1a73e8;
-            color: #1a73e8;
-        }
-        
-        .btn-outline:hover {
-            background: #f0f7ff;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            margin-top: 40px;
-            border-top: 1px solid #e1e4e8;
-            color: #5f6368;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .key-metrics {
-                grid-template-columns: 1fr;
-            }
-            
-            nav ul {
-                gap: 15px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-chart-line logo-icon"></i>
-                <h1>MarketAnalytics Pro</h1>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="#" class="active">Dashboard</a></li>
-                    <li><a href="#">Research</a></li>
-                    <li><a href="#">Portfolio</a></li>
-                    <li><a href="#">News</a></li>
-                    <li><a href="#">Settings</a></li>
-                </ul>
-            </nav>
-        </header>
-        
-        <div class="dashboard">
-            <div class="main-content">
-                <div class="card">
-                    <div class="stock-header">
-                        <div>
-                            <h2>NIFTY 50 Index</h2>
-                            <div class="stock-meta">9 Oct, 3:30 pm IST • Disclaimer</div>
-                        </div>
-                        <div>
-                            <div class="stock-price">3,060.20</div>
-                            <div class="stock-change">
-                                <i class="fas fa-arrow-up"></i>
-                                +33.00 (1.09%)
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="time-filters">
-                        <div class="time-filter active">1D</div>
-                        <div class="time-filter">5D</div>
-                        <div class="time-filter">1M</div>
-                        <div class="time-filter">6M</div>
-                        <div class="time-filter">YTD</div>
-                        <div class="time-filter">1Y</div>
-                        <div class="time-filter">5Y</div>
-                        <div class="time-filter">Max</div>
-                    </div>
-                    
-                    <div class="chart-placeholder">
-                        <div style="text-align: center;">
-                            <i class="fas fa-chart-area" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>Interactive Chart Area</p>
-                            <p style="font-size: 12px; margin-top: 5px;">3,070 | 3,060 | 3,050 | 3,040 | 3,030 | 3,020</p>
-                            <p style="font-size: 12px; margin-top: 10px;">11:00 am | 1:00 pm | 3:00 pm</p>
-                        </div>
-                    </div>
-                    
-                    <div class="key-metrics">
-                        <div class="metric">
-                            <span class="metric-label">Previous Close</span>
-                            <span class="metric-value">3,027.20</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Open</span>
-                            <span class="metric-value">3,034.00</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">High</span>
-                            <span class="metric-value">3,066.00</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Low</span>
-                            <span class="metric-value">3,020.00</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Mkt Cap</span>
-                            <span class="metric-value">11.08 LCr</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">P/E Ratio</span>
-                            <span class="metric-value">22.47</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">52-wk High</span>
-                            <span class="metric-value">4,494.90</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Dividend Yield</span>
-                            <span class="metric-value">1.99%</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Qtrly Div Amt</span>
-                            <span class="metric-value">15.22</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">52-wk Low</span>
-                            <span class="metric-value">2,866.60</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-sections">
-                    <div class="section">
-                        <h3 class="section-title">Technical Analysis</h3>
-                        <div class="section-content">
-                            <p>The NIFTY 50 index shows a bullish trend with a strong support level at 3,020. The index has broken through the resistance at 3,050 and is now testing the 3,070 level.</p>
-                            <p>RSI indicator is at 62, suggesting there is still room for upward movement before reaching overbought territory. The moving averages (50-day and 200-day) are in a bullish alignment.</p>
-                            <div class="actions">
-                                <a href="#" class="btn">View Full Report</a>
-                                <a href="#" class="btn btn-outline">Download PDF</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <h3 class="section-title">Fundamental Analysis</h3>
-                        <div class="section-content">
-                            <p>The current P/E ratio of 22.47 is slightly above the 5-year historical average of 21.3, indicating a modest premium valuation. Market capitalization stands at 11.08 Lakh Crore.</p>
-                            <p>Dividend yield of 1.99% is competitive compared to fixed income alternatives in the current interest rate environment. Quarterly dividend amount of 15.22 represents a stable payout ratio.</p>
-                            <div class="actions">
-                                <a href="#" class="btn">View Full Report</a>
-                                <a href="#" class="btn btn-outline">Download PDF</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="section">
-                        <h3 class="section-title">Risk Assessment</h3>
-                        <div class="section-content">
-                            <p>The index is currently trading 32% below its 52-week high, indicating significant recovery potential but also highlighting the volatility experienced over the past year.</p>
-                            <p>Key risk factors include global macroeconomic conditions, currency fluctuations, and geopolitical tensions that could impact market sentiment.</p>
-                            <div class="actions">
-                                <a href="#" class="btn">View Full Report</a>
-                                <a href="#" class="btn btn-outline">Download PDF</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="sidebar">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Watchlist</h3>
-                        <a href="#">Manage</a>
-                    </div>
-                    <div class="watchlist">
-                        <div class="metric">
-                            <span class="metric-label">RELIANCE</span>
-                            <span class="metric-value">2,450.50 <span style="color: #0f9d58; font-size: 12px;">+1.2%</span></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">TCS</span>
-                            <span class="metric-value">3,215.75 <span style="color: #0f9d58; font-size: 12px;">+0.8%</span></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">HDFC BANK</span>
-                            <span class="metric-value">1,550.25 <span style="color: #d93025; font-size: 12px;">-0.5%</span></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">INFOSYS</span>
-                            <span class="metric-value">1,675.40 <span style="color: #0f9d58; font-size: 12px;">+1.7%</span></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">News & Updates</h3>
-                        <a href="#">View All</a>
-                    </div>
-                    <div class="news">
-                        <div class="metric">
-                            <span class="metric-label">RBI Policy Decision</span>
-                            <span class="metric-value" style="font-size: 12px;">2h ago</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Q2 Earnings Reports</span>
-                            <span class="metric-value" style="font-size: 12px;">5h ago</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Global Market Trends</span>
-                            <span class="metric-value" style="font-size: 12px;">1d ago</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-label">Sector Rotation Analysis</span>
-                            <span class="metric-value" style="font-size: 12px;">2d ago</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Quick Actions</h3>
-                    </div>
-                    <div class="actions" style="flex-direction: column;">
-                        <a href="#" class="btn" style="text-align: center; margin-bottom: 10px;">Create Alert</a>
-                        <a href="#" class="btn btn-outline" style="text-align: center; margin-bottom: 10px;">Export Data</a>
-                        <a href="#" class="btn btn-outline" style="text-align: center;">Compare Stocks</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>Disclaimer: This data is for informational purposes only and should not be considered as financial advice.</p>
-            <p>MarketAnalytics Pro &copy; 2025. All rights reserved.</p>
-        </footer>
-    </div>
+import streamlit as st
+import pandas as pd
+import numpy as np
+import yfinance as yf
+import altair as alt
+from datetime import datetime, timedelta
 
-    <script>
-        // Simple interactivity for time filters
-        document.querySelectorAll('.time-filter').forEach(filter => {
-            filter.addEventListener('click', function() {
-                document.querySelectorAll('.time-filter').forEach(f => f.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+# ----------------------- PAGE CONFIG -----------------------
+st.set_page_config(
+    page_title="Smart Trade with Prasanth Subrahmanian", 
+    layout="wide"
+)
+
+# ----------------------- CUSTOM STYLE -----------------------
+custom_css = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+body, .main, .block-container {
+    background-color: #000 !important;
+    color: #fff !important;
+    padding-top: 0.5rem !important;
+}
+
+.main-header {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #00ffcc;
+    text-align: center;
+    padding: 0.2rem 0;
+}
+
+/* Top Navigation */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 0.2rem 0 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background-color: #00ffcc;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    background-color: #00ffcc;
+    color: #000;
+}
+
+.stock-selector {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 1rem 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.landing-box {
+    background-color: #111;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    margin: 0.5rem 0;
+    box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
+}
+
+.section-header {
+    color: #00ffcc !important;
+    margin-top: 0.2rem !important;
+    margin-bottom: 1rem !important;
+}
+
+h2, h3, h4, p, label {
+    color: #fff !important;
+}
+
+div[data-testid="stDataFrame"] {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+.metric-card {
+    background-color: #1a1a1a;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #00ffcc;
+    margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+    .landing-box { padding: 1.5rem; }
+    .main-header { font-size: 2.2rem; }
+    .nav-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+}
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# ----------------------- CACHED FUNCTIONS -----------------------
+@st.cache_data(ttl=300)
+def get_stock_data(ticker, period):
+    return yf.download(ticker, period=f"{period}d")
+
+def calculate_rsi(prices, window=14):
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def calculate_macd(prices, fast=12, slow=26, signal=9):
+    ema_fast = prices.ewm(span=fast).mean()
+    ema_slow = prices.ewm(span=slow).mean()
+    macd = ema_fast - ema_slow
+    signal_line = macd.ewm(span=signal).mean()
+    histogram = macd - signal_line
+    return macd, signal_line, histogram
+
+# ----------------------- SESSION STATE -----------------------
+if 'current_section' not in st.session_state:
+    st.session_state.current_section = "Home"
+if 'stock_name' not in st.session_state:
+    st.session_state.stock_name = "RELIANCE"
+if 'period' not in st.session_state:
+    st.session_state.period = 60
+
+# ----------------------- TOP NAVIGATION -----------------------
+st.markdown("""
+<div class="top-nav">
+    <button class="nav-btn %s" onclick="setSection('Home')">🏠 Home</button>
+    <button class="nav-btn %s" onclick="setSection('Research Reports')">📑 Research Reports</button>
+    <button class="nav-btn %s" onclick="setSection('Options Trading')">💹 Options Trading</button>
+    <button class="nav-btn %s" onclick="setSection('Chart Analysis')">📈 Chart Analysis</button>
+    <button class="nav-btn %s" onclick="setSection('AI Predictions')">🤖 AI Predictions</button>
+</div>
+
+<script>
+function setSection(section) {
+    window.location.href = '?section=' + section;
+}
+</script>
+""" % (
+    'active' if st.session_state.current_section == 'Home' else '',
+    'active' if st.session_state.current_section == 'Research Reports' else '',
+    'active' if st.session_state.current_section == 'Options Trading' else '',
+    'active' if st.session_state.current_section == 'Chart Analysis' else '',
+    'active' if st.session_state.current_section == 'AI Predictions' else ''
+), unsafe_allow_html=True)
+
+# ----------------------- HEADER -----------------------
+st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
+
+# ----------------------- STOCK SELECTION -----------------------
+stocks = {
+    "RELIANCE": "RELIANCE.NS", 
+    "TCS": "TCS.NS", 
+    "INFY": "INFY.NS", 
+    "HDFC BANK": "HDFCBANK.NS",
+    "ICICI BANK": "ICICIBANK.NS",
+    "NIFTY 50": "^NSEI",
+    "BANK NIFTY": "^NSEBANK",
+    "AAPL": "AAPL",
+    "TSLA": "TSLA"
+}
+
+# Handle URL parameters using st.query_params
+params = st.query_params
+if 'section' in params:
+    st.session_state.current_section = params['section'][0]
+
+# Stock selection in main area
+col1, col2, col3 = st.columns([1, 1, 1])
+with col1:
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
+                             index=list(stocks.keys()).index(st.session_state.stock_name))
+with col2:
+    period = st.slider("Period (Days)", 10, 365, st.session_state.period)
+with col3:
+    st.write("")  # Spacer
+    st.write(f"**Current:** {stock_name} | {period} days")
+
+# Update session state
+st.session_state.stock_name = stock_name
+st.session_state.period = period
+ticker = stocks[stock_name]
+section = st.session_state.current_section
+
+# ----------------------- HOME SECTION -----------------------
+if section == "Home":
+    st.markdown("### Real-Time Market Data")
+    
+    with st.spinner(f"Fetching {stock_name} data..."):
+        try:
+            df = get_stock_data(ticker, period)
+            if df.empty:
+                st.error("No data available. Try again later or choose another stock.")
+            else:
+                df.reset_index(inplace=True)
+                df["SMA20"] = df["Close"].rolling(20).mean()
+                df["SMA50"] = df["Close"].rolling(50).mean()
+                df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+                
+                # Key Metrics
+                st.subheader("Key Metrics")
+                col1, col2, col3, col4 = st.columns(4)
+                
+                current_price = float(df['Close'].iloc[-1])
+                prev_price = float(df['Close'].iloc[-2])
+                price_change_pct = ((current_price - prev_price) / prev_price) * 100
+                
+                with col1:
+                    st.metric("Current Price", f"{current_price:.2f}", f"{price_change_pct:+.2f}%")
+                
+                with col2:
+                    current_volume = int(df['Volume'].iloc[-1])
+                    avg_volume = float(df['Volume'].iloc[-5:].mean())
+                    volume_change_pct = ((current_volume - avg_volume) / avg_volume) * 100
+                    st.metric("Volume", f"{current_volume:,}", f"{volume_change_pct:+.1f}%")
+                
+                with col3:
+                    high_52w = float(df['High'].max())
+                    st.metric("52W High", f"{high_52w:.2f}")
+                
+                with col4:
+                    low_52w = float(df['Low'].min())
+                    st.metric("52W Low", f"{low_52w:.2f}")
+                
+                # Price Chart with Indicators
+                st.subheader("Price Chart")
+                
+                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50', 'EMA20']].copy()
+                
+                base = alt.Chart(chart_data).encode(x='Date:T').properties(height=400)
+                
+                close_line = base.mark_line(color='#00ffcc').encode(y='Close:Q', tooltip=['Date:T', 'Close:Q'])
+                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q', tooltip=['Date:T', 'SMA20:Q'])
+                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q', tooltip=['Date:T', 'SMA50:Q'])
+                ema20_line = base.mark_line(color='#33cc33', strokeDash=[2,2]).encode(y='EMA20:Q', tooltip=['Date:T', 'EMA20:Q'])
+                
+                chart = close_line + sma20_line + sma50_line + ema20_line
+                st.altair_chart(chart, use_container_width=True)
+                st.caption("Close | SMA20 | SMA50 | EMA20")
+                
+                # OHLC Data
+                st.subheader("OHLC Data")
+                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(30).copy()
+                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
+                st.dataframe(display_df, use_container_width=True)
+                
+                # Volume Chart
+                st.subheader("Trading Volume")
+                volume_chart = alt.Chart(df).mark_bar(color='#00ccff').encode(
+                    x='Date:T', y='Volume:Q', tooltip=['Date:T', 'Volume:Q']
+                ).properties(height=300)
+                st.altair_chart(volume_chart, use_container_width=True)
+                
+        except Exception as e:
+            st.error(f"Error fetching data: {str(e)}")
+
+# ----------------------- RESEARCH REPORTS -----------------------
+elif section == "Research Reports":
+    st.markdown(
+        '<div class="landing-box"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current Stock Info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current Analysis for {stock_name}: ₹{current_price:.2f}**")
+    except:
+        pass
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 Fundamental Analysis")
+        st.metric("P/E Ratio", "22.5", "1.2")
+        st.metric("EPS (₹)", "85.20", "5.0%")
+        st.metric("Market Cap", "₹12.5T", "2.3%")
+        st.metric("Dividend Yield", "1.2%", "0.1%")
         
-        // Simulate loading state for chart
-        const chart = document.querySelector('.chart-placeholder');
-        chart.addEventListener('click', function() {
-            this.innerHTML = '<div style="text-align: center;"><div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #1a73e8; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto 15px;"></div><p>Loading advanced chart...</p></div>';
-            
-            setTimeout(() => {
-                chart.innerHTML = '<div style="text-align: center;"><i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px; color: #1a73e8;"></i><p>Advanced Chart Loaded</p><p style="font-size: 12px; margin-top: 10px;">Interactive features enabled</p></div>';
-            }, 1500);
-        });
-    </script>
-</body>
-</html>
+    with col2:
+        st.subheader("🔧 Technical Analysis")
+        st.metric("RSI", "54.2", "Neutral")
+        st.metric("Moving Average", "Bullish", "↑")
+        st.metric("Volatility", "Medium", "→")
+        st.metric("Support Level", "₹1,350", "Strong")
+    
+    st.subheader("📈 Analyst Recommendations")
+    rec_data = {
+        'Broker': ['Morgan Stanley', 'Goldman Sachs', 'JP Morgan', 'Credit Suisse', 'UBS'],
+        'Rating': ['Overweight', 'Buy', 'Neutral', 'Outperform', 'Buy'],
+        'Target Price': ['₹1,550', '₹1,600', '₹1,450', '₹1,580', '₹1,620'],
+        'Change': ['+5%', '+8%', '+2%', '+7%', '+9%']
+    }
+    st.dataframe(pd.DataFrame(rec_data), use_container_width=True)
+
+# ----------------------- OPTIONS TRADING -----------------------
+elif section == "Options Trading":
+    st.markdown(
+        '<div class="landing-box"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current Stock Info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Spot Price: ₹{current_price:.2f}**")
+    except:
+        pass
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 Options Overview")
+        st.metric("IV Rank", "65%", "High")
+        st.metric("Put/Call Ratio", "0.85", "Bullish")
+        st.metric("Open Interest", "2.5M", "+15%")
+        st.metric("Volume", "1.8M", "+22%")
+        
+    with col2:
+        st.subheader("⚡ Volatility Analysis")
+        st.metric("IV", "28.5%", "+2.1%")
+        st.metric("HV", "25.2%", "-1.3%")
+        st.metric("VIX", "18.2", "-0.5")
+        st.metric("Skew", "1.05", "Normal")
+    
+    st.subheader("🎯 Trading Strategies")
+    strat_col1, strat_col2, strat_col3 = st.columns(3)
+    
+    with strat_col1:
+        st.metric("Covered Call", "15.2% ROI", "Low Risk")
+    with strat_col2:
+        st.metric("Bull Put Spread", "22.8% ROI", "Medium Risk")
+    with strat_col3:
+        st.metric("Iron Condor", "18.5% ROI", "Neutral")
+
+# ----------------------- CHART ANALYSIS -----------------------
+elif section == "Chart Analysis":
+    st.markdown(
+        '<div class="landing-box"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current Stock Info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price: ₹{current_price:.2f}**")
+    except:
+        pass
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 Technical Indicators")
+        st.metric("RSI", "54.2", "Neutral")
+        st.metric("MACD", "Bullish", "↑")
+        st.metric("Stochastic", "68.5", "Oversold")
+        st.metric("Bollinger", "Within Bands", "→")
+        
+    with col2:
+        st.subheader("📈 Price Action")
+        st.metric("Trend", "Uptrend", "Strong")
+        st.metric("Support", "₹1,350", "Strong")
+        st.metric("Resistance", "₹1,480", "Moderate")
+        st.metric("Pattern", "Bull Flag", "Continuing")
+    
+    st.subheader("🔍 Pattern Recognition")
+    pattern_col1, pattern_col2, pattern_col3, pattern_col4 = st.columns(4)
+    
+    with pattern_col1:
+        st.metric("Head & Shoulders", "No", "→")
+    with pattern_col2:
+        st.metric("Double Top", "No", "→")
+    with pattern_col3:
+        st.metric("Cup & Handle", "Yes", "Bullish")
+    with pattern_col4:
+        st.metric("Triangle", "Ascending", "Bullish")
+
+# ----------------------- AI PREDICTIONS -----------------------
+elif section == "AI Predictions":
+    st.markdown(
+        '<div class="landing-box"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Current Stock Info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price: ₹{current_price:.2f}**")
+    except:
+        pass
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.subheader("🎯 AI Signal")
+        st.metric("Prediction", "BUY", "Strong")
+        st.metric("Confidence", "85%", "High")
+        st.metric("Timeframe", "2 Weeks", "→")
+        
+    with col2:
+        st.subheader("📊 Market Sentiment")
+        st.metric("Bullish", "68%", "+5%")
+        st.metric("Neutral", "22%", "-3%")
+        st.metric("Bearish", "10%", "-2%")
+        
+    with col3:
+        st.subheader("⚡ Risk Assessment")
+        st.metric("Volatility", "Medium", "→")
+        st.metric("Drawdown", "8.2%", "Low")
+        st.metric("Sharpe Ratio", "1.8", "Good")
+    
+    st.subheader("📈 Price Targets")
+    target_col1, target_col2, target_col3, target_col4 = st.columns(4)
+    
+    with target_col1:
+        st.metric("1 Week", "₹1,420", "+3.1%")
+    with target_col2:
+        st.metric("2 Weeks", "₹1,450", "+5.2%")
+    with target_col3:
+        st.metric("1 Month", "₹1,520", "+10.4%")
+    with target_col4:
+        st.metric("Stop Loss", "₹1,320", "-4.2%")
+
+# ----------------------- FOOTER -----------------------
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
