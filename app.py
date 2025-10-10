@@ -122,6 +122,28 @@ section[data-testid="stSidebar"] .stButton button:hover {
     background-color: #00e6b8;
 }
 
+/* Quick navigation buttons when sidebar is hidden */
+.quick-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.quick-nav button {
+    background: #00ffcc;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.quick-nav button:hover {
+    background: #00e6b8;
+}
+
 @media (max-width: 768px) {
     .landing-box { padding: 1.5rem; }
     .main-header { font-size: 2rem; text-align: center; }
@@ -132,20 +154,16 @@ section[data-testid="stSidebar"] .stButton button:hover {
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# ----------------------- SESSION STATE FOR SIDEBAR -----------------------
+# ----------------------- SESSION STATE -----------------------
+# Initialize session state
 if 'sidebar_visible' not in st.session_state:
     st.session_state.sidebar_visible = True
-
-# ----------------------- CUSTOM TOGGLE BUTTON -----------------------
-# Create a custom toggle button using Streamlit components
-col1, col2, col3 = st.columns([1, 2, 1])
-with col1:
-    if st.button("☰", key="sidebar_toggle", help="Toggle Sidebar"):
-        st.session_state.sidebar_visible = not st.session_state.sidebar_visible
-        st.rerun()
-
-# ----------------------- MAIN HEADER AT TOP -----------------------
-st.markdown('<div class="main-header">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
+if 'section' not in st.session_state:
+    st.session_state.section = "Home"
+if 'stock_name' not in st.session_state:
+    st.session_state.stock_name = "RELIANCE"
+if 'period' not in st.session_state:
+    st.session_state.period = 60
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
@@ -159,6 +177,17 @@ stocks = {
     "AAPL": "AAPL",
     "TSLA": "TSLA"
 }
+
+# ----------------------- CUSTOM TOGGLE BUTTON -----------------------
+# Create a custom toggle button using Streamlit components
+col1, col2, col3 = st.columns([1, 2, 1])
+with col1:
+    if st.button("☰", key="sidebar_toggle", help="Toggle Sidebar"):
+        st.session_state.sidebar_visible = not st.session_state.sidebar_visible
+        st.rerun()
+
+# ----------------------- MAIN HEADER AT TOP -----------------------
+st.markdown('<div class="main-header">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
 
 # ----------------------- SIDEBAR NAVIGATION -----------------------
 # Only show sidebar if it's supposed to be visible
@@ -196,37 +225,58 @@ if st.session_state.sidebar_visible:
         through sections for analysis.
         """)
         
-        # Additional help text
-        st.markdown("---")
-        st.markdown("""
-        <div style='color: #888; font-size: 0.8rem; text-align: center;'>
-        💡 Use the ☰ button to show sidebar
-        </div>
-        """, unsafe_allow_html=True)
-else:
-    # If sidebar is hidden, we still need to get the section and stock selection
-    # So we'll use session state to remember the values
-    if 'section' not in st.session_state:
-        st.session_state.section = "Home"
-    if 'stock_name' not in st.session_state:
-        st.session_state.stock_name = "RELIANCE"
-    if 'period' not in st.session_state:
-        st.session_state.period = 60
-    
-    section = st.session_state.section
-    stock_name = st.session_state.stock_name
-    period = st.session_state.period
-    
-    # Show a message about the sidebar being hidden
-    st.info("💡 Sidebar is hidden. Click the ☰ button in the top-left to show navigation.")
+        # Update session state with sidebar selections
+        st.session_state.section = section
+        st.session_state.stock_name = stock_name
+        st.session_state.period = period
 
-# Update session state with current selections
-if 'section' in locals():
-    st.session_state.section = section
-if 'stock_name' in locals():
-    st.session_state.stock_name = stock_name
-if 'period' in locals():
-    st.session_state.period = period
+else:
+    # If sidebar is hidden, show quick navigation buttons
+    st.info("💡 Sidebar is hidden. Click the ☰ button in the top-left to show navigation.")
+    
+    # Quick navigation buttons
+    st.markdown('<div class="quick-nav">', unsafe_allow_html=True)
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        if st.button("🏠 Home"):
+            st.session_state.section = "Home"
+            st.rerun()
+    with col2:
+        if st.button("📑 Research"):
+            st.session_state.section = "Research Reports"
+            st.rerun()
+    with col3:
+        if st.button("💹 Options"):
+            st.session_state.section = "Options Trading"
+            st.rerun()
+    with col4:
+        if st.button("📈 Charts"):
+            st.session_state.section = "Chart Analysis"
+            st.rerun()
+    with col5:
+        if st.button("🤖 AI"):
+            st.session_state.section = "AI Predictions"
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Show current stock and allow quick change
+    st.subheader("🔍 Quick Stock Selection")
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        new_stock = st.selectbox("Select Stock:", list(stocks.keys()), 
+                               index=list(stocks.keys()).index(st.session_state.stock_name),
+                               key="quick_stock_select")
+        if new_stock != st.session_state.stock_name:
+            st.session_state.stock_name = new_stock
+            st.rerun()
+    
+    with col2:
+        new_period = st.slider("Period:", 10, 365, st.session_state.period, key="quick_period_slider")
+        if new_period != st.session_state.period:
+            st.session_state.period = new_period
+            st.rerun()
 
 # Use the values from session state
 section = st.session_state.section
