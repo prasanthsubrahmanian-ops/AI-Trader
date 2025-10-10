@@ -365,7 +365,8 @@ if 'current_tool' not in st.session_state:
     st.session_state.current_tool = None
 
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">🚀 SMART TRADE PRO</div>', unsafe_allow_html=True)
+# REMOVED AEROPLANE LOGO FROM MAIN HEADING
+st.markdown('<div class="main-header">SMART TRADE PRO</div>', unsafe_allow_html=True)
 st.markdown('<div class="main-subtitle">by <em>Prasanth Subrahmanian</em> | Advanced Trading Analytics Platform</div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
@@ -926,8 +927,8 @@ def show_market_trends():
                 beta = stock_info.get('beta', 'N/A')
                 st.metric("Beta", f"{beta}" if beta != 'N/A' else "N/A")
     
-    # Advanced Charting
-    st.markdown(f"### 📊 {stock_name} Advanced Chart")
+    # Advanced Charting - CHANGED TO LINE GRAPH
+    st.markdown(f"### 📊 {stock_name} Price Chart")
     
     try:
         # Get chart data
@@ -950,18 +951,20 @@ def show_market_trends():
             len(df_chart) > 1 and
             'Close' in df_chart.columns):
             
-            # Create basic chart
+            # Create LINE chart
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
             fig = go.Figure()
             
-            # Always use line chart for simplicity
+            # LINE CHART for price
             fig.add_trace(go.Scatter(
                 x=df_chart.index, 
                 y=df_chart['Close'], 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00d4ff', width=3)
+                line=dict(color='#00d4ff', width=3),
+                fill='tozeroy',
+                fillcolor='rgba(0, 212, 255, 0.1)'
             ))
             
             # Simple moving average calculation
@@ -982,7 +985,7 @@ def show_market_trends():
             
             # Chart layout
             is_index = stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]
-            chart_title = f"{stock_name} - {timeframe} Chart"
+            chart_title = f"{stock_name} - {timeframe} Price Chart"
             y_axis_title = "Index Value" if is_index else "Price (₹)"
             
             fig.update_layout(
@@ -995,7 +998,8 @@ def show_market_trends():
                 yaxis_title=y_axis_title,
                 plot_bgcolor='rgba(16,22,58,0.8)',
                 paper_bgcolor='rgba(16,22,58,0.8)',
-                font=dict(color='#e0e0ff')
+                font=dict(color='#e0e0ff'),
+                hovermode='x unified'
             )
             
             st.plotly_chart(fig, use_container_width=True)
@@ -1070,7 +1074,7 @@ def show_market_trends():
         else:
             st.warning(f"Chart data not available for {stock_name}. Trying fallback data...")
             
-            # Fallback: Create a simple demo chart
+            # Fallback: Create a simple demo LINE chart
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
             # Generate sample data for demonstration
@@ -1083,11 +1087,13 @@ def show_market_trends():
                 y=prices, 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00d4ff', width=3)
+                line=dict(color='#00d4ff', width=3),
+                fill='tozeroy',
+                fillcolor='rgba(0, 212, 255, 0.1)'
             ))
             
             fig.update_layout(
-                title=dict(text=f"{stock_name} - Sample Chart (Demo Data)", font=dict(color='#00d4ff')),
+                title=dict(text=f"{stock_name} - Sample Price Chart (Demo Data)", font=dict(color='#00d4ff')),
                 template="plotly_dark",
                 height=400,
                 showlegend=True,
