@@ -18,51 +18,22 @@ custom_css = """
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
+.css-1v3fvcr.egzxvld0 {visibility: hidden;}
 
-/* Hide the default sidebar collapse button */
-button[title="Hide sidebar"] {
-    display: none !important;
-}
-
-button[title="Show sidebar"] {
-    display: none !important;
-}
-
-body, .main, .block-container {
+body, .main, .block-container, .sidebar .sidebar-content {
     background-color: #000 !important;
     color: #fff !important;
 }
 
 .main-header {
     margin-top: 0rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     font-size: 2.5rem;
     font-weight: 700;
     color: #00ffcc;
     text-align: center;
     padding: 1rem 0;
     border-bottom: 2px solid #00ffcc;
-}
-
-.sidebar-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 9999;
-    background-color: #00ffcc;
-    color: #000;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 255, 204, 0.3);
-}
-
-.sidebar-toggle:hover {
-    background-color: #00e6b8;
-    transform: scale(1.1);
 }
 
 .landing-box {
@@ -91,35 +62,12 @@ div[data-testid="stDataFrame"] {
 }
 
 /* Sidebar styling */
-section[data-testid="stSidebar"] {
+.css-1d391kg, .css-1lcbmhc, .css-1outpf7 {
     background-color: #111 !important;
-    border-right: 2px solid #00ffcc;
 }
 
-section[data-testid="stSidebar"] .stRadio label {
-    color: white !important;
-}
-
-section[data-testid="stSidebar"] .stSelectbox label {
-    color: white !important;
-}
-
-section[data-testid="stSidebar"] .stSlider label {
-    color: white !important;
-}
-
-section[data-testid="stSidebar"] h3 {
-    color: #00ffcc !important;
-}
-
-section[data-testid="stSidebar"] .stButton button {
-    background-color: #00ffcc;
-    color: #000;
-    font-weight: bold;
-}
-
-section[data-testid="stSidebar"] .stButton button:hover {
-    background-color: #00e6b8;
+.css-1d391kg {
+    border-right: 1px solid #333;
 }
 
 @media (max-width: 768px) {
@@ -131,34 +79,6 @@ section[data-testid="stSidebar"] .stButton button:hover {
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
-
-# ----------------------- SIDEBAR TOGGLE BUTTON -----------------------
-st.markdown("""
-<script>
-// Add a permanent sidebar toggle button
-function addSidebarToggle() {
-    const toggleBtn = document.createElement('button');
-    toggleBtn.innerHTML = '☰';
-    toggleBtn.className = 'sidebar-toggle';
-    toggleBtn.title = 'Toggle Sidebar';
-    toggleBtn.onclick = function() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            const isHidden = sidebar.style.transform === 'translateX(-100%)';
-            sidebar.style.transform = isHidden ? 'translateX(0)' : 'translateX(-100%)';
-        }
-    };
-    document.body.appendChild(toggleBtn);
-}
-
-// Run after page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addSidebarToggle);
-} else {
-    addSidebarToggle();
-}
-</script>
-""", unsafe_allow_html=True)
 
 # ----------------------- CACHED FUNCTIONS -----------------------
 @st.cache_data(ttl=300)
@@ -181,10 +101,6 @@ def calculate_macd(prices, fast=12, slow=26, signal=9):
     histogram = macd - signal_line
     return macd, signal_line, histogram
 
-# ----------------------- SESSION STATE FOR SIDEBAR -----------------------
-if 'sidebar_visible' not in st.session_state:
-    st.session_state.sidebar_visible = True
-
 # ----------------------- MAIN HEADER AT TOP -----------------------
 st.markdown('<div class="main-header">PRASANTH AI TRADING INSIGHTS</div>', unsafe_allow_html=True)
 
@@ -203,43 +119,26 @@ stocks = {
 
 # ----------------------- SIDEBAR NAVIGATION -----------------------
 with st.sidebar:
-    st.title("📊 PRASANTH AI")
+    st.markdown("### 📊 Navigation")
+    st.markdown("---")
     
-    # Manual sidebar toggle button inside sidebar
-    if st.button("📱 Toggle Sidebar"):
-        st.session_state.sidebar_visible = not st.session_state.sidebar_visible
-        st.rerun()
-    
-    st.markdown("### 🧭 Navigation")
     section = st.radio(
-        "Choose Section:",
-        ["Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions"],
-        key="nav_radio"
+        "Choose Section",
+        ("Home", "Research Reports", "Options Trading", "Chart Analysis", "AI Predictions")
     )
     
     st.markdown("---")
-    
-    # Stock selection section
     st.markdown("### 🔍 Stock Selection")
-    stock_name = st.selectbox("Select Stock:", list(stocks.keys()), key="stock_select")
-    period = st.slider("Period (Days):", 10, 365, 60, key="period_slider")
+    
+    stock_name = st.selectbox("Select Stock", list(stocks.keys()))
+    period = st.slider("Period (Days)", 10, 365, 60)
     
     st.markdown("---")
-    
-    # Info section
-    st.markdown("### ℹ️ About")
-    st.info("""
-    Real-time market data and 
-    AI-powered trading insights.
-    Select a stock and navigate 
-    through sections for analysis.
-    """)
-    
-    # Additional help text
-    st.markdown("---")
+    st.markdown("### ℹ️ Info")
     st.markdown("""
-    <div style='color: #888; font-size: 0.8rem; text-align: center;'>
-    💡 Use the ☰ button in the top-left to show/hide sidebar
+    <div style='color: #888; font-size: 0.9rem;'>
+    Real-time market data and AI-powered trading insights. 
+    Select a stock and navigate through different sections for detailed analysis.
     </div>
     """, unsafe_allow_html=True)
 
@@ -285,7 +184,7 @@ if section == "Home":
                     low_52w = float(df['Low'].min())
                     st.metric("52W Low", f"{low_52w:.2f}")
                 
-                # Price Chart with Indicators
+                # Price Chart with Indicators - FIXED VERSION
                 st.subheader(f"{stock_name} Price Chart")
                 
                 # Create a simple chart using Altair with proper data structure
@@ -295,7 +194,8 @@ if section == "Home":
                 base = alt.Chart(chart_data).encode(
                     x='Date:T'
                 ).properties(
-                    height=400
+                    height=400,
+                    width=800
                 )
                 
                 # Create individual lines
@@ -330,7 +230,7 @@ if section == "Home":
                 display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
                 st.dataframe(display_df, use_container_width=True)
                 
-                # Volume Chart
+                # Volume Chart - FIXED VERSION
                 st.subheader("Trading Volume")
                 volume_chart = alt.Chart(df).mark_bar(color='#00ccff').encode(
                     x='Date:T',
@@ -344,11 +244,314 @@ if section == "Home":
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
 
-# ----------------------- OTHER SECTIONS (Research Reports, Options Trading, etc.) -----------------------
-# [Keep all the other sections exactly as they were in the previous code]
-# Research Reports, Options Trading, Chart Analysis, AI Predictions sections remain the same...
+# ----------------------- RESEARCH REPORTS -----------------------
+elif section == "Research Reports":
+    st.markdown(
+        '<div class="landing-box"><h2>📑 Research Reports</h2><p>Access AI-powered fundamental & technical analysis reports here.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Fundamental Analysis")
+        st.metric("P/E Ratio", "22.5", "1.2")
+        st.metric("EPS", "85.20", "5.0")
+        st.metric("Market Cap", "12.5T", "2.3")
+        
+    with col2:
+        st.subheader("Technical Ratings")
+        st.metric("RSI Signal", "Neutral")
+        st.metric("Moving Avg", "Bullish")
+        st.metric("Volatility", "Medium")
+    
+    uploaded_file = st.file_uploader("Upload Research PDF", type="pdf")
+    if uploaded_file:
+        st.success(f"Uploaded: {uploaded_file.name}")
 
-# For brevity, I'm showing only the Home section. The other sections should be copied from the previous code.
+# ----------------------- OPTIONS TRADING -----------------------
+elif section == "Options Trading":
+    st.markdown(
+        '<div class="landing-box"><h2>💹 Options Trading</h2><p>Monitor open interest, volatility, and strategy payoffs.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    st.subheader("Options Chain")
+    
+    if st.button("Fetch Options Data"):
+        try:
+            stock = yf.Ticker(ticker)
+            expirations = stock.options
+            if expirations:
+                selected_expiry = st.selectbox("Select Expiry", expirations[:4])
+                opt_chain = stock.option_chain(selected_expiry)
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("**Calls**")
+                    calls_df = opt_chain.calls.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']]
+                    st.dataframe(calls_df)
+                
+                with col2:
+                    st.write("**Puts**")
+                    puts_df = opt_chain.puts.head(8)[['strike', 'lastPrice', 'change', 'volume', 'openInterest']]
+                    st.dataframe(puts_df)
+            else:
+                st.info("Options data not available for this symbol")
+        except Exception as e:
+            st.info(f"Options data not available: {str(e)}")
+
+# ----------------------- CHART ANALYSIS -----------------------
+elif section == "Chart Analysis":
+    st.markdown(
+        '<div class="landing-box"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Display current stock info
+    try:
+        df = get_stock_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**Current {stock_name} Price:** {current_price:.2f}")
+    except:
+        pass
+    
+    try:
+        df = get_stock_data(ticker, period)
+        if not df.empty:
+            df.reset_index(inplace=True)
+            
+            st.subheader("Technical Indicators")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                show_rsi = st.checkbox("RSI", value=True)
+                show_macd = st.checkbox("MACD", value=True)
+            
+            # RSI Calculation and Display
+            if show_rsi:
+                df['RSI'] = calculate_rsi(df['Close'])
+                st.subheader("RSI (Relative Strength Index)")
+                
+                # Display RSI values
+                current_rsi = df['RSI'].iloc[-1]
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Current RSI", f"{current_rsi:.2f}")
+                with col2:
+                    if current_rsi < 30:
+                        st.metric("Signal", "OVERSOLD", delta="Buy Opportunity")
+                    elif current_rsi > 70:
+                        st.metric("Signal", "OVERBOUGHT", delta="Sell Opportunity")
+                    else:
+                        st.metric("Signal", "NEUTRAL")
+                with col3:
+                    st.metric("RSI Trend", "Up" if current_rsi > df['RSI'].iloc[-5] else "Down")
+                
+                # RSI chart using Altair
+                rsi_chart = alt.Chart(df).mark_line(color='#ff6b6b').encode(
+                    x='Date:T',
+                    y=alt.Y('RSI:Q', scale=alt.Scale(domain=[0, 100])),
+                    tooltip=['Date:T', 'RSI:Q']
+                ).properties(height=300)
+                
+                # Add reference lines
+                overbought = alt.Chart(pd.DataFrame({'y': [70]})).mark_rule(color='red', strokeDash=[5,5]).encode(y='y:Q')
+                oversold = alt.Chart(pd.DataFrame({'y': [30]})).mark_rule(color='green', strokeDash=[5,5]).encode(y='y:Q')
+                neutral = alt.Chart(pd.DataFrame({'y': [50]})).mark_rule(color='gray', strokeDash=[2,2]).encode(y='y:Q')
+                
+                st.altair_chart(rsi_chart + overbought + oversold + neutral, use_container_width=True)
+                st.caption("RSI above 70: Overbought | RSI below 30: Oversold")
+            
+            # MACD Calculation and Display
+            if show_macd:
+                macd, signal, histogram = calculate_macd(df['Close'])
+                st.subheader("MACD")
+                
+                # Display MACD values
+                current_macd = macd.iloc[-1]
+                current_signal = signal.iloc[-1]
+                current_histogram = histogram.iloc[-1]
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("MACD", f"{current_macd:.4f}")
+                with col2:
+                    st.metric("Signal", f"{current_signal:.4f}")
+                with col3:
+                    st.metric("Histogram", f"{current_histogram:.4f}")
+                
+                # MACD chart using Altair
+                macd_data = pd.DataFrame({
+                    'Date': df['Date'],
+                    'MACD': macd.values,
+                    'Signal': signal.values
+                })
+                
+                macd_base = alt.Chart(macd_data).encode(x='Date:T')
+                
+                macd_line = macd_base.mark_line(color='#00ffcc').encode(
+                    y='MACD:Q',
+                    tooltip=['Date:T', 'MACD:Q']
+                )
+                
+                signal_line = macd_base.mark_line(color='#ffaa00').encode(
+                    y='Signal:Q',
+                    tooltip=['Date:T', 'Signal:Q']
+                )
+                
+                st.altair_chart(macd_line + signal_line, use_container_width=True)
+                
+    except Exception as e:
+        st.error(f"Error in chart analysis: {str(e)}")
+
+# ----------------------- AI PREDICTIONS -----------------------
+elif section == "AI Predictions":
+    st.markdown(
+        '<div class="landing-box"><h2>🤖 AI Predictions</h2><p>AI-powered price predictions and trading signals.</p></div>',
+        unsafe_allow_html=True,
+    )
+    
+    try:
+        df = get_stock_data(ticker, period)
+        if not df.empty and len(df) > 50:
+            df.reset_index(inplace=True)
+            df["SMA20"] = df["Close"].rolling(20).mean()
+            df["SMA50"] = df["Close"].rolling(50).mean()
+            
+            current_price = float(df['Close'].iloc[-1])
+            sma_20 = float(df['SMA20'].iloc[-1])
+            sma_50 = float(df['SMA50'].iloc[-1])
+            rsi = float(calculate_rsi(df['Close']).iloc[-1])
+            
+            # Simple AI Prediction Logic
+            st.subheader(f"🎯 {stock_name} - AI Trading Signal")
+            
+            prediction_score = 0
+            
+            # SMA Crossover Analysis
+            if sma_20 > sma_50:
+                prediction_score += 30
+                trend = "BULLISH"
+                trend_color = "#00ff00"
+            else:
+                prediction_score -= 20
+                trend = "BEARISH" 
+                trend_color = "#ff4444"
+            
+            # RSI Analysis
+            if rsi < 30:
+                prediction_score += 25  # Oversold - potential buy
+            elif rsi > 70:
+                prediction_score -= 25  # Overbought - potential sell
+            
+            # Price momentum
+            price_5d_ago = float(df['Close'].iloc[-5])
+            price_change_5d = ((current_price - price_5d_ago) / price_5d_ago) * 100
+            if price_change_5d > 2:
+                prediction_score += 15
+            elif price_change_5d < -2:
+                prediction_score -= 15
+            
+            # Normalize score and generate prediction
+            confidence = min(95, max(5, abs(prediction_score)))
+            
+            if prediction_score > 10:
+                final_prediction = "STRONG BUY 🚀"
+                final_color = "#00ff00"
+            elif prediction_score > 0:
+                final_prediction = "BUY 📈"
+                final_color = "#88ff00"
+            elif prediction_score > -10:
+                final_prediction = "SELL 📉"
+                final_color = "#ff8800"
+            else:
+                final_prediction = "STRONG SELL 🚨"
+                final_color = "#ff4444"
+            
+            # Display Predictions
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown(f"""
+                <div style='background: #1a1a1a; padding: 1.5rem; border-radius: 10px; border-left: 4px solid {final_color};'>
+                    <h3 style='color: {final_color}; margin: 0;'>{final_prediction}</h3>
+                    <p style='margin: 0.5rem 0 0 0; color: #ccc;'>AI Recommendation</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.metric("Confidence Score", f"{confidence:.1f}%")
+            
+            with col3:
+                st.metric("Current Price", f"{current_price:.2f}")
+            
+            # Technical Factors
+            st.subheader("Technical Factors")
+            tech_col1, tech_col2, tech_col3, tech_col4 = st.columns(4)
+            
+            with tech_col1:
+                st.metric("RSI", f"{rsi:.1f}")
+            
+            with tech_col2:
+                sma_signal = "Bullish" if sma_20 > sma_50 else "Bearish"
+                st.metric("SMA Signal", sma_signal)
+            
+            with tech_col3:
+                st.metric("5D Change", f"{price_change_5d:+.1f}%")
+            
+            with tech_col4:
+                volatility = float(df['Close'].pct_change().std() * 100)
+                st.metric("Volatility", f"{volatility:.1f}%")
+            
+            # Price Targets
+            st.subheader("Price Targets")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                if trend == "BULLISH":
+                    target_1 = current_price * 1.05
+                    target_2 = current_price * 1.10
+                    st.metric("Target 1 (5%)", f"{target_1:.2f}")
+                    st.metric("Target 2 (10%)", f"{target_2:.2f}")
+                else:
+                    target_1 = current_price * 0.95
+                    target_2 = current_price * 0.90
+                    st.metric("Support 1 (5%)", f"{target_1:.2f}")
+                    st.metric("Support 2 (10%)", f"{target_2:.2f}")
+            
+            with col2:
+                stop_loss = current_price * 0.97 if trend == "BULLISH" else current_price * 1.03
+                st.metric("Stop Loss", f"{stop_loss:.2f}")
+            
+            with col3:
+                risk_reward = "1:2" if trend == "BULLISH" else "1:1.5"
+                st.metric("Risk/Reward", risk_reward)
+                
+        else:
+            st.warning("Insufficient data for AI predictions")
+            
+    except Exception as e:
+        st.error(f"Error generating predictions: {str(e)}")
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
