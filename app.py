@@ -30,15 +30,6 @@ body, .main, .block-container {
     font-weight: 700;
     color: #00ffcc;
     text-align: center;
-    padding: 1rem 0;
-}
-
-.subheader {
-    margin-top: -1rem;
-    margin-bottom: 2rem;
-    font-size: 1.3rem;
-    color: #00ffcc;
-    text-align: center;
     padding: 0.5rem 0;
 }
 
@@ -47,7 +38,7 @@ body, .main, .block-container {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin: 2rem 0;
+    margin: 1rem 0 2rem 0;
     flex-wrap: wrap;
 }
 
@@ -146,10 +137,6 @@ if 'stock_name' not in st.session_state:
 if 'period' not in st.session_state:
     st.session_state.period = 60
 
-# ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE</div>', unsafe_allow_html=True)
-st.markdown('<div class="subheader">with Prasanth Subrahamanian</div>', unsafe_allow_html=True)
-
 # ----------------------- TOP NAVIGATION -----------------------
 st.markdown("""
 <div class="top-nav">
@@ -173,6 +160,9 @@ function setSection(section) {
     'active' if st.session_state.current_section == 'AI Predictions' else ''
 ), unsafe_allow_html=True)
 
+# ----------------------- HEADER -----------------------
+st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahamanian</div>', unsafe_allow_html=True)
+
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
     "RELIANCE": "RELIANCE.NS", 
@@ -186,8 +176,8 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-# Handle URL parameters
-params = st.experimental_get_query_params()
+# Handle URL parameters using st.query_params
+params = st.query_params
 if 'section' in params:
     st.session_state.current_section = params['section'][0]
 
