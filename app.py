@@ -66,6 +66,100 @@ body, .main, .block-container {
     color: #000;
 }
 
+/* Compact Metrics */
+.compact-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+
+.metric-box {
+    background: #1a1a1a;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border-left: 3px solid #00ffcc;
+    text-align: center;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 0.3rem;
+}
+
+.metric-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.metric-change {
+    font-size: 0.7rem;
+    color: #00ffcc;
+}
+
+.metric-change.negative {
+    color: #ff4444;
+}
+
+/* Research Sections */
+.research-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.research-card {
+    background: #111;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.research-card:hover {
+    border-color: #00ffcc;
+    transform: translateY(-2px);
+}
+
+.research-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+    color: #00ffcc;
+}
+
+.research-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.research-desc {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+.research-btn {
+    background: transparent;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 0.4rem 1rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.research-btn:hover {
+    background: #00ffcc;
+    color: #000;
+}
+
 .stock-selector {
     display: flex;
     justify-content: center;
@@ -107,6 +201,12 @@ div[data-testid="stDataFrame"] {
 }
 
 @media (max-width: 768px) {
+    .compact-metrics {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .research-grid {
+        grid-template-columns: 1fr;
+    }
     .landing-box { padding: 1.5rem; }
     .main-header { font-size: 2.2rem; }
     .nav-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
@@ -120,21 +220,13 @@ st.markdown(custom_css, unsafe_allow_html=True)
 def get_stock_data(ticker, period):
     return yf.download(ticker, period=f"{period}d")
 
-def calculate_rsi(prices, window=14):
-    delta = prices.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-
-def calculate_macd(prices, fast=12, slow=26, signal=9):
-    ema_fast = prices.ewm(span=fast).mean()
-    ema_slow = prices.ewm(span=slow).mean()
-    macd = ema_fast - ema_slow
-    signal_line = macd.ewm(span=signal).mean()
-    histogram = macd - signal_line
-    return macd, signal_line, histogram
+def get_stock_info(ticker):
+    try:
+        stock = yf.Ticker(ticker)
+        info = stock.info
+        return info
+    except:
+        return {}
 
 # ----------------------- SESSION STATE -----------------------
 if 'current_section' not in st.session_state:
@@ -183,12 +275,12 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-# Handle URL parameters using st.query_params
+# Handle URL parameters
 params = st.query_params
 if 'section' in params:
     st.session_state.current_section = params['section'][0]
 
-# Stock selection in main area
+# Stock selection
 col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
     stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
@@ -196,10 +288,9 @@ with col1:
 with col2:
     period = st.slider("Period (Days)", 10, 365, st.session_state.period)
 with col3:
-    st.write("")  # Spacer
+    st.write("")
     st.write(f"**Current:** {stock_name} | {period} days")
 
-# Update session state
 st.session_state.stock_name = stock_name
 st.session_state.period = period
 ticker = stocks[stock_name]
@@ -212,72 +303,97 @@ if section == "Home":
     with st.spinner(f"Fetching {stock_name} data..."):
         try:
             df = get_stock_data(ticker, period)
+            stock_info = get_stock_info(ticker)
+            
             if df.empty:
                 st.error("No data available. Try again later or choose another stock.")
             else:
                 df.reset_index(inplace=True)
-                df["SMA20"] = df["Close"].rolling(20).mean()
-                df["SMA50"] = df["Close"].rolling(50).mean()
-                df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
                 
-                # Key Metrics
-                st.subheader("Key Metrics")
-                col1, col2, col3, col4 = st.columns(4)
+                # COMPACT KEY METRICS SECTION
+                st.markdown("#### 📊 Key Metrics")
                 
                 current_price = float(df['Close'].iloc[-1])
                 prev_price = float(df['Close'].iloc[-2])
-                price_change_pct = ((current_price - prev_price) / prev_price) * 100
+                price_change = current_price - prev_price
+                price_change_pct = (price_change / prev_price) * 100
                 
-                with col1:
-                    st.metric("Current Price", f"{current_price:.2f}", f"{price_change_pct:+.2f}%")
+                # Get additional metrics from stock info
+                pe_ratio = stock_info.get('trailingPE', 'N/A')
+                market_cap = stock_info.get('marketCap', 'N/A')
+                if market_cap != 'N/A':
+                    market_cap = f"${market_cap/1e9:.1f}B" if market_cap > 1e9 else f"${market_cap/1e6:.1f}M"
                 
-                with col2:
-                    current_volume = int(df['Volume'].iloc[-1])
-                    avg_volume = float(df['Volume'].iloc[-5:].mean())
-                    volume_change_pct = ((current_volume - avg_volume) / avg_volume) * 100
-                    st.metric("Volume", f"{current_volume:,}", f"{volume_change_pct:+.1f}%")
+                dividend_yield = stock_info.get('dividendYield', 'N/A')
+                if dividend_yield != 'N/A':
+                    dividend_yield = f"{dividend_yield*100:.2f}%"
                 
-                with col3:
-                    high_52w = float(df['High'].max())
-                    st.metric("52W High", f"{high_52w:.2f}")
+                # Compact metrics grid
+                st.markdown(f"""
+                <div class="compact-metrics">
+                    <div class="metric-box">
+                        <div class="metric-label">Current Price</div>
+                        <div class="metric-value">₹{current_price:.2f}</div>
+                        <div class="metric-change {'negative' if price_change < 0 else ''}">
+                            {price_change:+.2f} ({price_change_pct:+.2f}%)
+                        </div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Previous Close</div>
+                        <div class="metric-value">₹{prev_price:.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Open</div>
+                        <div class="metric-value">₹{float(df['Open'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Day High</div>
+                        <div class="metric-value">₹{float(df['High'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Day Low</div>
+                        <div class="metric-value">₹{float(df['Low'].iloc[-1]):.2f}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Volume</div>
+                        <div class="metric-value">{int(df['Volume'].iloc[-1]):,}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">P/E Ratio</div>
+                        <div class="metric-value">{pe_ratio if pe_ratio != 'N/A' else 'N/A'}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Market Cap</div>
+                        <div class="metric-value">{market_cap}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Div Yield</div>
+                        <div class="metric-value">{dividend_yield}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">52W Range</div>
+                        <div class="metric-value">₹{float(df['Low'].min()):.0f}-₹{float(df['High'].max()):.0f}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                with col4:
-                    low_52w = float(df['Low'].min())
-                    st.metric("52W Low", f"{low_52w:.2f}")
-                
-                # Price Chart with Indicators
+                # Price Chart
                 st.subheader("Price Chart")
+                df["SMA20"] = df["Close"].rolling(20).mean()
+                df["SMA50"] = df["Close"].rolling(50).mean()
                 
-                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50', 'EMA20']].copy()
-                
+                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50']].copy()
                 base = alt.Chart(chart_data).encode(x='Date:T').properties(height=400)
-                
                 close_line = base.mark_line(color='#00ffcc').encode(y='Close:Q', tooltip=['Date:T', 'Close:Q'])
-                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q', tooltip=['Date:T', 'SMA20:Q'])
-                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q', tooltip=['Date:T', 'SMA50:Q'])
-                ema20_line = base.mark_line(color='#33cc33', strokeDash=[2,2]).encode(y='EMA20:Q', tooltip=['Date:T', 'EMA20:Q'])
-                
-                chart = close_line + sma20_line + sma50_line + ema20_line
+                sma20_line = base.mark_line(color='#ffaa00', strokeDash=[5,5]).encode(y='SMA20:Q')
+                sma50_line = base.mark_line(color='#ff00ff', strokeDash=[5,5]).encode(y='SMA50:Q')
+                chart = close_line + sma20_line + sma50_line
                 st.altair_chart(chart, use_container_width=True)
-                st.caption("Close | SMA20 | SMA50 | EMA20")
-                
-                # OHLC Data
-                st.subheader("OHLC Data")
-                display_df = df[["Date", "Open", "High", "Low", "Close", "Volume"]].tail(30).copy()
-                display_df["Date"] = display_df["Date"].dt.strftime("%Y-%m-%d")
-                st.dataframe(display_df, use_container_width=True)
-                
-                # Volume Chart
-                st.subheader("Trading Volume")
-                volume_chart = alt.Chart(df).mark_bar(color='#00ccff').encode(
-                    x='Date:T', y='Volume:Q', tooltip=['Date:T', 'Volume:Q']
-                ).properties(height=300)
-                st.altair_chart(volume_chart, use_container_width=True)
                 
         except Exception as e:
             st.error(f"Error fetching data: {str(e)}")
 
-# ----------------------- RESEARCH REPORTS -----------------------
+# ----------------------- RESEARCH REPORTS SECTION -----------------------
 elif section == "Research Reports":
     st.markdown(
         '<div class="landing-box"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
@@ -293,164 +409,217 @@ elif section == "Research Reports":
     except:
         pass
     
-    col1, col2 = st.columns(2)
+    # RESEARCH REPORT SECTIONS GRID
+    st.markdown("### Research Report Sections")
+    
+    research_sections = [
+        {
+            "icon": "📊",
+            "title": "Executive Summary",
+            "description": "High-level overview and investment recommendation",
+            "page": "executive_summary"
+        },
+        {
+            "icon": "🔍",
+            "title": "Company Overview",
+            "description": "Business model, management, and competitive positioning",
+            "page": "company_overview"
+        },
+        {
+            "icon": "💹",
+            "title": "Financial Analysis",
+            "description": "Income statement, balance sheet, and cash flow analysis",
+            "page": "financial_analysis"
+        },
+        {
+            "icon": "📈",
+            "title": "Valuation Analysis",
+            "description": "DCF, comparable companies, and intrinsic value calculation",
+            "page": "valuation_analysis"
+        },
+        {
+            "icon": "⚡",
+            "title": "Technical Analysis",
+            "description": "Chart patterns, indicators, and price targets",
+            "page": "technical_analysis"
+        },
+        {
+            "icon": "🔄",
+            "title": "Industry Analysis",
+            "description": "Market trends, competition, and growth prospects",
+            "page": "industry_analysis"
+        },
+        {
+            "icon": "⚠️",
+            "title": "Risk Assessment",
+            "description": "Key risks and mitigation strategies",
+            "page": "risk_assessment"
+        },
+        {
+            "icon": "🎯",
+            "title": "Investment Thesis",
+            "description": "Bull and bear cases with probability assessment",
+            "page": "investment_thesis"
+        }
+    ]
+    
+    st.markdown('<div class="research-grid">', unsafe_allow_html=True)
+    
+    for section in research_sections:
+        st.markdown(f"""
+        <div class="research-card" onclick="navigateTo('{section['page']}')">
+            <div class="research-icon">{section['icon']}</div>
+            <div class="research-title">{section['title']}</div>
+            <div class="research-desc">{section['description']}</div>
+            <button class="research-btn" onclick="event.stopPropagation(); navigateTo('{section['page']}')">
+                View Report →
+            </button>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # JavaScript for navigation
+    st.markdown("""
+    <script>
+    function navigateTo(page) {
+        // In a real app, this would navigate to different pages
+        // For demo, we'll show an alert
+        alert('Navigating to: ' + page + ' report page\\n\\nIn a full implementation, this would open a separate page with detailed analysis.');
+        
+        // For Streamlit multi-page app, you could use:
+        // window.location.href = page + '.py';
+    }
+    </script>
+    """, unsafe_allow_html=True)
+    
+    # Quick Stats
+    st.subheader("Quick Stats")
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.subheader("📊 Fundamental Analysis")
-        st.metric("P/E Ratio", "22.5", "1.2")
-        st.metric("EPS (₹)", "85.20", "5.0%")
-        st.metric("Market Cap", "₹12.5T", "2.3%")
-        st.metric("Dividend Yield", "1.2%", "0.1%")
-        
+        st.metric("Analyst Rating", "BUY", "4.2/5")
     with col2:
-        st.subheader("🔧 Technical Analysis")
-        st.metric("RSI", "54.2", "Neutral")
-        st.metric("Moving Average", "Bullish", "↑")
-        st.metric("Volatility", "Medium", "→")
-        st.metric("Support Level", "₹1,350", "Strong")
-    
-    st.subheader("📈 Analyst Recommendations")
-    rec_data = {
-        'Broker': ['Morgan Stanley', 'Goldman Sachs', 'JP Morgan', 'Credit Suisse', 'UBS'],
-        'Rating': ['Overweight', 'Buy', 'Neutral', 'Outperform', 'Buy'],
-        'Target Price': ['₹1,550', '₹1,600', '₹1,450', '₹1,580', '₹1,620'],
-        'Change': ['+5%', '+8%', '+2%', '+7%', '+9%']
-    }
-    st.dataframe(pd.DataFrame(rec_data), use_container_width=True)
+        st.metric("Price Target", "₹1,650", "+12%")
+    with col3:
+        st.metric("Upside Potential", "15%", "+2%")
+    with col4:
+        st.metric("Risk Level", "Medium", "Stable")
 
-# ----------------------- OPTIONS TRADING -----------------------
+# ----------------------- OTHER SECTIONS (Options, Chart, AI) -----------------------
 elif section == "Options Trading":
     st.markdown(
         '<div class="landing-box"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
         unsafe_allow_html=True,
     )
     
-    # Current Stock Info
-    try:
-        df = get_stock_data(ticker, 30)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current {stock_name} Spot Price: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📊 Options Overview")
-        st.metric("IV Rank", "65%", "High")
-        st.metric("Put/Call Ratio", "0.85", "Bullish")
-        st.metric("Open Interest", "2.5M", "+15%")
-        st.metric("Volume", "1.8M", "+22%")
-        
-    with col2:
-        st.subheader("⚡ Volatility Analysis")
-        st.metric("IV", "28.5%", "+2.1%")
-        st.metric("HV", "25.2%", "-1.3%")
-        st.metric("VIX", "18.2", "-0.5")
-        st.metric("Skew", "1.05", "Normal")
-    
-    st.subheader("🎯 Trading Strategies")
-    strat_col1, strat_col2, strat_col3 = st.columns(3)
-    
-    with strat_col1:
-        st.metric("Covered Call", "15.2% ROI", "Low Risk")
-    with strat_col2:
-        st.metric("Bull Put Spread", "22.8% ROI", "Medium Risk")
-    with strat_col3:
-        st.metric("Iron Condor", "18.5% ROI", "Neutral")
+    # Compact metrics for options
+    st.markdown("#### Options Key Metrics")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">IV Rank</div>
+            <div class="metric-value">65%</div>
+            <div class="metric-change">High</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Put/Call Ratio</div>
+            <div class="metric-value">0.85</div>
+            <div class="metric-change">Bullish</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Open Interest</div>
+            <div class="metric-value">2.5M</div>
+            <div class="metric-change">+15%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Volume</div>
+            <div class="metric-value">1.8M</div>
+            <div class="metric-change">+22%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">VIX</div>
+            <div class="metric-value">18.2</div>
+            <div class="metric-change negative">-0.5</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ----------------------- CHART ANALYSIS -----------------------
 elif section == "Chart Analysis":
     st.markdown(
         '<div class="landing-box"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
         unsafe_allow_html=True,
     )
     
-    # Current Stock Info
-    try:
-        df = get_stock_data(ticker, 30)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current {stock_name} Price: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📊 Technical Indicators")
-        st.metric("RSI", "54.2", "Neutral")
-        st.metric("MACD", "Bullish", "↑")
-        st.metric("Stochastic", "68.5", "Oversold")
-        st.metric("Bollinger", "Within Bands", "→")
-        
-    with col2:
-        st.subheader("📈 Price Action")
-        st.metric("Trend", "Uptrend", "Strong")
-        st.metric("Support", "₹1,350", "Strong")
-        st.metric("Resistance", "₹1,480", "Moderate")
-        st.metric("Pattern", "Bull Flag", "Continuing")
-    
-    st.subheader("🔍 Pattern Recognition")
-    pattern_col1, pattern_col2, pattern_col3, pattern_col4 = st.columns(4)
-    
-    with pattern_col1:
-        st.metric("Head & Shoulders", "No", "→")
-    with pattern_col2:
-        st.metric("Double Top", "No", "→")
-    with pattern_col3:
-        st.metric("Cup & Handle", "Yes", "Bullish")
-    with pattern_col4:
-        st.metric("Triangle", "Ascending", "Bullish")
+    # Compact metrics for technical analysis
+    st.markdown("#### Technical Indicators")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">RSI</div>
+            <div class="metric-value">54.2</div>
+            <div class="metric-change">Neutral</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">MACD</div>
+            <div class="metric-value">Bullish</div>
+            <div class="metric-change">↑</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Support</div>
+            <div class="metric-value">₹1,350</div>
+            <div class="metric-change">Strong</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Resistance</div>
+            <div class="metric-value">₹1,480</div>
+            <div class="metric-change">Moderate</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Trend</div>
+            <div class="metric-value">Uptrend</div>
+            <div class="metric-change">Strong</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ----------------------- AI PREDICTIONS -----------------------
 elif section == "AI Predictions":
     st.markdown(
         '<div class="landing-box"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
         unsafe_allow_html=True,
     )
     
-    # Current Stock Info
-    try:
-        df = get_stock_data(ticker, 30)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**Current {stock_name} Price: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.subheader("🎯 AI Signal")
-        st.metric("Prediction", "BUY", "Strong")
-        st.metric("Confidence", "85%", "High")
-        st.metric("Timeframe", "2 Weeks", "→")
-        
-    with col2:
-        st.subheader("📊 Market Sentiment")
-        st.metric("Bullish", "68%", "+5%")
-        st.metric("Neutral", "22%", "-3%")
-        st.metric("Bearish", "10%", "-2%")
-        
-    with col3:
-        st.subheader("⚡ Risk Assessment")
-        st.metric("Volatility", "Medium", "→")
-        st.metric("Drawdown", "8.2%", "Low")
-        st.metric("Sharpe Ratio", "1.8", "Good")
-    
-    st.subheader("📈 Price Targets")
-    target_col1, target_col2, target_col3, target_col4 = st.columns(4)
-    
-    with target_col1:
-        st.metric("1 Week", "₹1,420", "+3.1%")
-    with target_col2:
-        st.metric("2 Weeks", "₹1,450", "+5.2%")
-    with target_col3:
-        st.metric("1 Month", "₹1,520", "+10.4%")
-    with target_col4:
-        st.metric("Stop Loss", "₹1,320", "-4.2%")
+    # Compact metrics for AI predictions
+    st.markdown("#### AI Analysis Metrics")
+    st.markdown("""
+    <div class="compact-metrics">
+        <div class="metric-box">
+            <div class="metric-label">AI Signal</div>
+            <div class="metric-value">BUY</div>
+            <div class="metric-change">Strong</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Confidence</div>
+            <div class="metric-value">85%</div>
+            <div class="metric-change">High</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">1W Target</div>
+            <div class="metric-value">₹1,420</div>
+            <div class="metric-change">+3.1%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">1M Target</div>
+            <div class="metric-value">₹1,520</div>
+            <div class="metric-change">+10.4%</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Stop Loss</div>
+            <div class="metric-value">₹1,320</div>
+            <div class="metric-change negative">-4.2%</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
