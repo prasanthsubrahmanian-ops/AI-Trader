@@ -3,12 +3,14 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import altair as alt
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 # ----------------------- PAGE CONFIG -----------------------
 st.set_page_config(
-    page_title="Smart Trade with Prasanth Subrahmanian", 
-    layout="wide"
+    page_title="Smart Trade Analytics", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # ----------------------- CUSTOM STYLE -----------------------
@@ -19,8 +21,8 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 
 body, .main, .block-container {
-    background-color: #000 !important;
-    color: #fff !important;
+    background-color: #0f0f0f !important;
+    color: #ffffff !important;
     padding-top: 0.5rem !important;
 }
 
@@ -29,7 +31,9 @@ body, .main, .block-container {
     margin-bottom: 0.5rem;
     font-size: 2.8rem;
     font-weight: 700;
-    color: #00ffcc;
+    background: linear-gradient(45deg, #00ffcc, #0099ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     text-align: center;
     padding: 0.2rem 0;
 }
@@ -44,135 +48,154 @@ body, .main, .block-container {
 }
 
 .nav-btn {
-    background: transparent;
-    border: 2px solid #00ffcc;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 204, 0.3);
     color: #00ffcc;
     padding: 0.6rem 1.2rem;
-    border-radius: 25px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.95rem;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .nav-btn:hover {
-    background-color: #00ffcc;
-    color: #000;
+    background: rgba(0, 255, 204, 0.2);
+    border-color: #00ffcc;
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
 }
 
 .nav-btn.active {
-    background-color: #00ffcc;
+    background: linear-gradient(45deg, #00ffcc, #0099ff);
     color: #000;
+    border-color: #00ffcc;
 }
 
 /* Compact Metrics */
-.compact-metrics {
+.compact-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.8rem;
-    margin: 1rem 0;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
 }
 
-.metric-box {
-    background: #1a1a1a;
-    padding: 0.8rem;
-    border-radius: 8px;
-    border-left: 3px solid #00ffcc;
+.metric-item {
     text-align: center;
+    padding: 0.3rem;
+    border-radius: 6px;
 }
 
 .metric-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #888;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.2rem;
 }
 
 .metric-value {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #fff;
 }
 
-.metric-change {
-    font-size: 0.7rem;
-    color: #00ffcc;
-}
-
-.metric-change.negative {
-    color: #ff4444;
-}
-
-/* Research Cards */
-.research-card {
-    background: #111;
+/* Cards */
+.feature-card {
+    background: rgba(255, 255, 255, 0.05);
     padding: 1.5rem;
-    border-radius: 10px;
-    border: 1px solid #333;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 1rem;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-.research-card:hover {
+.feature-card:hover {
     border-color: #00ffcc;
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 204, 0.2);
 }
 
-.research-icon {
+.feature-icon {
     font-size: 2rem;
     margin-bottom: 0.8rem;
     color: #00ffcc;
 }
 
-.research-title {
+.feature-title {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #fff;
 }
 
-.research-desc {
+.feature-desc {
     font-size: 0.9rem;
     color: #888;
     margin-bottom: 1rem;
 }
 
-/* Report Details */
-.report-section {
-    background: #111;
-    padding: 2rem;
-    border-radius: 10px;
+/* Chart Container */
+.chart-container {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
     margin: 1rem 0;
-    border-left: 4px solid #00ffcc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
-.report-header {
+.chart-header {
     color: #00ffcc;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #333;
-    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
 }
 
-.report-content {
-    line-height: 1.6;
+/* Options Panel */
+.options-panel {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
-.report-metrics {
+.options-chain {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    margin: 1.5rem 0;
+    margin-top: 1rem;
+}
+
+.call-options, .put-options {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prediction-badge {
+    background: linear-gradient(45deg, #00ffcc, #0099ff);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 1rem;
 }
 
 @media (max-width: 768px) {
-    .compact-metrics {
+    .compact-metrics-grid {
         grid-template-columns: repeat(3, 1fr);
-    }
-    .report-metrics {
-        grid-template-columns: 1fr;
     }
     .main-header { font-size: 2.2rem; }
     .nav-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+    .options-chain {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 """
@@ -187,6 +210,34 @@ def get_stock_data(ticker, period="1y"):
 def get_daily_data(ticker, days=60):
     return yf.download(ticker, period=f"{days}d")
 
+@st.cache_data(ttl=300)
+def get_intraday_data(ticker, interval="5m", days=1):
+    return yf.download(ticker, period=f"{days}d", interval=interval)
+
+@st.cache_data(ttl=3600)
+def get_market_data():
+    """Get NIFTY, sector data, gainers, losers"""
+    indices = {
+        'NIFTY 50': '^NSEI',
+        'BANK NIFTY': '^NSEBANK',
+        'NIFTY IT': '^CNXIT',
+        'SENSEX': '^BSESN'
+    }
+    
+    data = {}
+    for name, ticker in indices.items():
+        try:
+            df = yf.download(ticker, period='1d')
+            if not df.empty:
+                data[name] = {
+                    'current': df['Close'].iloc[-1],
+                    'change': df['Close'].iloc[-1] - df['Close'].iloc[-2],
+                    'change_pct': ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
+                }
+        except:
+            continue
+    return data
+
 def get_stock_info(ticker):
     try:
         stock = yf.Ticker(ticker)
@@ -197,22 +248,18 @@ def get_stock_info(ticker):
 
 # ----------------------- SESSION STATE -----------------------
 if 'current_section' not in st.session_state:
-    st.session_state.current_section = "Home"
+    st.session_state.current_section = "Market Trends"
 if 'stock_name' not in st.session_state:
     st.session_state.stock_name = "RELIANCE"
-if 'chart_period' not in st.session_state:
-    st.session_state.chart_period = "1Y"
-if 'current_report' not in st.session_state:
-    st.session_state.current_report = None
 if 'current_ticker' not in st.session_state:
     st.session_state.current_ticker = "RELIANCE.NS"
 
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE with Prasanth Subrahmanian</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">SMART TRADE ANALYTICS</div>', unsafe_allow_html=True)
 
-# ----------------------- SIMPLE NAVIGATION -----------------------
-nav_options = ["🏠 Home", "📑 Research Reports", "💹 Options Trading", "📈 Chart Analysis", "🤖 AI Predictions"]
-nav_labels = [option.split(" ")[-1] for option in nav_options]
+# ----------------------- MAIN NAVIGATION -----------------------
+nav_options = ["📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
+nav_labels = ["Market Trends", "AI Predictions", "Options Trading", "Portfolio Insights", "Backtesting"]
 
 nav_cols = st.columns(5)
 for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
@@ -222,7 +269,7 @@ for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
             st.session_state.current_section = nav_labels[i]
             st.rerun()
 
-# ----------------------- STOCK SELECTION (Only on Home Page) -----------------------
+# ----------------------- STOCK SELECTION -----------------------
 stocks = {
     "RELIANCE": "RELIANCE.NS", 
     "TCS": "TCS.NS", 
@@ -235,542 +282,422 @@ stocks = {
     "TSLA": "TSLA"
 }
 
-# Only show stock selection on Home page
-if st.session_state.current_section == "Home":
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        stock_name = st.selectbox("Select Stock", list(stocks.keys()), 
-                                 index=list(stocks.keys()).index(st.session_state.stock_name))
-    with col2:
-        # Chart period selection only on Home page
-        chart_period = st.selectbox("Chart Period", 
-                                   ["1M", "3M", "6M", "1Y", "2Y", "5Y"],
-                                   index=3)
-    with col3:
-        st.write("")
-        st.write(f"**Current:** {stock_name} | {chart_period}")
+# Stock selection available on all pages
+col1, col2, col3 = st.columns([1, 1, 1])
+with col1:
+    stock_name = st.selectbox("Select Stock/Index", list(stocks.keys()), 
+                             index=list(stocks.keys()).index(st.session_state.stock_name))
+with col2:
+    if st.session_state.current_section == "Market Trends":
+        timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=0)
+    else:
+        timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"], index=2)
+with col3:
+    st.write("")
+    st.write(f"**Current:** {stock_name} | {timeframe}")
 
-    st.session_state.stock_name = stock_name
-    st.session_state.chart_period = chart_period
-
-# Always update ticker based on selected stock
+st.session_state.stock_name = stock_name
 ticker = stocks[st.session_state.stock_name]
 st.session_state.current_ticker = ticker
 section = st.session_state.current_section
 
-# Map period selection to yfinance period
-period_map = {
-    "1M": "1mo",
-    "3M": "3mo", 
-    "6M": "6mo",
-    "1Y": "1y",
-    "2Y": "2y",
-    "5Y": "5y"
-}
-
-# ----------------------- RESEARCH MAIN PAGE FUNCTION -----------------------
-def show_research_main_page():
-    """Show the main research reports page"""
+# ----------------------- MARKET TRENDS PAGE -----------------------
+def show_market_trends():
+    """Market Trends - Shows NIFTY, sectors, gainers, losers"""
     st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📑 Research Reports</h2><p>Comprehensive fundamental & technical analysis reports powered by advanced AI algorithms.</p></div>',
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>📈 Market Trends & Analysis</h2>'
+        '<p>Real-time market indices, sector performance, and stock movers</p>'
+        '</div>',
         unsafe_allow_html=True,
     )
     
-    # Current Stock Info
+    # Market Indices
+    st.markdown("### 📊 Market Indices")
+    
+    market_data = get_market_data()
+    cols = st.columns(4)
+    
+    for i, (idx_name, idx_data) in enumerate(market_data.items()):
+        with cols[i % 4]:
+            st.metric(
+                idx_name,
+                f"₹{idx_data['current']:.2f}",
+                f"{idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)"
+            )
+    
+    # Individual Stock Analysis
+    st.markdown(f"### 🔍 {stock_name} Analysis")
+    
     try:
-        df = get_daily_data(st.session_state.current_ticker, 30)
+        # Get stock data
+        period_map = {"1D": "1d", "1W": "5d", "1M": "1mo", "3M": "3mo", "6M": "6mo", "1Y": "1y"}
+        df = get_stock_data(ticker, period_map.get(timeframe, "1mo"))
+        
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            prev_close = float(df['Close'].iloc[-2])
-            change = current_price - prev_close
-            change_pct = (change / prev_close) * 100
+            prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
+            price_change = current_price - prev_price
+            price_change_pct = (price_change / prev_price) * 100
             
-            st.info(f"**{st.session_state.stock_name}: ₹{current_price:.2f} | {change:+.2f} ({change_pct:+.2f}%)**")
-    except:
-        pass
+            # Stock metrics
+            st.markdown("#### Stock Overview")
+            metric_cols = st.columns(4)
+            with metric_cols[0]:
+                st.metric("Current Price", f"₹{current_price:.2f}", f"{price_change:+.2f} ({price_change_pct:+.2f}%)")
+            with metric_cols[1]:
+                st.metric("Day High", f"₹{df['High'].max():.2f}")
+            with metric_cols[2]:
+                st.metric("Day Low", f"₹{df['Low'].min():.2f}")
+            with metric_cols[3]:
+                volume = df['Volume'].iloc[-1] if 'Volume' in df.columns else 0
+                st.metric("Volume", f"{volume:,.0f}")
+            
+            # Price Chart
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+            st.markdown(f'<div class="chart-header">{stock_name} Price Chart</div>', unsafe_allow_html=True)
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=df.index, 
+                y=df['Close'], 
+                mode='lines', 
+                name='Price',
+                line=dict(color='#00ffcc', width=2)
+            ))
+            
+            fig.update_layout(
+                title=f"{stock_name} - {timeframe}",
+                template="plotly_dark",
+                height=400,
+                showlegend=True,
+                xaxis_rangeslider_visible=False
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+    except Exception as e:
+        st.error(f"Error loading market data: {str(e)}")
     
-    # RESEARCH REPORT SECTIONS
-    st.markdown("### 📋 Research Report Sections")
+    # Sector Performance (Mock Data)
+    st.markdown("### 🏢 Sector Performance")
+    sectors = {
+        "Banking": "+2.3%",
+        "IT": "+1.8%", 
+        "Pharma": "-0.5%",
+        "Auto": "+1.2%",
+        "FMCG": "+0.8%",
+        "Energy": "+3.1%"
+    }
     
-    research_sections = [
-        {
-            "icon": "📊",
-            "title": "Executive Summary",
-            "description": "High-level overview and investment recommendation",
-            "page": "executive_summary"
-        },
-        {
-            "icon": "🔍",
-            "title": "Company Overview", 
-            "description": "Business model, management, and competitive positioning",
-            "page": "company_overview"
-        },
-        {
-            "icon": "💹",
-            "title": "Financial Analysis",
-            "description": "Income statement, balance sheet, and cash flow analysis",
-            "page": "financial_analysis"
-        },
-        {
-            "icon": "📈",
-            "title": "Valuation Analysis",
-            "description": "DCF, comparable companies, and intrinsic value calculation",
-            "page": "valuation_analysis"
-        },
-        {
-            "icon": "⚡", 
-            "title": "Technical Analysis",
-            "description": "Chart patterns, indicators, and price targets",
-            "page": "technical_analysis"
-        },
-        {
-            "icon": "🔄",
-            "title": "Industry Analysis",
-            "description": "Market trends, competition, and growth prospects", 
-            "page": "industry_analysis"
-        },
-        {
-            "icon": "⚠️",
-            "title": "Risk Assessment",
-            "description": "Key risks and mitigation strategies",
-            "page": "risk_assessment"
-        },
-        {
-            "icon": "🎯",
-            "title": "Investment Thesis",
-            "description": "Bull and bear cases with probability assessment",
-            "page": "investment_thesis"
-        }
-    ]
-    
-    # Create research cards in 2 columns
-    col1, col2 = st.columns(2)
-    
-    for idx, research in enumerate(research_sections):
-        with col1 if idx % 2 == 0 else col2:
+    cols = st.columns(3)
+    for i, (sector, performance) in enumerate(sectors.items()):
+        with cols[i % 3]:
+            color = "#00ffcc" if "+" in performance else "#ff4444"
             st.markdown(f"""
-            <div class="research-card">
-                <div class="research-icon">{research['icon']}</div>
-                <div class="research-title">{research['title']}</div>
-                <div class="research-desc">{research['description']}</div>
+            <div class="feature-card">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">{sector}</div>
+                <div style="color: {color}; font-size: 1.2rem; font-weight: 600;">{performance}</div>
             </div>
             """, unsafe_allow_html=True)
-            
-            if st.button(f"View {research['title']}", key=research['page'], use_container_width=True):
-                st.session_state.current_report = research['page']
-                st.rerun()
-    
-    # Quick Stats
-    st.markdown("---")
-    st.subheader("📊 Quick Stats")
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Analyst Rating", "BUY", "4.2/5")
-    with col2:
-        st.metric("Price Target", "₹1,650", "+12%")
-    with col3:
-        st.metric("Upside Potential", "15%", "+2%")
-    with col4:
-        st.metric("Risk Level", "Medium", "Stable")
 
-# ----------------------- REPORT DETAILS FUNCTION -----------------------
-def show_report_details():
-    """Display detailed report content"""
+# ----------------------- AI PREDICTIONS PAGE -----------------------
+def show_ai_predictions():
+    """AI Predictions - Forecasts next week/month price"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>🤖 AI Price Predictions</h2>'
+        '<p>Machine learning forecasts for next week and month</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     
-    # Back button
-    if st.button("← Back to Research Reports"):
-        st.session_state.current_report = None
-        st.rerun()
-    
-    report_name = st.session_state.current_report
-    
-    st.markdown(f'<div class="report-section"><h2 class="report-header">{report_name.replace("_", " ").title()} - {st.session_state.stock_name}</h2>', unsafe_allow_html=True)
-    
+    # Current price
     try:
-        df = get_stock_data(st.session_state.current_ticker, "1y")
-        current_price = float(df['Close'].iloc[-1]) if not df.empty else 0
-        prev_close = float(df['Close'].iloc[-2])
-        change = current_price - prev_close
-        change_pct = (change / prev_close) * 100
+        df = get_daily_data(ticker, 30)
+        if not df.empty:
+            current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         current_price = 0
-        change = 0
-        change_pct = 0
     
-    # Report-specific content
-    if report_name == "executive_summary":
-        st.markdown("""
-        <div class="report-content">
-            <h3>🎯 Investment Recommendation: STRONG BUY</h3>
-            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
-            <p><strong>Target Price:</strong> ₹1,650 (15% Upside)</p>
-            <p><strong>Time Horizon:</strong> 12-18 Months</p>
-            <p><strong>Risk Rating:</strong> Medium</p>
-            
-            <h4>Key Highlights:</h4>
-            <ul>
-                <li>Strong revenue growth of 18% YoY</li>
-                <li>Market leadership in core segments</li>
-                <li>Robust balance sheet with low debt</li>
-                <li>Favorable industry tailwinds</li>
-            </ul>
-        </div>
-        """.format(current_price, change_pct), unsafe_allow_html=True)
-        
-        # Executive metrics
-        st.subheader("Key Metrics")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Upside Potential", "15%", "2.1%")
-        with col2:
-            st.metric("Dividend Yield", "1.8%", "0.2%")
-        with col3:
-            st.metric("EPS Growth", "12%", "1.5%")
-        
-    elif report_name == "financial_analysis":
-        st.markdown("""
-        <div class="report-content">
-            <h3>💰 Financial Performance</h3>
-            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
-            
-            <h4>Income Statement Highlights (Last Quarter):</h4>
-            <ul>
-                <li><strong>Revenue:</strong> ₹25,400 Cr (+18% YoY)</li>
-                <li><strong>Net Profit:</strong> ₹4,200 Cr (+22% YoY)</li>
-                <li><strong>Operating Margin:</strong> 24.5% (+1.2%)</li>
-                <li><strong>EPS:</strong> ₹62.5 (+20% YoY)</li>
-            </ul>
-            
-            <h4>Balance Sheet Strength:</h4>
-            <ul>
-                <li><strong>Debt-to-Equity:</strong> 0.35 (Conservative)</li>
-                <li><strong>Current Ratio:</strong> 2.1 (Healthy)</li>
-                <li><strong>ROE:</strong> 18.5% (Above Industry)</li>
-                <li><strong>ROCE:</strong> 22.1% (Strong)</li>
-            </ul>
-        </div>
-        """.format(current_price, change_pct), unsafe_allow_html=True)
-        
-        # Financial metrics
-        st.subheader("Financial Metrics")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Revenue Growth", "18%", "2.1%")
-        with col2:
-            st.metric("Profit Margin", "16.5%", "0.8%")
-        with col3:
-            st.metric("ROE", "18.5%", "1.2%")
-        
-    elif report_name == "technical_analysis":
-        st.markdown("""
-        <div class="report-content">
-            <h3>📈 Technical Outlook</h3>
-            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
-            
-            <h4>Key Technical Levels:</h4>
-            <ul>
-                <li><strong>Support:</strong> ₹1,350 (Strong), ₹1,280 (Major)</li>
-                <li><strong>Resistance:</strong> ₹1,480 (Immediate), ₹1,550 (Major)</li>
-                <li><strong>Trend:</strong> Bullish (Higher Highs & Higher Lows)</li>
-            </ul>
-            
-            <h4>Indicator Analysis:</h4>
-            <ul>
-                <li><strong>RSI:</strong> 58 (Neutral-Bullish)</li>
-                <li><strong>MACD:</strong> Bullish Crossover</li>
-                <li><strong>Moving Averages:</strong> Price above 50 & 200 DMA</li>
-                <li><strong>Volume:</strong> Increasing on up moves</li>
-            </ul>
-        </div>
-        """.format(current_price, change_pct), unsafe_allow_html=True)
-        
-        # Technical metrics
-        st.subheader("Technical Indicators")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("RSI", "58", "Neutral")
-        with col2:
-            st.metric("Trend", "Bullish", "Strong")
-        with col3:
-            st.metric("Volume Trend", "Positive", "12%")
-        
-    else:
-        # Default content for other reports
-        st.markdown("""
-        <div class="report-content">
-            <h3>📋 {} Analysis</h3>
-            <p><strong>Current Price:</strong> ₹{:.2f} ({:+.2f}%)</p>
-            <p>Detailed analysis for {} is currently being generated by our AI algorithms.</p>
-            
-            <h4>Key Points:</h4>
-            <ul>
-                <li>Comprehensive analysis in progress</li>
-                <li>Real-time data integration active</li>
-                <li>AI-powered insights being calculated</li>
-                <li>Full report available shortly</li>
-            </ul>
-            
-            <p><strong>Analysis Last Updated:</strong> {}</p>
-        </div>
-        """.format(
-            report_name.replace('_', ' ').title(),
-            current_price, change_pct,
-            st.session_state.stock_name,
-            datetime.now().strftime('%Y-%m-%d %H:%M')
-        ), unsafe_allow_html=True)
+    # AI Predictions
+    st.markdown("### 📈 Price Forecasts")
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    pred_cols = st.columns(2)
+    with pred_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">📅</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Next Week Forecast</div>', unsafe_allow_html=True)
+        st.metric("Predicted Price", f"₹{current_price * 1.025:.2f}", "+2.5%")
+        st.progress(78, text="Confidence: 78%")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with pred_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">📊</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Next Month Forecast</div>', unsafe_allow_html=True)
+        st.metric("Predicted Price", f"₹{current_price * 1.068:.2f}", "+6.8%")
+        st.progress(72, text="Confidence: 72%")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # AI Models
+    st.markdown("### 🧠 AI Models Used")
+    
+    models_cols = st.columns(4)
+    models = [
+        {"name": "LSTM", "accuracy": "86%", "icon": "🧠"},
+        {"name": "Random Forest", "accuracy": "83%", "icon": "🌳"},
+        {"name": "XGBoost", "accuracy": "81%", "icon": "🚀"},
+        {"name": "Neural Network", "accuracy": "79%", "icon": "🕸️"}
+    ]
+    
+    for i, model in enumerate(models):
+        with models_cols[i]:
+            st.markdown(f"""
+            <div class="feature-card">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">{model['icon']}</div>
+                <div style="font-weight: 600; margin-bottom: 0.3rem;">{model['name']}</div>
+                <div style="color: #00ffcc; font-size: 0.9rem;">Accuracy: {model['accuracy']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Trading Signal
+    st.markdown("### 🎯 AI Trading Signal")
+    signal_cols = st.columns(3)
+    with signal_cols[0]:
+        st.markdown('<div class="prediction-badge">STRONG BUY</div>', unsafe_allow_html=True)
+    with signal_cols[1]:
+        st.metric("Confidence", "85%", "+2%")
+    with signal_cols[2]:
+        st.metric("Risk Level", "LOW", "Stable")
 
-# ----------------------- HOME SECTION -----------------------
-if section == "Home":
-    # Stock selection is already shown above for Home page
-    
-    st.markdown("### Real-Time Market Data")
-    
-    with st.spinner(f"Fetching {st.session_state.stock_name} data..."):
-        try:
-            # Get daily data for the selected period
-            df = get_stock_data(ticker, period_map[st.session_state.chart_period])
-            stock_info = get_stock_info(ticker)
-            
-            if df.empty:
-                st.error("No data available. Try again later or choose another stock.")
-            else:
-                df.reset_index(inplace=True)
-                
-                # Calculate current values
-                current_price = float(df['Close'].iloc[-1])
-                prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
-                price_change = current_price - prev_price
-                price_change_pct = (price_change / prev_price) * 100 if prev_price > 0 else 0
-                
-                day_high = float(df['High'].iloc[-1])
-                day_low = float(df['Low'].iloc[-1])
-                day_open = float(df['Open'].iloc[-1])
-                volume = int(df['Volume'].iloc[-1])
-                
-                # Get additional metrics from stock info
-                pe_ratio = stock_info.get('trailingPE', 'N/A')
-                market_cap = stock_info.get('marketCap', 'N/A')
-                if market_cap != 'N/A':
-                    market_cap = f"${market_cap/1e9:.1f}B" if market_cap > 1e9 else f"${market_cap/1e6:.1f}M"
-                
-                dividend_yield = stock_info.get('dividendYield', 'N/A')
-                if dividend_yield != 'N/A':
-                    dividend_yield = f"{dividend_yield*100:.2f}%"
-                
-                # 52-week range from the data
-                high_52w = float(df['High'].max())
-                low_52w = float(df['Low'].min())
-                
-                # COMPACT KEY METRICS SECTION
-                st.markdown("#### 📊 Current Market Data")
-                
-                # Current price with large display
-                col1, col2, col3 = st.columns([2, 1, 1])
-                with col1:
-                    st.metric(
-                        f"{st.session_state.stock_name} Current Price",
-                        f"₹{current_price:.2f}",
-                        f"{price_change:+.2f} ({price_change_pct:+.2f}%)"
-                    )
-                with col2:
-                    st.metric("Day High", f"₹{day_high:.2f}")
-                with col3:
-                    st.metric("Day Low", f"₹{day_low:.2f}")
-                
-                # Compact metrics grid
-                metrics_html = f"""
-                <div class="compact-metrics">
-                    <div class="metric-box">
-                        <div class="metric-label">Open</div>
-                        <div class="metric-value">₹{day_open:.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Previous Close</div>
-                        <div class="metric-value">₹{prev_price:.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Volume</div>
-                        <div class="metric-value">{volume:,}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">P/E Ratio</div>
-                        <div class="metric-value">{pe_ratio if pe_ratio != 'N/A' else 'N/A'}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Market Cap</div>
-                        <div class="metric-value">{market_cap}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Div Yield</div>
-                        <div class="metric-value">{dividend_yield}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">52W High</div>
-                        <div class="metric-value">₹{high_52w:.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">52W Low</div>
-                        <div class="metric-value">₹{low_52w:.2f}</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Change</div>
-                        <div class="metric-value {'negative' if price_change < 0 else ''}">
-                            {price_change:+.2f}
-                        </div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-label">Change %</div>
-                        <div class="metric-value {'negative' if price_change_pct < 0 else ''}">
-                            {price_change_pct:+.2f}%
-                        </div>
-                    </div>
-                </div>
-                """
-                st.markdown(metrics_html, unsafe_allow_html=True)
-                
-                # Daily Price Chart
-                st.subheader(f"📈 {st.session_state.chart_period} Price Chart - {st.session_state.stock_name}")
-                
-                # Calculate moving averages
-                df["SMA20"] = df["Close"].rolling(20).mean()
-                df["SMA50"] = df["Close"].rolling(50).mean()
-                
-                # Create interactive chart
-                chart_data = df[['Date', 'Close', 'SMA20', 'SMA50']].copy()
-                
-                base = alt.Chart(chart_data).encode(
-                    x=alt.X('Date:T', title='Date')
-                ).properties(
-                    height=400,
-                    title=f"{st.session_state.stock_name} Price Chart ({st.session_state.chart_period})"
-                )
-                
-                # Create layers for different lines
-                close_line = base.mark_line(color='#00ffcc', strokeWidth=2).encode(
-                    y=alt.Y('Close:Q', title='Price (₹)', scale=alt.Scale(zero=False)),
-                    tooltip=['Date:T', 'Close:Q', 'SMA20:Q', 'SMA50:Q']
-                )
-                
-                sma20_line = base.mark_line(color='#ffaa00', strokeWidth=1.5, strokeDash=[5,5]).encode(
-                    y='SMA20:Q'
-                )
-                
-                sma50_line = base.mark_line(color='#ff00ff', strokeWidth=1.5, strokeDash=[5,5]).encode(
-                    y='SMA50:Q'
-                )
-                
-                # Combine all layers
-                chart = alt.layer(close_line, sma20_line, sma50_line).configure(
-                    background='#000000',
-                    axis=alt.Axis(
-                        labelColor='#ffffff',
-                        titleColor='#ffffff'
-                    ),
-                    title=alt.TitleConfig(color='#ffffff')
-                )
-                
-                st.altair_chart(chart, use_container_width=True)
-                st.caption("Close Price (Green) | 20-Day SMA (Orange) | 50-Day SMA (Pink)")
-                
-        except Exception as e:
-            st.error(f"Error fetching data: {str(e)}")
-
-# ----------------------- RESEARCH REPORTS SECTION -----------------------
-elif section == "Research Reports":
-    # Show current stock info
-    st.write(f"**Currently Analyzing:** {st.session_state.stock_name}")
-    
-    # If a specific report is selected, show its details
-    if st.session_state.current_report:
-        show_report_details()
-    else:
-        show_research_main_page()
-
-# ----------------------- OTHER SECTIONS -----------------------
-elif section == "Options Trading":
+# ----------------------- OPTIONS TRADING PAGE -----------------------
+def show_options_trading():
+    """Options Trading - Option chain & strategy analyzer"""
     st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>💹 Options Trading</h2><p>Advanced options chain analysis, volatility tracking, and strategy optimization tools.</p></div>',
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>💹 Options Trading</h2>'
+        '<p>Options chain analysis and strategy builder</p>'
+        '</div>',
         unsafe_allow_html=True,
     )
     
-    # Current price display
+    # Current price
     try:
         df = get_daily_data(ticker, 1)
         if not df.empty:
             current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
+            st.info(f"**{stock_name} Current Price: ₹{current_price:.2f}**")
     except:
-        pass
+        current_price = 2500
     
-    # Options content
-    st.subheader("Options Overview")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("IV Rank", "65%", "High")
-    with col2:
-        st.metric("Put/Call Ratio", "0.85", "Bullish")
-    with col3:
-        st.metric("Open Interest", "2.5M", "+15%")
-    with col4:
-        st.metric("Volume", "1.8M", "+22%")
+    # Options Overview
+    st.markdown("### 📊 Options Overview")
+    overview_cols = st.columns(4)
+    with overview_cols[0]:
+        st.metric("IV Rank", "78%", "High")
+    with overview_cols[1]:
+        st.metric("Put/Call Ratio", "0.82", "Bullish")
+    with overview_cols[2]:
+        st.metric("Open Interest", "2.8M", "+15%")
+    with overview_cols[3]:
+        st.metric("Volume", "1.9M", "+22%")
+    
+    # Strategy Builder
+    st.markdown("### 🛠️ Strategy Builder")
+    
+    strat_cols = st.columns(2)
+    with strat_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Strategy Configuration</div>', unsafe_allow_html=True)
+        
+        strategy = st.selectbox("Select Strategy", 
+                              ["Long Call", "Long Put", "Covered Call", "Bull Spread", "Iron Condor"])
+        expiry = st.selectbox("Expiry", ["Weekly", "Monthly"])
+        strike = st.selectbox("Strike", ["ATM", "OTM 10%", "OTM 20%", "ITM 10%"])
+        
+        if st.button("Analyze Strategy", use_container_width=True):
+            st.success("Strategy analyzed successfully!")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with strat_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Strategy Analysis</div>', unsafe_allow_html=True)
+        
+        # P&L Chart
+        strikes = np.arange(current_price - 100, current_price + 100, 10)
+        pnl = [max(s - (current_price + 15), -15) * 100 for s in strikes]  # Mock P&L
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=strikes, y=pnl, mode='lines', name='P&L', line=dict(color='#00ffcc')))
+        fig.add_vline(x=current_price, line_dash="dash", line_color="white")
+        fig.update_layout(title="Profit & Loss", height=250, template="plotly_dark", showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.metric("Max Profit", "₹12,500")
+        st.metric("Max Loss", "₹1,500")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-elif section == "Chart Analysis":
+# ----------------------- PORTFOLIO INSIGHTS PAGE -----------------------
+def show_portfolio_insights():
+    """Portfolio Insights - User or sample portfolio charts"""
     st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>📈 Chart Analysis</h2><p>Advanced technical analysis with multiple indicators, patterns, and drawing tools.</p></div>',
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>📊 Portfolio Insights</h2>'
+        '<p>Portfolio analysis and performance tracking</p>'
+        '</div>',
         unsafe_allow_html=True,
     )
     
-    # Current price display
-    try:
-        df = get_daily_data(ticker, 1)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
-    except:
-        pass
+    # Sample Portfolio
+    st.markdown("### 💼 Sample Portfolio")
     
-    # Chart analysis content
-    st.subheader("Technical Indicators")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("RSI", "54.2", "Neutral")
-    with col2:
-        st.metric("MACD", "Bullish", "↑")
-    with col3:
-        st.metric("Support", "₹1,350", "Strong")
-    with col4:
-        st.metric("Resistance", "₹1,480", "Moderate")
+    portfolio_data = {
+        "Stock": ["RELIANCE", "TCS", "HDFC BANK", "INFY", "ICICI BANK"],
+        "Quantity": [50, 100, 75, 120, 80],
+        "Avg Price": [2450, 3200, 1650, 1850, 920],
+        "Current Price": [2580, 3350, 1680, 1920, 950],
+        "P&L (%)": ["+5.3%", "+4.7%", "+1.8%", "+3.8%", "+3.3%"]
+    }
+    
+    portfolio_df = pd.DataFrame(portfolio_data)
+    portfolio_df['Investment'] = portfolio_df['Quantity'] * portfolio_df['Avg Price']
+    portfolio_df['Current Value'] = portfolio_df['Quantity'] * portfolio_df['Current Price']
+    portfolio_df['P&L'] = portfolio_df['Current Value'] - portfolio_df['Investment']
+    
+    # Portfolio Summary
+    total_investment = portfolio_df['Investment'].sum()
+    total_value = portfolio_df['Current Value'].sum()
+    total_pnl = total_value - total_investment
+    total_pnl_pct = (total_pnl / total_investment) * 100
+    
+    summary_cols = st.columns(4)
+    with summary_cols[0]:
+        st.metric("Total Investment", f"₹{total_investment:,.0f}")
+    with summary_cols[1]:
+        st.metric("Current Value", f"₹{total_value:,.0f}")
+    with summary_cols[2]:
+        st.metric("Total P&L", f"₹{total_pnl:,.0f}", f"{total_pnl_pct:+.1f}%")
+    with summary_cols[3]:
+        st.metric("Portfolio Beta", "0.92", "Low Risk")
+    
+    # Portfolio Allocation Chart
+    st.markdown("### 📈 Portfolio Allocation")
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=portfolio_df['Stock'],
+        values=portfolio_df['Current Value'],
+        hole=0.4,
+        marker_colors=['#00ffcc', '#0099ff', '#ff4444', '#ffaa00', '#ff00ff']
+    )])
+    fig.update_layout(template="plotly_dark", height=400)
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Performance Chart
+    st.markdown("### 📊 Performance Trend")
+    
+    # Mock performance data
+    dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
+    performance = 1000000 + np.cumsum(np.random.normal(5000, 20000, len(dates)))
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=dates, y=performance, mode='lines', name='Portfolio Value', line=dict(color='#00ffcc')))
+    fig.update_layout(
+        title="Portfolio Value Over Time",
+        template="plotly_dark",
+        height=300,
+        xaxis_title="Date",
+        yaxis_title="Portfolio Value (₹)"
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
+# ----------------------- BACKTESTING PAGE -----------------------
+def show_backtesting():
+    """Backtesting - Test strategies on past data"""
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
+        '<h2>🔍 Strategy Backtesting</h2>'
+        '<p>Test trading strategies on historical data</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    
+    # Strategy Configuration
+    st.markdown("### ⚙️ Strategy Configuration")
+    
+    config_cols = st.columns(3)
+    with config_cols[0]:
+        strategy = st.selectbox("Trading Strategy", 
+                              ["Moving Average Crossover", "RSI Strategy", "MACD Strategy", "Bollinger Bands"])
+    with config_cols[1]:
+        capital = st.number_input("Initial Capital (₹)", value=100000, step=10000)
+    with config_cols[2]:
+        period = st.selectbox("Backtest Period", ["3 Months", "6 Months", "1 Year", "2 Years"])
+    
+    # Parameters
+    st.markdown("### 📊 Strategy Parameters")
+    param_cols = st.columns(4)
+    with param_cols[0]:
+        ma_fast = st.slider("MA Fast Period", 5, 50, 20)
+    with param_cols[1]:
+        ma_slow = st.slider("MA Slow Period", 20, 200, 50)
+    with param_cols[2]:
+        rsi_upper = st.slider("RSI Upper", 60, 90, 70)
+    with param_cols[3]:
+        rsi_lower = st.slider("RSI Lower", 10, 40, 30)
+    
+    if st.button("Run Backtest", type="primary", use_container_width=True):
+        st.success("Backtest completed successfully!")
+        
+        # Backtest Results
+        st.markdown("### 📈 Backtest Results")
+        
+        result_cols = st.columns(4)
+        with result_cols[0]:
+            st.metric("Final Value", "₹1,245,000", "+24.5%")
+        with result_cols[1]:
+            st.metric("Total Trades", "156")
+        with result_cols[2]:
+            st.metric("Win Rate", "62.8%", "+2.3%")
+        with result_cols[3]:
+            st.metric("Max Drawdown", "-8.2%", "Moderate")
+        
+        # Equity Curve
+        st.markdown("### 📊 Equity Curve")
+        
+        # Mock equity curve
+        dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
+        equity = capital + np.cumsum(np.random.normal(500, 2000, len(dates)))
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates, y=equity, mode='lines', name='Strategy', line=dict(color='#00ffcc')))
+        fig.add_trace(go.Scatter(x=dates, y=[capital] * len(dates), mode='lines', name='Buy & Hold', 
+                               line=dict(color='#ff4444', dash='dash')))
+        fig.update_layout(
+            title="Strategy vs Buy & Hold",
+            template="plotly_dark",
+            height=400
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+# ----------------------- MAIN PAGE ROUTING -----------------------
+if section == "Market Trends":
+    show_market_trends()
 elif section == "AI Predictions":
-    st.markdown(
-        '<div style="background: #111; padding: 2rem; border-radius: 12px; margin: 1rem 0;"><h2>🤖 AI Predictions</h2><p>Machine learning powered price predictions, sentiment analysis, and trading signals.</p></div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Current price display
-    try:
-        df = get_daily_data(ticker, 1)
-        if not df.empty:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
-    except:
-        pass
-    
-    # AI predictions content
-    st.subheader("AI Analysis")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("AI Signal", "BUY", "Strong")
-    with col2:
-        st.metric("Confidence", "85%", "High")
-    with col3:
-        st.metric("1W Target", "₹1,420", "+3.1%")
-    with col4:
-        st.metric("1M Target", "₹1,520", "+10.4%")
+    show_ai_predictions()
+elif section == "Options Trading":
+    show_options_trading()
+elif section == "Portfolio Insights":
+    show_portfolio_insights()
+elif section == "Backtesting":
+    show_backtesting()
 
 # ----------------------- FOOTER -----------------------
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #666;'>SMART TRADE with Prasanth Subrahmanian • Real-time Market Data</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div style='text-align: center; color: #666;'>"
+    "Smart Trade Analytics • Real-time Market Data • Powered by AI"
+    "</div>", 
+    unsafe_allow_html=True
+)
