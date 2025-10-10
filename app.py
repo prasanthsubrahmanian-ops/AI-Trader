@@ -205,30 +205,36 @@ st.markdown(custom_css, unsafe_allow_html=True)
 @st.cache_data(ttl=300)
 def get_stock_data(ticker, period="1y"):
     try:
-        return yf.download(ticker, period=period)
-    except:
+        stock = yf.Ticker(ticker)
+        return stock.history(period=period)
+    except Exception as e:
+        st.error(f"Error fetching data for {ticker}: {str(e)}")
         return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def get_daily_data(ticker, days=60):
     try:
-        return yf.download(ticker, period=f"{days}d")
-    except:
+        stock = yf.Ticker(ticker)
+        return stock.history(period=f"{days}d")
+    except Exception as e:
+        st.error(f"Error fetching daily data for {ticker}: {str(e)}")
         return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def get_intraday_data(ticker, interval="5m", days=1):
     try:
-        return yf.download(ticker, period=f"{days}d", interval=interval)
-    except:
+        stock = yf.Ticker(ticker)
+        return stock.history(period=f"{days}d", interval=interval)
+    except Exception as e:
+        st.error(f"Error fetching intraday data for {ticker}: {str(e)}")
         return pd.DataFrame()
 
 @st.cache_data(ttl=3600)
 def get_market_data():
-    """Get NIFTY, sector data, gainers, losers"""
+    """Get NIFTY, sector data with proper error handling"""
     indices = {
         'NIFTY 50': '^NSEI',
-        'BANK NIFTY': '^NSEBANK',
+        'BANK NIFTY': '^NSEBANK', 
         'NIFTY IT': '^CNXIT',
         'SENSEX': '^BSESN'
     }
@@ -236,15 +242,36 @@ def get_market_data():
     data = {}
     for name, ticker in indices.items():
         try:
-            df = yf.download(ticker, period='1d')
-            if not df.empty and len(df) > 1:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period='2d')  # Get 2 days to calculate change
+            
+            if not hist.empty and len(hist) > 1:
+                current_price = float(hist['Close'].iloc[-1])
+                prev_price = float(hist['Close'].iloc[-2])
+                change = current_price - prev_price
+                change_pct = (change / prev_price) * 100
+                
                 data[name] = {
-                    'current': df['Close'].iloc[-1],
-                    'change': df['Close'].iloc[-1] - df['Close'].iloc[-2],
-                    'change_pct': ((df['Close'].iloc[-1] - df['Close'].iloc[-2]) / df['Close'].iloc[-2]) * 100
+                    'current': current_price,
+                    'change': change,
+                    'change_pct': change_pct
                 }
-        except:
-            continue
+            else:
+                # Fallback data
+                data[name] = {
+                    'current': 0.00,
+                    'change': 0.00,
+                    'change_pct': 0.00
+                }
+        except Exception as e:
+            print(f"Error fetching {name}: {e}")
+            # Fallback data
+            data[name] = {
+                'current': 0.00,
+                'change': 0.00, 
+                'change_pct': 0.00
+            }
+    
     return data
 
 def get_stock_info(ticker):
@@ -323,17 +350,19 @@ def show_home_page():
         unsafe_allow_html=True,
     )
     
-    # Quick Stats
+    # Quick Stats with error handling
     st.markdown("### 📊 Market Overview")
     
     try:
-        market_data = get_market_data()
-        cols = st.columns(4)
+        with st.spinner("Loading market data..."):
+            market_data = get_market_data()
         
+        cols = st.columns(4)
         indices = ['NIFTY 50', 'BANK NIFTY', 'NIFTY IT', 'SENSEX']
+        
         for i, idx in enumerate(indices):
             with cols[i]:
-                if idx in market_data:
+                if idx in market_data and market_data[idx]['current'] > 0:
                     data = market_data[idx]
                     st.metric(
                         idx,
@@ -341,9 +370,15 @@ def show_home_page():
                         f"{data['change']:+.2f} ({data['change_pct']:+.2f}%)"
                     )
                 else:
-                    st.metric(idx, "₹0.00", "0.00%")
-    except:
-        st.info("Market data loading...")
+                    st.metric(idx, "Loading...", "0.00%")
+    except Exception as e:
+        st.error("Unable to load market data")
+        # Show placeholder metrics
+        cols = st.columns(4)
+        indices = ['NIFTY 50', 'BANK NIFTY', 'NIFTY IT', 'SENSEX']
+        for i, idx in enumerate(indices):
+            with cols[i]:
+                st.metric(idx, "₹0.00", "0.00%")
     
     # Feature Cards
     st.markdown("### 🚀 Trading Tools")
@@ -419,24 +454,33 @@ def show_market_trends():
         unsafe_allow_html=True,
     )
     
-    # Market Indices
+    # Market Indices with better error handling
     st.markdown("### 📊 Market Indices")
     
-    market_data = get_market_data()
-    cols = st.columns(4)
+    with st.spinner("Loading market data..."):
+        market_data = get_market_data()
     
+    if not market_data:
+        st.error("Unable to fetch market data. Please check your internet connection.")
+        return
+    
+    cols = st.columns(4)
     indices = ['NIFTY 50', 'BANK NIFTY', 'NIFTY IT', 'SENSEX']
+    
     for i, idx in enumerate(indices):
         with cols[i]:
             if idx in market_data:
                 data = market_data[idx]
-                st.metric(
-                    idx,
-                    f"₹{data['current']:.2f}",
-                    f"{data['change']:+.2f} ({data['change_pct']:+.2f}%)"
-                )
+                if data['current'] > 0:  # Valid data
+                    st.metric(
+                        idx,
+                        f"₹{data['current']:.2f}",
+                        f"{data['change']:+.2f} ({data['change_pct']:+.2f}%)"
+                    )
+                else:
+                    st.metric(idx, "Loading...", "0.00%")
             else:
-                st.metric(idx, "₹0.00", "0.00%")
+                st.metric(idx, "N/A", "0.00%")
     
     # Individual Stock Analysis
     st.markdown(f"### 🔍 {st.session_state.stock_name} Analysis")
@@ -464,7 +508,8 @@ def show_market_trends():
             st.markdown("#### Stock Overview")
             metric_cols = st.columns(4)
             with metric_cols[0]:
-                st.metric("Current Price", f"₹{current_price:.2f}", f"{price_change:+.2f} ({price_change_pct:+.2f}%)")
+                st.metric("Current Price", f"₹{current_price:.2f}", 
+                         f"{price_change:+.2f} ({price_change_pct:+.2f}%)")
             with metric_cols[1]:
                 st.metric("Day High", f"₹{df['High'].max():.2f}")
             with metric_cols[2]:
@@ -473,26 +518,38 @@ def show_market_trends():
                 volume = df['Volume'].iloc[-1] if 'Volume' in df.columns else 0
                 st.metric("Volume", f"{volume:,.0f}")
             
-            # Price Chart - FIXED
+            # Enhanced Price Chart
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             st.markdown(f'<div class="chart-header">{st.session_state.stock_name} - {timeframe} Price Chart</div>', unsafe_allow_html=True)
             
-            # Create the chart properly
+            # Create interactive chart with more features
             fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=df.index, 
-                y=df['Close'], 
-                mode='lines', 
-                name='Close Price',
-                line=dict(color='#00ffcc', width=2)
-            ))
+            
+            # Candlestick chart for better visualization
+            if len(df) > 10:  # Only show candlestick for sufficient data
+                fig.add_trace(go.Candlestick(
+                    x=df.index,
+                    open=df['Open'],
+                    high=df['High'],
+                    low=df['Low'],
+                    close=df['Close'],
+                    name='Price'
+                ))
+            else:
+                fig.add_trace(go.Scatter(
+                    x=df.index, 
+                    y=df['Close'], 
+                    mode='lines', 
+                    name='Close Price',
+                    line=dict(color='#00ffcc', width=2)
+                ))
             
             fig.update_layout(
                 title=f"{st.session_state.stock_name} Price Movement",
                 xaxis_title="Date",
                 yaxis_title="Price (₹)",
                 template="plotly_dark",
-                height=400,
+                height=500,
                 showlegend=True,
                 font=dict(color="white")
             )
@@ -507,25 +564,30 @@ def show_market_trends():
         st.error(f"Error loading chart data: {str(e)}")
         st.info("Please try selecting a different stock or timeframe.")
     
-    # Sector Performance (Mock Data)
+    # Enhanced Sector Performance
     st.markdown("### 🏢 Sector Performance")
+    
+    # Mock sector data (you can replace with real API calls)
     sectors = {
         "Banking": "+2.3%",
         "IT": "+1.8%", 
         "Pharma": "-0.5%",
         "Auto": "+1.2%",
         "FMCG": "+0.8%",
-        "Energy": "+3.1%"
+        "Energy": "+3.1%",
+        "Real Estate": "+1.5%",
+        "Metals": "-0.8%"
     }
     
-    cols = st.columns(3)
+    # Display sectors in a grid
+    cols = st.columns(4)
     for i, (sector, performance) in enumerate(sectors.items()):
-        with cols[i % 3]:
+        with cols[i % 4]:
             color = "#00ffcc" if "+" in performance else "#ff4444"
             st.markdown(f"""
-            <div class="feature-card">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">{sector}</div>
-                <div style="color: {color}; font-size: 1.2rem; font-weight: 600;">{performance}</div>
+            <div class="feature-card" style="padding: 1rem; margin-bottom: 0.5rem;">
+                <div style="font-weight: 600; margin-bottom: 0.3rem; font-size: 0.9rem;">{sector}</div>
+                <div style="color: {color}; font-size: 1rem; font-weight: 600;">{performance}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -545,6 +607,9 @@ def show_ai_predictions():
         df = get_daily_data(st.session_state.current_ticker, 30)
         if not df.empty and len(df) > 1:
             current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
+        else:
+            current_price = 2500
             st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         current_price = 2500
@@ -617,6 +682,9 @@ def show_options_trading():
         df = get_daily_data(st.session_state.current_ticker, 1)
         if not df.empty and len(df) > 0:
             current_price = float(df['Close'].iloc[-1])
+            st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
+        else:
+            current_price = 2500
             st.info(f"**{st.session_state.stock_name} Current Price: ₹{current_price:.2f}**")
     except:
         current_price = 2500
@@ -724,123 +792,4 @@ def show_portfolio_insights():
     
     fig = go.Figure(data=[go.Pie(
         labels=portfolio_df['Stock'],
-        values=portfolio_df['Current Value'],
-        hole=0.4,
-        marker_colors=['#00ffcc', '#0099ff', '#ff4444', '#ffaa00', '#ff00ff']
-    )])
-    fig.update_layout(
-        template="plotly_dark", 
-        height=400,
-        title="Portfolio Allocation by Stock"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Performance Chart
-    st.markdown("### 📊 Performance Trend")
-    
-    # Mock performance data
-    dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
-    performance = 1000000 + np.cumsum(np.random.normal(5000, 20000, len(dates)))
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=dates, y=performance, mode='lines', name='Portfolio Value', line=dict(color='#00ffcc')))
-    fig.update_layout(
-        title="Portfolio Value Over Time",
-        template="plotly_dark",
-        height=300,
-        xaxis_title="Date",
-        yaxis_title="Portfolio Value (₹)"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-# ----------------------- BACKTESTING PAGE -----------------------
-def show_backtesting():
-    """Backtesting - Test strategies on past data"""
-    st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; margin: 1rem 0;">'
-        '<h2>🔍 Strategy Backtesting</h2>'
-        '<p>Test trading strategies on historical data</p>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    
-    # Strategy Configuration
-    st.markdown("### ⚙️ Strategy Configuration")
-    
-    config_cols = st.columns(3)
-    with config_cols[0]:
-        strategy = st.selectbox("Trading Strategy", 
-                              ["Moving Average Crossover", "RSI Strategy", "MACD Strategy", "Bollinger Bands"])
-    with config_cols[1]:
-        capital = st.number_input("Initial Capital (₹)", value=100000, step=10000)
-    with config_cols[2]:
-        period = st.selectbox("Backtest Period", ["3 Months", "6 Months", "1 Year", "2 Years"])
-    
-    # Parameters
-    st.markdown("### 📊 Strategy Parameters")
-    param_cols = st.columns(4)
-    with param_cols[0]:
-        ma_fast = st.slider("MA Fast Period", 5, 50, 20)
-    with param_cols[1]:
-        ma_slow = st.slider("MA Slow Period", 20, 200, 50)
-    with param_cols[2]:
-        rsi_upper = st.slider("RSI Upper", 60, 90, 70)
-    with param_cols[3]:
-        rsi_lower = st.slider("RSI Lower", 10, 40, 30)
-    
-    if st.button("Run Backtest", type="primary", use_container_width=True):
-        st.success("Backtest completed successfully!")
-        
-        # Backtest Results
-        st.markdown("### 📈 Backtest Results")
-        
-        result_cols = st.columns(4)
-        with result_cols[0]:
-            st.metric("Final Value", "₹1,245,000", "+24.5%")
-        with result_cols[1]:
-            st.metric("Total Trades", "156")
-        with result_cols[2]:
-            st.metric("Win Rate", "62.8%", "+2.3%")
-        with result_cols[3]:
-            st.metric("Max Drawdown", "-8.2%", "Moderate")
-        
-        # Equity Curve
-        st.markdown("### 📊 Equity Curve")
-        
-        # Mock equity curve
-        dates = pd.date_range(start='2024-01-01', end='2024-12-10', freq='D')
-        equity = capital + np.cumsum(np.random.normal(500, 2000, len(dates)))
-        
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=dates, y=equity, mode='lines', name='Strategy', line=dict(color='#00ffcc')))
-        fig.add_trace(go.Scatter(x=dates, y=[capital] * len(dates), mode='lines', name='Buy & Hold', 
-                               line=dict(color='#ff4444', dash='dash')))
-        fig.update_layout(
-            title="Strategy vs Buy & Hold",
-            template="plotly_dark",
-            height=400
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-# ----------------------- MAIN PAGE ROUTING -----------------------
-if section == "Home":
-    show_home_page()
-elif section == "Market Trends":
-    show_market_trends()
-elif section == "AI Predictions":
-    show_ai_predictions()
-elif section == "Options Trading":
-    show_options_trading()
-elif section == "Portfolio Insights":
-    show_portfolio_insights()
-elif section == "Backtesting":
-    show_backtesting()
-
-# ----------------------- FOOTER -----------------------
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #666;'>"
-    "Smart Trade with Prasanth Subrahmanian • Real-time Market Data • Powered by AI"
-    "</div>", 
-    unsafe_allow_html=True
-)
+        values
