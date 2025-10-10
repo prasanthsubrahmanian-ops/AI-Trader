@@ -20,8 +20,8 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 
 body, .main, .block-container {
-    background: #000000 !important;
-    color: #e0e0e0 !important;
+    background: #ffffff !important;
+    color: #333333 !important;
     padding-top: 0.5rem !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -31,18 +31,18 @@ body, .main, .block-container {
     margin-bottom: 0.3rem;
     font-size: 2.2rem;
     font-weight: 800;
-    background: linear-gradient(45deg, #00ff88, #00ccff, #0099ff);
+    background: linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
     padding: 0.3rem 0;
-    text-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+    text-shadow: 0 2px 10px rgba(37, 99, 235, 0.1);
 }
 
 .main-subtitle {
     font-size: 1rem;
     text-align: center;
-    color: #888888;
+    color: #6b7280;
     margin-top: -0.5rem;
     margin-bottom: 1.5rem;
     font-weight: 500;
@@ -60,9 +60,9 @@ body, .main, .block-container {
 }
 
 .nav-btn {
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 255, 0.15) 100%);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    color: #00ff88;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.15) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    color: #2563eb;
     padding: 0.5rem 1.2rem;
     border-radius: 12px;
     cursor: pointer;
@@ -70,114 +70,114 @@ body, .main, .block-container {
     font-size: 0.9rem;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
 }
 
 .nav-btn:hover {
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 204, 255, 0.25) 100%);
-    border-color: #00ff88;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(59, 130, 246, 0.25) 100%);
+    border-color: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
-    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);
+    color: #1e40af;
 }
 
 .nav-btn.active {
-    background: linear-gradient(45deg, #00ff88, #00ccff);
-    color: #000000;
-    border-color: #00ff88;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.6);
+    background: linear-gradient(45deg, #2563eb, #3b82f6);
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
 }
 
 /* Cards */
 .feature-card {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(40, 40, 40, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
     padding: 1.2rem;
     border-radius: 14px;
-    border: 1px solid rgba(0, 255, 136, 0.2);
+    border: 1px solid rgba(37, 99, 235, 0.2);
     margin-bottom: 1.2rem;
     transition: all 0.3s ease;
     backdrop-filter: blur(15px);
-    box-shadow: 0 6px 25px rgba(0, 255, 136, 0.1);
+    box-shadow: 0 6px 25px rgba(37, 99, 235, 0.08);
 }
 
 .feature-card:hover {
-    border-color: #00ff88;
+    border-color: #2563eb;
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(50, 50, 50, 0.8) 100%);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.8) 100%);
 }
 
 .feature-icon {
     font-size: 1.8rem;
     margin-bottom: 0.8rem;
-    background: linear-gradient(45deg, #00ff88, #00ccff);
+    background: linear-gradient(45deg, #2563eb, #3b82f6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 6px rgba(0, 255, 136, 0.3));
+    filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.2));
 }
 
 .feature-title {
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 0.6rem;
-    color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    color: #1f2937;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .feature-desc {
     font-size: 0.9rem;
-    color: #aaaaaa;
+    color: #6b7280;
     margin-bottom: 0.8rem;
     line-height: 1.4;
 }
 
 /* Chart Container */
 .chart-container {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(40, 40, 40, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.8) 100%);
     padding: 1.5rem;
     border-radius: 16px;
     margin: 1.2rem 0;
-    border: 1px solid rgba(0, 255, 136, 0.25);
+    border: 1px solid rgba(37, 99, 235, 0.25);
     backdrop-filter: blur(15px);
-    box-shadow: 0 6px 30px rgba(0, 255, 136, 0.15);
+    box-shadow: 0 6px 30px rgba(37, 99, 235, 0.1);
 }
 
 .chart-header {
-    color: #00ff88;
+    color: #2563eb;
     margin-bottom: 1.2rem;
     font-size: 1.3rem;
     font-weight: 700;
-    text-shadow: 0 2px 6px rgba(0, 255, 136, 0.3);
+    text-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
 }
 
 .prediction-badge {
-    background: linear-gradient(45deg, #00ff88, #00ccff);
-    color: #000000;
+    background: linear-gradient(45deg, #2563eb, #3b82f6);
+    color: #ffffff;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 700;
     display: inline-block;
     margin-bottom: 0.8rem;
-    box-shadow: 0 3px 12px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.2);
 }
 
 .risk-badge {
-    background: linear-gradient(45deg, #ff4444, #ffaa00);
-    color: #000000;
+    background: linear-gradient(45deg, #dc2626, #ef4444);
+    color: #ffffff;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 700;
     display: inline-block;
     margin-bottom: 0.8rem;
-    box-shadow: 0 3px 12px rgba(255, 68, 68, 0.3);
+    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.2);
 }
 
 /* Metric Cards */
 [data-testid="metric-container"] {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(40, 40, 40, 0.7) 100%) !important;
-    border: 1px solid rgba(0, 255, 136, 0.2) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.2) !important;
     border-radius: 12px !important;
     padding: 1.2rem !important;
     backdrop-filter: blur(10px);
@@ -185,57 +185,57 @@ body, .main, .block-container {
 
 /* Select Box Styling */
 .stSelectbox > div > div {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(40, 40, 40, 0.8) 100%) !important;
-    border: 1px solid rgba(0, 255, 136, 0.3) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.8) 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
     border-radius: 10px !important;
-    color: #e0e0e0 !important;
+    color: #333333 !important;
 }
 
 .stSelectbox > div > div:hover {
-    border-color: #00ff88 !important;
+    border-color: #2563eb !important;
 }
 
 /* Button Styling */
 .stButton > button {
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 255, 0.15) 100%) !important;
-    border: 1px solid rgba(0, 255, 136, 0.3) !important;
-    color: #00ff88 !important;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
+    color: #2563eb !important;
     border-radius: 10px !important;
     transition: all 0.3s ease !important;
 }
 
 .stButton > button:hover {
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 204, 255, 0.25) 100%) !important;
-    border-color: #00ff88 !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(59, 130, 246, 0.25) 100%) !important;
+    border-color: #2563eb !important;
+    color: #1e40af !important;
     transform: translateY(-1px);
-    box-shadow: 0 3px 12px rgba(0, 255, 136, 0.3) !important;
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.2) !important;
 }
 
 /* Progress Bar */
 .stProgress > div > div {
-    background: linear-gradient(45deg, #00ff88, #00ccff) !important;
+    background: linear-gradient(45deg, #2563eb, #3b82f6) !important;
 }
 
 /* Dataframe Styling */
 .dataframe {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(40, 40, 40, 0.7) 100%) !important;
-    border: 1px solid rgba(0, 255, 136, 0.2) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.2) !important;
     border-radius: 10px !important;
 }
 
 /* Compact Header Boxes */
 .compact-header {
-    background: linear-gradient(135deg, rgba(20,20,20,0.95) 0%, rgba(40,40,40,0.8) 100%) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.8) 100%) !important;
     padding: 1.2rem 1.5rem !important;
     border-radius: 14px !important;
     margin: 1rem 0 !important;
-    border: 1px solid rgba(0,255,136,0.3) !important;
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
     backdrop-filter: blur(10px);
 }
 
 .compact-header h2 {
-    color: #00ff88 !important;
+    color: #2563eb !important;
     text-align: center !important;
     margin-bottom: 0.5rem !important;
     font-size: 1.4rem !important;
@@ -243,7 +243,7 @@ body, .main, .block-container {
 }
 
 .compact-header p {
-    color: #aaaaaa !important;
+    color: #6b7280 !important;
     text-align: center !important;
     font-size: 0.95rem !important;
     margin-bottom: 0 !important;
@@ -252,23 +252,23 @@ body, .main, .block-container {
 
 /* Confidence Text Color */
 .confidence-text {
-    color: #ffd700 !important;
+    color: #d97706 !important;
     font-weight: 600 !important;
     font-size: 0.9rem !important;
-    text-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(217, 119, 6, 0.1);
 }
 
 /* Positive/Negative Colors */
 .positive-color {
-    color: #00ff88 !important;
+    color: #059669 !important;
 }
 
 .negative-color {
-    color: #ff4444 !important;
+    color: #dc2626 !important;
 }
 
 .neutral-color {
-    color: #ffaa00 !important;
+    color: #d97706 !important;
 }
 
 @media (max-width: 768px) {
@@ -479,11 +479,11 @@ def show_home():
         for i, (idx_name, idx_data) in enumerate(market_data.items()):
             with cols[i % 4]:
                 change_value = float(idx_data['change'])
-                change_color = "#00ff88" if change_value >= 0 else "#ff4444"
+                change_color = "#059669" if change_value >= 0 else "#dc2626"
                 st.markdown(f"""
                 <div class="feature-card">
-                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #00ccff; font-size: 0.95rem;">{idx_name}</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #ffffff;">₹{idx_data['current']:.2f}</div>
+                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #2563eb; font-size: 0.95rem;">{idx_name}</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #1f2937;">₹{idx_data['current']:.2f}</div>
                     <div style="color: {change_color}; font-weight: 600; font-size: 0.9rem;">
                         {idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)
                     </div>
@@ -501,11 +501,11 @@ def show_home():
         cols = st.columns(4)
         for i, (idx_name, idx_data) in enumerate(fallback_data.items()):
             with cols[i % 4]:
-                change_color = "#00ff88" if idx_data['change'] >= 0 else "#ff4444"
+                change_color = "#059669" if idx_data['change'] >= 0 else "#dc2626"
                 st.markdown(f"""
                 <div class="feature-card">
-                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #00ccff; font-size: 0.95rem;">{idx_name}</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #ffffff;">₹{idx_data['current']:,.2f}</div>
+                    <div style="font-weight: 600; margin-bottom: 0.6rem; color: #2563eb; font-size: 0.95rem;">{idx_name}</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: #1f2937;">₹{idx_data['current']:,.2f}</div>
                     <div style="color: {change_color}; font-weight: 600; font-size: 0.9rem;">
                         {idx_data['change']:+.2f} ({idx_data['change_pct']:+.2f}%)
                     </div>
@@ -528,8 +528,8 @@ def show_home():
                 </div>
             </div>
             <div style="text-align: center; margin: 1rem 0;">
-                <div style="font-size: 3rem; color: #00ff88; opacity: 0.7;">📊</div>
-                <div style="color: #aaaaaa; font-size: 0.8rem; margin-top: 0.5rem;">Advanced Analytics</div>
+                <div style="font-size: 3rem; color: #2563eb; opacity: 0.7;">📊</div>
+                <div style="color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">Advanced Analytics</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -548,8 +548,8 @@ def show_home():
                 </div>
             </div>
             <div style="text-align: center; margin: 1rem 0;">
-                <div style="font-size: 3rem; color: #00ff88; opacity: 0.7;">📰</div>
-                <div style="color: #aaaaaa; font-size: 0.8rem; margin-top: 0.5rem;">Real-time Updates</div>
+                <div style="font-size: 3rem; color: #2563eb; opacity: 0.7;">📰</div>
+                <div style="color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">Real-time Updates</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -568,8 +568,8 @@ def show_home():
                 </div>
             </div>
             <div style="text-align: center; margin: 1rem 0;">
-                <div style="font-size: 3rem; color: #00ff88; opacity: 0.7;">🤖</div>
-                <div style="color: #aaaaaa; font-size: 0.8rem; margin-top: 0.5rem;">Smart Predictions</div>
+                <div style="font-size: 3rem; color: #2563eb; opacity: 0.7;">🤖</div>
+                <div style="color: #6b7280; font-size: 0.8rem; margin-top: 0.5rem;">Smart Predictions</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -623,10 +623,10 @@ def show_home():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">📈 Today's Top Movers</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• RELIANCE: +2.8%</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• TCS: +1.9%</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• HDFC BANK: +1.5%</div>
-            <div style="color: #ff4444; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• INFY: -0.8%</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• RELIANCE: +2.8%</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• TCS: +1.9%</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• HDFC BANK: +1.5%</div>
+            <div style="color: #dc2626; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• INFY: -0.8%</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -634,10 +634,10 @@ def show_home():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">🎯 Trading Signals</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Overall: BULLISH 📈</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volume: HIGH 🔥</div>
-            <div style="color: #ffaa00; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volatility: MEDIUM ⚡</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Momentum: STRONG 💪</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Overall: BULLISH 📈</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volume: HIGH 🔥</div>
+            <div style="color: #d97706; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Volatility: MEDIUM ⚡</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600; font-size: 0.9rem;">• Momentum: STRONG 💪</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -674,10 +674,10 @@ def show_market_intelligence():
     sectors = list(intel_data['sector_performance'].items())
     for i, (sector, performance) in enumerate(sectors):
         with sector_cols[i]:
-            color = "#00ff88" if '+' in performance else "#ff4444"
+            color = "#059669" if '+' in performance else "#dc2626"
             st.markdown(f"""
             <div class="feature-card" style="text-align: center;">
-                <div style="font-weight: 600; color: #00ccff; margin-bottom: 0.5rem;">{sector}</div>
+                <div style="font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">{sector}</div>
                 <div style="font-size: 1.2rem; font-weight: 700; color: {color};">{performance}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -690,9 +690,9 @@ def show_market_intelligence():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">FII Activity</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600;">• Net Buy: ₹1,250 Cr</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600;">• Equity: ₹980 Cr</div>
-            <div style="color: #ff4444; margin: 0.5rem 0; font-weight: 600;">• Debt: ₹-270 Cr</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600;">• Net Buy: ₹1,250 Cr</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600;">• Equity: ₹980 Cr</div>
+            <div style="color: #dc2626; margin: 0.5rem 0; font-weight: 600;">• Debt: ₹-270 Cr</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -700,9 +700,9 @@ def show_market_intelligence():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-title">DII Activity</div>
-            <div style="color: #ff4444; margin: 0.5rem 0; font-weight: 600;">• Net Sell: ₹-850 Cr</div>
-            <div style="color: #ff4444; margin: 0.5rem 0; font-weight: 600;">• Equity: ₹-720 Cr</div>
-            <div style="color: #00ff88; margin: 0.5rem 0; font-weight: 600;">• Debt: ₹130 Cr</div>
+            <div style="color: #dc2626; margin: 0.5rem 0; font-weight: 600;">• Net Sell: ₹-850 Cr</div>
+            <div style="color: #dc2626; margin: 0.5rem 0; font-weight: 600;">• Equity: ₹-720 Cr</div>
+            <div style="color: #059669; margin: 0.5rem 0; font-weight: 600;">• Debt: ₹130 Cr</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -739,19 +739,19 @@ def show_market_news():
     
     for news in news_data:
         impact_color = {
-            'Positive': '#00ff88',
-            'Negative': '#ff4444', 
-            'Neutral': '#ffaa00'
-        }.get(news['impact'], '#ffaa00')
+            'Positive': '#059669',
+            'Negative': '#dc2626', 
+            'Neutral': '#d97706'
+        }.get(news['impact'], '#d97706')
         
         st.markdown(f"""
         <div class="feature-card">
             <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.8rem;">
                 <div style="flex: 1;">
-                    <div style="font-weight: 700; color: #ffffff; margin-bottom: 0.3rem; font-size: 1.1rem;">{news['title']}</div>
-                    <div style="color: #aaaaaa; font-size: 0.9rem;">{news['source']} • {news['time']}</div>
+                    <div style="font-weight: 700; color: #1f2937; margin-bottom: 0.3rem; font-size: 1.1rem;">{news['title']}</div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">{news['source']} • {news['time']}</div>
                 </div>
-                <div style="background: {impact_color}; color: #000000; padding: 0.3rem 0.8rem; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">
+                <div style="background: {impact_color}; color: #ffffff; padding: 0.3rem 0.8rem; border-radius: 12px; font-weight: 700; font-size: 0.8rem;">
                     {news['impact']}
                 </div>
             </div>
@@ -769,15 +769,15 @@ def show_market_news():
     ]
     
     for earning in earnings_data:
-        exp_color = '#00ff88' if earning['expectation'] == 'Positive' else '#ffaa00'
+        exp_color = '#059669' if earning['expectation'] == 'Positive' else '#d97706'
         st.markdown(f"""
         <div class="feature-card">
             <div style="display: flex; justify-content: between; align-items: center;">
                 <div style="flex: 1;">
-                    <div style="font-weight: 600; color: #ffffff;">{earning['company']}</div>
-                    <div style="color: #aaaaaa; font-size: 0.9rem;">Date: {earning['date']}</div>
+                    <div style="font-weight: 600; color: #1f2937;">{earning['company']}</div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">Date: {earning['date']}</div>
                 </div>
-                <div style="background: {exp_color}; color: #000000; padding: 0.3rem 0.8rem; border-radius: 12px; font-weight: 700;">
+                <div style="background: {exp_color}; color: #ffffff; padding: 0.3rem 0.8rem; border-radius: 12px; font-weight: 700;">
                     {earning['expectation']}
                 </div>
             </div>
@@ -800,28 +800,28 @@ def show_ai_signals():
     st.markdown("### 🎯 Live Trading Signals")
     
     for stock, signal in signals_data.items():
-        signal_color = '#00ff88' if signal['signal'] == 'BUY' else '#ff4444' if signal['signal'] == 'SELL' else '#ffaa00'
+        signal_color = '#059669' if signal['signal'] == 'BUY' else '#dc2626' if signal['signal'] == 'SELL' else '#d97706'
         
         st.markdown(f"""
         <div class="feature-card">
             <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
-                <div style="font-weight: 700; color: #ffffff; font-size: 1.2rem;">{stock}</div>
-                <div style="background: {signal_color}; color: #000000; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 800;">
+                <div style="font-weight: 700; color: #1f2937; font-size: 1.2rem;">{stock}</div>
+                <div style="background: {signal_color}; color: #ffffff; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 800;">
                     {signal['signal']}
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                 <div>
-                    <div style="color: #aaaaaa; font-size: 0.9rem;">Confidence</div>
-                    <div style="color: #ffffff; font-weight: 600;">{signal['confidence']}</div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">Confidence</div>
+                    <div style="color: #1f2937; font-weight: 600;">{signal['confidence']}</div>
                 </div>
                 <div>
-                    <div style="color: #aaaaaa; font-size: 0.9rem;">Target</div>
-                    <div style="color: #00ff88; font-weight: 600;">{signal['target']}</div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">Target</div>
+                    <div style="color: #059669; font-weight: 600;">{signal['target']}</div>
                 </div>
                 <div>
-                    <div style="color: #aaaaaa; font-size: 0.9rem;">Stop Loss</div>
-                    <div style="color: #ff4444; font-weight: 600;">{signal['stop_loss']}</div>
+                    <div style="color: #6b7280; font-size: 0.9rem;">Stop Loss</div>
+                    <div style="color: #dc2626; font-weight: 600;">{signal['stop_loss']}</div>
                 </div>
             </div>
         </div>
@@ -883,16 +883,16 @@ def show_market_trends():
             <div class="feature-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-size: 1rem; color: #00ccff; margin-bottom: 0.4rem;">{stock_name}</div>
-                        <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(45deg, #00ff88, #00ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.4rem;">
+                        <div style="font-size: 1rem; color: #2563eb; margin-bottom: 0.4rem;">{stock_name}</div>
+                        <div style="font-size: 2.2rem; font-weight: 800; background: linear-gradient(45deg, #2563eb, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.4rem;">
                             ₹{current_price:,.2f}
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 1.2rem; font-weight: 700; color: {'#00ff88' if price_change >= 0 else '#ff4444'};">
+                        <div style="font-size: 1.2rem; font-weight: 700; color: {'#059669' if price_change >= 0 else '#dc2626'};">
                             {price_change:+.2f} ({price_change_pct:+.2f}%)
                         </div>
-                        <div style="font-size: 0.9rem; color: #aaaaaa; margin-top: 0.3rem;">
+                        <div style="font-size: 0.9rem; color: #6b7280; margin-top: 0.3rem;">
                             {timeframe} Return
                         </div>
                     </div>
@@ -974,9 +974,9 @@ def show_market_trends():
                 y=df_chart['Close'], 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00ff88', width=3),
+                line=dict(color='#2563eb', width=3),
                 fill='tozeroy',
-                fillcolor='rgba(0, 255, 136, 0.1)'
+                fillcolor='rgba(37, 99, 235, 0.1)'
             ))
             
             # Simple moving average calculation
@@ -990,7 +990,7 @@ def show_market_trends():
                             y=ma20, 
                             mode='lines', 
                             name='MA20',
-                            line=dict(color='#ff4444', width=2, dash='dash')
+                            line=dict(color='#dc2626', width=2, dash='dash')
                         ))
                 except:
                     pass
@@ -1001,16 +1001,16 @@ def show_market_trends():
             y_axis_title = "Index Value" if is_index else "Price (₹)"
             
             fig.update_layout(
-                title=dict(text=chart_title, font=dict(color='#00ff88', size=18)),
-                template="plotly_dark",
+                title=dict(text=chart_title, font=dict(color='#2563eb', size=18)),
+                template="plotly_white",
                 height=450,
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
                 yaxis_title=y_axis_title,
-                plot_bgcolor='rgba(0,0,0,0.8)',
-                paper_bgcolor='rgba(0,0,0,0.8)',
-                font=dict(color='#e0e0e0'),
+                plot_bgcolor='rgba(255,255,255,0.8)',
+                paper_bgcolor='rgba(255,255,255,0.8)',
+                font=dict(color='#333333'),
                 hovermode='x unified'
             )
             
@@ -1099,14 +1099,14 @@ def show_market_trends():
                 y=prices, 
                 mode='lines', 
                 name='Price',
-                line=dict(color='#00ff88', width=3),
+                line=dict(color='#2563eb', width=3),
                 fill='tozeroy',
-                fillcolor='rgba(0, 255, 136, 0.1)'
+                fillcolor='rgba(37, 99, 235, 0.1)'
             ))
             
             fig.update_layout(
-                title=dict(text=f"{stock_name} - Sample Price Chart (Demo Data)", font=dict(color='#00ff88')),
-                template="plotly_dark",
+                title=dict(text=f"{stock_name} - Sample Price Chart (Demo Data)", font=dict(color='#2563eb')),
+                template="plotly_white",
                 height=400,
                 showlegend=True,
                 xaxis_title="Date",
@@ -1124,7 +1124,7 @@ def show_market_trends():
         # Ultra-simple fallback
         st.markdown("""
         <div class="chart-container">
-            <p style="text-align: center; color: #aaaaaa; padding: 1.5rem; font-size: 1rem;">
+            <p style="text-align: center; color: #6b7280; padding: 1.5rem; font-size: 1rem;">
                 Chart is temporarily unavailable. Please try refreshing the page or select a different stock.
             </p>
         </div>
@@ -1220,7 +1220,7 @@ def show_ai_predictions():
             y=[current_price],
             mode='markers',
             name='Current Price',
-            marker=dict(color='#00ff88', size=10)
+            marker=dict(color='#2563eb', size=10)
         ))
         
         # Prediction line
@@ -1229,22 +1229,22 @@ def show_ai_predictions():
             y=predictions,
             mode='lines+markers',
             name='AI Prediction',
-            line=dict(color='#ffaa00', width=2.5, dash='dot')
+            line=dict(color='#d97706', width=2.5, dash='dot')
         ))
         
         # Stop loss line
-        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#ff4444", 
+        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#dc2626", 
                      annotation_text="Stop Loss", annotation_position="bottom right")
         
         # Target lines
-        fig.add_hline(y=target_1, line_dash="dash", line_color="#00ff88",
+        fig.add_hline(y=target_1, line_dash="dash", line_color="#059669",
                      annotation_text="Target 1", annotation_position="top right")
-        fig.add_hline(y=target_2, line_dash="dash", line_color="#00ccff",
+        fig.add_hline(y=target_2, line_dash="dash", line_color="#2563eb",
                      annotation_text="Target 2", annotation_position="top right")
         
         fig.update_layout(
-            title=dict(text=f"AI Price Prediction for {stock_name} (Next 30 Days)", font=dict(color='#00ff88')),
-            template="plotly_dark",
+            title=dict(text=f"AI Price Prediction for {stock_name} (Next 30 Days)", font=dict(color='#2563eb')),
+            template="plotly_white",
             height=350,
             showlegend=True,
             xaxis_title="Date",
@@ -1370,11 +1370,11 @@ def show_portfolio_insights():
             labels=portfolio_df['Stock'],
             values=portfolio_df['Current Value'],
             hole=0.4,
-            marker_colors=['#00ff88', '#00ccff', '#ff4444', '#ffaa00', '#9966ff']
+            marker_colors=['#2563eb', '#3b82f6', '#dc2626', '#d97706', '#8b5cf6']
         )])
         fig_pie.update_layout(
-            title=dict(text="Portfolio Allocation", font=dict(color='#00ff88')),
-            template="plotly_dark",
+            title=dict(text="Portfolio Allocation", font=dict(color='#2563eb')),
+            template="plotly_white",
             height=350
         )
         st.plotly_chart(fig_pie, use_container_width=True)
@@ -1385,13 +1385,13 @@ def show_portfolio_insights():
         fig_bar.add_trace(go.Bar(
             x=portfolio_df['Stock'],
             y=portfolio_df['P&L %'],
-            marker_color=['#00ff88' if x >= 0 else '#ff4444' for x in portfolio_df['P&L %']],
+            marker_color=['#059669' if x >= 0 else '#dc2626' for x in portfolio_df['P&L %']],
             text=portfolio_df['P&L %'].round(2).astype(str) + '%',
             textposition='auto',
         ))
         fig_bar.update_layout(
-            title=dict(text="Stock Performance (%)", font=dict(color='#00ff88')),
-            template="plotly_dark",
+            title=dict(text="Stock Performance (%)", font=dict(color='#2563eb')),
+            template="plotly_white",
             height=350,
             xaxis_title="Stocks",
             yaxis_title="P&L %"
@@ -1501,7 +1501,7 @@ def show_backtesting():
         y=portfolio_value,
         mode='lines',
         name='Strategy',
-        line=dict(color='#00ff88', width=2.5)
+        line=dict(color='#2563eb', width=2.5)
     ))
     
     # Add benchmark (buy & hold)
@@ -1515,14 +1515,15 @@ def show_backtesting():
         x=dates, 
         y=benchmark_value,
         mode='lines',
-        name='Buy & Hold',
-        line=dict(color='#ff4444', width=2, dash='dash')
+        name='Benchmark',
+        line=dict(color='#d97706', width=2, dash='dash')
     ))
     
     fig.update_layout(
-        title=dict(text="Strategy vs Buy & Hold Performance", font=dict(color='#00ff88')),
-        template="plotly_dark",
-        height=350,
+        title=dict(text="Strategy vs Benchmark Performance", font=dict(color='#2563eb')),
+        template="plotly_white",
+        height=400,
+        showlegend=True,
         xaxis_title="Date",
         yaxis_title="Portfolio Value (₹)"
     )
@@ -1532,14 +1533,13 @@ def show_backtesting():
     # Trade Analysis
     st.markdown("### 📋 Trade Analysis")
     
-    # Sample trade data
     trade_data = {
-        'Date': ['2023-01-15', '2023-02-20', '2023-03-10', '2023-04-05', '2023-05-12'],
-        'Stock': ['RELIANCE', 'TCS', 'HDFC BANK', 'INFOSYS', 'ICICI BANK'],
-        'Action': ['BUY', 'BUY', 'SELL', 'BUY', 'SELL'],
-        'Price': [2450, 3200, 1700, 1480, 980],
-        'Quantity': [10, 15, 20, 25, 30],
-        'P&L': ['-', '-', '₹2,500', '-', '₹900']
+        'Date': ['2023-01-15', '2023-02-20', '2023-03-10', '2023-04-05'],
+        'Stock': ['RELIANCE', 'TCS', 'HDFC BANK', 'INFOSYS'],
+        'Action': ['BUY', 'SELL', 'BUY', 'SELL'],
+        'Quantity': [10, 25, 15, 30],
+        'Price': [2450, 3350, 1650, 1580],
+        'P&L': ['-', '₹3,750', '-', '₹2,400']
     }
     
     trade_df = pd.DataFrame(trade_data)
@@ -1549,7 +1549,7 @@ def show_backtesting():
 def main():
     """Main application logic"""
     
-    # Check if we're in a tools page
+    # Handle tool pages from home
     if st.session_state.current_tool:
         if st.session_state.current_tool == "Market Intelligence":
             show_market_intelligence()
@@ -1557,24 +1557,21 @@ def main():
             show_market_news()
         elif st.session_state.current_tool == "AI Signals":
             show_ai_signals()
-        else:
-            show_home()
-    else:
-        # Regular section navigation
-        section = st.session_state.current_section
-        
-        if section == "Home":
-            show_home()
-        elif section == "Market Trends":
-            show_market_trends()
-        elif section == "AI Predictions":
-            show_ai_predictions()
-        elif section == "Options Trading":
-            show_options_trading()
-        elif section == "Portfolio Insights":
-            show_portfolio_insights()
-        elif section == "Backtesting":
-            show_backtesting()
+        return
+    
+    # Handle main sections
+    if st.session_state.current_section == "Home":
+        show_home()
+    elif st.session_state.current_section == "Market Trends":
+        show_market_trends()
+    elif st.session_state.current_section == "AI Predictions":
+        show_ai_predictions()
+    elif st.session_state.current_section == "Options Trading":
+        show_options_trading()
+    elif st.session_state.current_section == "Portfolio Insights":
+        show_portfolio_insights()
+    elif st.session_state.current_section == "Backtesting":
+        show_backtesting()
 
 if __name__ == "__main__":
     main()
