@@ -429,16 +429,33 @@ def show_market_trends():
     
     # Current Price Overview
     try:
-        df = get_stock_data(ticker, "1d")
-        if df is not None and not df.empty and len(df) > 0:
+        # Get sufficient data for proper calculation
+        period_map = {
+            "1D": "5d",  # Get 5 days for 1D to ensure we have previous close
+            "1W": "1mo", 
+            "1M": "3mo",
+            "3M": "6mo",
+            "6M": "1y",
+            "1Y": "2y"
+        }
+        
+        selected_period = period_map.get(timeframe, "3mo")
+        df = get_stock_data(ticker, selected_period)
+        
+        if df is not None and not df.empty and len(df) > 1:
+            # Get current and previous prices correctly
             current_price = float(df['Close'].iloc[-1])
-            if len(df) > 1:
+            
+            # For 1D timeframe, we need to find yesterday's close
+            if timeframe == "1D" and len(df) >= 2:
                 prev_price = float(df['Close'].iloc[-2])
-                price_change = current_price - prev_price
-                price_change_pct = (price_change / prev_price) * 100
             else:
-                price_change = 0
-                price_change_pct = 0
+                # For other timeframes, calculate from the beginning of the period
+                start_price = float(df['Close'].iloc[0])
+                prev_price = start_price
+            
+            price_change = current_price - prev_price
+            price_change_pct = (price_change / prev_price) * 100 if prev_price != 0 else 0
             
             # Display current price prominently
             st.markdown(f"""
@@ -455,14 +472,17 @@ def show_market_trends():
                             {price_change:+.2f} ({price_change_pct:+.2f}%)
                         </div>
                         <div style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">
-                            {timeframe} View
+                            {timeframe} Return
                         </div>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
-    except:
-        st.info(f"Loading data for {stock_name}...")
+        else:
+            st.info(f"Loading data for {stock_name}...")
+            
+    except Exception as e:
+        st.error(f"Error loading price data: {str(e)}")
     
     # Fundamental Data for Stocks (not indices)
     if stock_name not in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]:
@@ -502,62 +522,68 @@ def show_market_trends():
     st.markdown(f"### 📊 {stock_name} Advanced Chart")
     
     try:
-        # Get stock data with proper period mapping
-        period_map = {
-            "1D": "1d",
-            "1W": "5d", 
-            "1M": "1mo",
-            "3M": "3mo",
-            "6M": "6mo",
-            "1Y": "1y"
+        # Get stock data with proper period mapping for chart
+        chart_period_map = {
+            "1D": "5d",
+            "1W": "1mo", 
+            "1M": "3mo",
+            "3M": "6mo",
+            "6M": "1y",
+            "1Y": "2y"
         }
         
-        selected_period = period_map.get(timeframe, "1mo")
-        df = get_stock_data(ticker, selected_period)
+        selected_chart_period = chart_period_map.get(timeframe, "3mo")
+        df_chart = get_stock_data(ticker, selected_chart_period)
         
-        # FIXED: Proper check for DataFrame emptiness and data availability
-        if df is not None and not df.empty and len(df) > 1:
+        # Proper check for DataFrame emptiness and data availability
+        if df_chart is not None and not df_chart.empty and len(df_chart) > 1:
             # Convert to scalar values explicitly
-            current_price = float(df['Close'].iloc[-1])
-            prev_price = float(df['Close'].iloc[-2]) if len(df) > 1 else current_price
-            price_change = current_price - prev_price
-            price_change_pct = (price_change / prev_price) * 100 if prev_price != 0 else 0
+            current_price = float(df_chart['Close'].iloc[-1])
             
             # Advanced Chart with multiple indicators
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
-            # Create chart
+            # Create chart - Use line chart for better reliability
             fig = go.Figure()
             
-            # Candlestick chart
-            fig.add_trace(go.Candlestick(
-                x=df.index,
-                open=df['Open'],
-                high=df['High'],
-                low=df['Low'],
-                close=df['Close'],
-                name='Price'
-            ))
+            # Check if we have enough data for candlestick (need Open, High, Low, Close)
+            if all(col in df_chart.columns for col in ['Open', 'High', 'Low', 'Close']) and len(df_chart) > 1:
+                # Use candlestick if we have all required data
+                fig.add_trace(go.Candlestick(
+                    x=df_chart.index,
+                    open=df_chart['Open'],
+                    high=df_chart['High'],
+                    low=df_chart['Low'],
+                    close=df_chart['Close'],
+                    name='Price'
+                ))
+            else:
+                # Fallback to line chart
+                fig.add_trace(go.Scatter(
+                    x=df_chart.index, 
+                    y=df_chart['Close'], 
+                    mode='lines', 
+                    name='Price',
+                    line=dict(color='#00ffcc', width=2)
+                ))
             
             # Add moving averages if enough data
-            if len(df) > 20:
-                ma20 = df['Close'].rolling(window=20).mean()
-                # FIXED: Check if MA20 has valid data
+            if len(df_chart) > 20:
+                ma20 = df_chart['Close'].rolling(window=20).mean()
                 if not ma20.isna().all():
                     fig.add_trace(go.Scatter(
-                        x=df.index, 
+                        x=df_chart.index, 
                         y=ma20, 
                         mode='lines', 
                         name='MA20',
                         line=dict(color='#ff4444', width=2)
                     ))
             
-            if len(df) > 50:
-                ma50 = df['Close'].rolling(window=50).mean()
-                # FIXED: Check if MA50 has valid data
+            if len(df_chart) > 50:
+                ma50 = df_chart['Close'].rolling(window=50).mean()
                 if not ma50.isna().all():
                     fig.add_trace(go.Scatter(
-                        x=df.index, 
+                        x=df_chart.index, 
                         y=ma50, 
                         mode='lines', 
                         name='MA50',
@@ -577,8 +603,15 @@ def show_market_trends():
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
                 yaxis_title=y_axis_title,
-                margin=dict(l=50, r=50, t=80, b=50)
+                margin=dict(l=50, r=50, t=80, b=50),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
             )
+            
+            # Configure axis colors for dark theme
+            fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.1)')
+            fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.1)')
             
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -590,13 +623,13 @@ def show_market_trends():
             
             with tech_cols[0]:
                 # Calculate actual RSI
-                if len(df) > 14:
-                    delta = df['Close'].diff()
+                if len(df_chart) > 14:
+                    delta = df_chart['Close'].diff()
                     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
                     rs = gain / loss
                     rsi = 100 - (100 / (1 + rs))
-                    current_rsi = rsi.iloc[-1] if not rsi.isna().all() else 50
+                    current_rsi = rsi.iloc[-1] if not rsi.isna().all() and not pd.isna(rsi.iloc[-1]) else 50
                 else:
                     current_rsi = 50
                 
@@ -605,12 +638,11 @@ def show_market_trends():
                 
             with tech_cols[1]:
                 # Simple MACD calculation
-                if len(df) > 26:
-                    exp12 = df['Close'].ewm(span=12, adjust=False).mean()
-                    exp26 = df['Close'].ewm(span=26, adjust=False).mean()
+                if len(df_chart) > 26:
+                    exp12 = df_chart['Close'].ewm(span=12, adjust=False).mean()
+                    exp26 = df_chart['Close'].ewm(span=26, adjust=False).mean()
                     macd = exp12 - exp26
-                    signal = macd.ewm(span=9, adjust=False).mean()
-                    current_macd = macd.iloc[-1] if not macd.isna().all() else 0
+                    current_macd = macd.iloc[-1] if not macd.isna().all() and not pd.isna(macd.iloc[-1]) else 0
                 else:
                     current_macd = 0
                 
@@ -618,22 +650,27 @@ def show_market_trends():
                 st.metric("MACD", f"{current_macd:.2f}", macd_status)
                 
             with tech_cols[2]:
-                if 'Volume' in df.columns and not df['Volume'].isna().all():
-                    volume_avg = float(df['Volume'].mean())  # FIXED: Convert to float
-                    current_volume = float(df['Volume'].iloc[-1])  # FIXED: Convert to float
-                    volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
-                    st.metric("Volume Ratio", f"{volume_ratio:.1f}x", "High" if volume_ratio > 1.5 else "Normal")
+                if 'Volume' in df_chart.columns and not df_chart['Volume'].isna().all() and len(df_chart) > 0:
+                    try:
+                        volume_avg = float(df_chart['Volume'].mean())
+                        current_volume = float(df_chart['Volume'].iloc[-1])
+                        volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
+                        st.metric("Volume Ratio", f"{volume_ratio:.1f}x", "High" if volume_ratio > 1.5 else "Normal")
+                    except:
+                        st.metric("Volume", "N/A", "")
                 else:
                     st.metric("Volume", "N/A", "")
                 
             with tech_cols[3]:
-                if len(df) > 1:
-                    # FIXED: Convert volatility calculation to scalar
-                    returns = df['Close'].pct_change().dropna()
-                    if not returns.empty:
-                        volatility = float(returns.std() * np.sqrt(252) * 100)  # Annualized volatility
-                        st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
-                    else:
+                if len(df_chart) > 1:
+                    try:
+                        returns = df_chart['Close'].pct_change().dropna()
+                        if not returns.empty:
+                            volatility = float(returns.std() * np.sqrt(252) * 100)  # Annualized volatility
+                            st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                        else:
+                            st.metric("Volatility", "N/A", "")
+                    except:
                         st.metric("Volatility", "N/A", "")
                 else:
                     st.metric("Volatility", "N/A", "")
@@ -650,12 +687,14 @@ def show_market_trends():
             """, unsafe_allow_html=True)
             
     except Exception as e:
-        st.error(f"Error loading market data: {str(e)}")
-        # Show fallback chart
-        st.markdown("""
+        st.error(f"Error loading chart data: {str(e)}")
+        # Show fallback chart with more details
+        st.markdown(f"""
         <div class="chart-container">
             <p style="text-align: center; color: #ff4444; padding: 2rem;">
-                Unable to load chart data. Please check your internet connection and try again.
+                Unable to load chart data for {stock_name}.<br>
+                Error: {str(e)}<br>
+                Please check your internet connection and try again.
             </p>
         </div>
         """, unsafe_allow_html=True)
