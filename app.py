@@ -346,6 +346,35 @@ def get_market_data():
             continue
     return data
 
+@st.cache_data(ttl=3600)
+def get_news_data():
+    """Get market news data"""
+    # Mock news data - in real implementation, you'd use a news API
+    return [
+        {"title": "RBI Keeps Repo Rate Unchanged at 6.5%", "source": "Economic Times", "time": "2 hours ago", "sentiment": "positive"},
+        {"title": "Reliance Announces Major Green Energy Investment", "source": "Business Standard", "time": "4 hours ago", "sentiment": "positive"},
+        {"title": "IT Sector Faces Headwinds from Global Slowdown", "source": "Money Control", "time": "6 hours ago", "sentiment": "negative"},
+        {"title": "Banking Stocks Rally on Strong Quarterly Results", "source": "Financial Express", "time": "8 hours ago", "sentiment": "positive"},
+        {"title": "Auto Sales Show Mixed Trends in November", "source": "Auto Car India", "time": "10 hours ago", "sentiment": "neutral"}
+    ]
+
+@st.cache_data(ttl=3600)
+def get_market_intelligence():
+    """Get market intelligence data"""
+    return {
+        "sector_performance": {
+            "Banking": "+2.8%",
+            "IT": "-1.2%", 
+            "Pharma": "+1.5%",
+            "Auto": "+0.8%",
+            "Energy": "+3.2%"
+        },
+        "market_sentiment": "Bullish",
+        "volume_trend": "Increasing",
+        "volatility_index": "Medium",
+        "institutional_activity": "Buying"
+    }
+
 # ----------------------- SESSION STATE -----------------------
 if 'current_section' not in st.session_state:
     st.session_state.current_section = "Home"
@@ -359,8 +388,8 @@ st.markdown('<div class="main-header">🚀 SMART TRADE PRO</div>', unsafe_allow_
 st.markdown('<div class="main-subtitle">by <em>Prasanth Subrahmanian</em> | Advanced Trading Analytics Platform</div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
-nav_options = ["🏠 Dashboard", "📈 Market Analysis", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio", "🔍 Backtesting"]
-nav_labels = ["Home", "Market Trends", "AI Predictions", "Options Trading", "Portfolio Insights", "Backtesting"]
+nav_options = ["🏠 Dashboard", "📈 Market Analysis", "🤖 AI Signals", "💡 Market Intelligence", "📰 News", "🔍 Backtesting"]
+nav_labels = ["Home", "Market Trends", "AI Signals", "Market Intelligence", "News", "Backtesting"]
 
 nav_cols = st.columns(6)
 for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
@@ -412,7 +441,7 @@ stocks = {
 }
 
 # Stock selection available on all pages except Home
-if st.session_state.current_section != "Home":
+if st.session_state.current_section not in ["Home", "Market Intelligence", "News"]:
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         stock_name = st.selectbox("Select Stock/Index", list(stocks.keys()), 
@@ -495,28 +524,28 @@ def show_home():
     
     with tools_cols[0]:
         st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">Live Charts</div>
-            <div class="feature-desc">Interactive price charts with technical indicators and drawing tools</div>
+        <div class="feature-card" onclick="window.location.href='?section=Market Intelligence'" style="cursor: pointer;">
+            <div class="feature-icon">💡</div>
+            <div class="feature-title">Market Intelligence</div>
+            <div class="feature-desc">Comprehensive market analysis, sector performance, and institutional activity tracking</div>
         </div>
         """, unsafe_allow_html=True)
     
     with tools_cols[1]:
         st.markdown("""
-        <div class="feature-card">
+        <div class="feature-card" onclick="window.location.href='?section=AI Signals'" style="cursor: pointer;">
             <div class="feature-icon">🤖</div>
             <div class="feature-title">AI Signals</div>
-            <div class="feature-desc">Machine learning based buy/sell signals and price predictions</div>
+            <div class="feature-desc">Machine learning based buy/sell signals and automated trading recommendations</div>
         </div>
         """, unsafe_allow_html=True)
     
     with tools_cols[2]:
         st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">💹</div>
-            <div class="feature-title">Options Analysis</div>
-            <div class="feature-desc">Advanced options strategy builder and risk analysis</div>
+        <div class="feature-card" onclick="window.location.href='?section=News'" style="cursor: pointer;">
+            <div class="feature-icon">📰</div>
+            <div class="feature-title">Market News</div>
+            <div class="feature-desc">Latest financial news, market updates, and sentiment analysis</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -831,13 +860,13 @@ def show_market_trends():
         </div>
         """, unsafe_allow_html=True)
 
-# ----------------------- AI PREDICTIONS PAGE -----------------------
-def show_ai_predictions():
-    """AI Predictions - Forecasts next week/month price"""
+# ----------------------- AI SIGNALS PAGE -----------------------
+def show_ai_signals():
+    """AI Signals - Advanced AI trading signals and recommendations"""
     st.markdown(
         '<div class="compact-header">'
-        '<h2>🤖 AI Trading Intelligence</h2>'
-        '<p>Machine learning forecasts and automated trading signals</p>'
+        '<h2>🤖 AI Trading Signals</h2>'
+        '<p>Advanced machine learning signals and automated trading recommendations</p>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -852,73 +881,76 @@ def show_ai_predictions():
     except:
         current_price = 2500
     
-    # AI Predictions Dashboard
-    st.markdown("### 🎯 Price Forecast Dashboard")
+    # AI Signals Dashboard
+    st.markdown("### 🎯 AI Trading Signals")
     
-    pred_cols = st.columns(3)
-    with pred_cols[0]:
-        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-icon">📅</div>', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Next Week</div>', unsafe_allow_html=True)
-        st.metric("Target Price", f"₹{current_price * 1.025:.2f}", "+2.5%")
-        st.progress(78, text="Confidence: 78%")
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with pred_cols[1]:
+    signal_cols = st.columns(3)
+    with signal_cols[0]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         st.markdown('<div class="feature-icon">📊</div>', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Next Month</div>', unsafe_allow_html=True)
-        st.metric("Target Price", f"₹{current_price * 1.068:.2f}", "+6.8%")
-        st.progress(72, text="Confidence: 72%")
+        st.markdown('<div class="feature-title">Momentum Signal</div>', unsafe_allow_html=True)
+        st.metric("Signal Strength", "STRONG BUY", "92% Confidence")
+        st.progress(92, text="Confidence: 92%")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    with pred_cols[2]:
+    with signal_cols[1]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-icon">🎯</div>', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Risk Assessment</div>', unsafe_allow_html=True)
-        st.metric("Risk Level", "LOW", "-15%")
-        st.progress(25, text="Drawdown Risk: 25%")
+        st.markdown('<div class="feature-icon">📈</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Trend Analysis</div>', unsafe_allow_html=True)
+        st.metric("Trend Direction", "BULLISH", "85% Accuracy")
+        st.progress(85, text="Accuracy: 85%")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # Stop Loss and Risk Management
-    st.markdown("### 🛡️ Risk Management")
+    with signal_cols[2]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-icon">⚡</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Volatility Signal</div>', unsafe_allow_html=True)
+        st.metric("Risk Level", "MEDIUM", "Optimal Entry")
+        st.progress(65, text="Risk Score: 65%")
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    risk_cols = st.columns(4)
-    with risk_cols[0]:
-        stop_loss = current_price * 0.95
-        st.metric("Stop Loss", f"₹{stop_loss:.2f}", "-5.0%")
+    # Advanced AI Analysis
+    st.markdown("### 🔍 Advanced AI Analysis")
     
-    with risk_cols[1]:
-        target_1 = current_price * 1.08
-        st.metric("Target 1", f"₹{target_1:.2f}", "+8.0%")
+    analysis_cols = st.columns(2)
+    with analysis_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Pattern Recognition</div>', unsafe_allow_html=True)
+        st.metric("Pattern Detected", "Bull Flag", "High Reliability")
+        st.metric("Target Price", f"₹{current_price * 1.12:.2f}", "+12.0%")
+        st.metric("Timeframe", "2-4 Weeks", "Expected Duration")
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with risk_cols[2]:
-        target_2 = current_price * 1.15
-        st.metric("Target 2", f"₹{target_2:.2f}", "+15.0%")
+    with analysis_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Sentiment Analysis</div>', unsafe_allow_html=True)
+        st.metric("Market Sentiment", "VERY BULLISH", "Positive")
+        st.metric("News Impact", "POSITIVE", "+2.3%")
+        st.metric("Social Buzz", "HIGH", "Increasing")
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with risk_cols[3]:
-        risk_reward = (target_1 - current_price) / (current_price - stop_loss)
-        st.metric("Risk/Reward", f"{risk_reward:.2f}:1", "Good" if risk_reward > 1.5 else "Fair")
-    
-    # Prediction Chart
-    st.markdown("### 📈 AI Prediction Chart")
+    # AI Prediction Chart
+    st.markdown("### 📈 AI Price Prediction")
     
     try:
         # Create prediction chart
         dates = pd.date_range(start=datetime.now(), periods=30, freq='D')
-        # Mock prediction data
+        # Mock prediction data with AI pattern
         base_price = current_price
-        predictions = [base_price * (1 + 0.002 * i + np.random.normal(0, 0.01)) for i in range(30)]
+        predictions = [base_price * (1 + 0.003 * i + np.random.normal(0, 0.008)) for i in range(30)]
         
         fig = go.Figure()
         
-        # Current price line
+        # Historical data
+        hist_dates = pd.date_range(start=datetime.now() - timedelta(days=60), end=datetime.now(), freq='D')
+        hist_prices = [base_price * (1 - 0.002 * i + np.random.normal(0, 0.01)) for i in range(60, 0, -1)]
+        
         fig.add_trace(go.Scatter(
-            x=[dates[0]], 
-            y=[current_price],
-            mode='markers',
-            name='Current Price',
-            marker=dict(color='#00b4ff', size=10)
+            x=hist_dates, 
+            y=hist_prices,
+            mode='lines',
+            name='Historical',
+            line=dict(color='#6666ff', width=2)
         ))
         
         # Prediction line
@@ -927,23 +959,37 @@ def show_ai_predictions():
             y=predictions,
             mode='lines+markers',
             name='AI Prediction',
-            line=dict(color='#ffaa44', width=2.5, dash='dot')
+            line=dict(color='#00ffaa', width=3)
         ))
         
-        # Stop loss line
-        fig.add_hline(y=stop_loss, line_dash="dash", line_color="#ff5555", 
-                     annotation_text="Stop Loss", annotation_position="bottom right")
+        # Confidence interval
+        upper_bound = [p * 1.05 for p in predictions]
+        lower_bound = [p * 0.95 for p in predictions]
         
-        # Target lines
-        fig.add_hline(y=target_1, line_dash="dash", line_color="#00b4ff",
-                     annotation_text="Target 1", annotation_position="top right")
-        fig.add_hline(y=target_2, line_dash="dash", line_color="#0088ff",
-                     annotation_text="Target 2", annotation_position="top right")
+        fig.add_trace(go.Scatter(
+            x=dates, 
+            y=upper_bound,
+            mode='lines',
+            name='Upper Bound',
+            line=dict(width=0),
+            showlegend=False
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=dates, 
+            y=lower_bound,
+            mode='lines',
+            name='Lower Bound',
+            fill='tonexty',
+            fillcolor='rgba(0, 255, 170, 0.2)',
+            line=dict(width=0),
+            showlegend=False
+        ))
         
         fig.update_layout(
             title=dict(text=f"AI Price Prediction for {stock_name} (Next 30 Days)", font=dict(color='#00b4ff')),
             template="plotly_dark",
-            height=350,
+            height=400,
             showlegend=True,
             xaxis_title="Date",
             yaxis_title="Price (₹)"
@@ -953,184 +999,257 @@ def show_ai_predictions():
         
     except Exception as e:
         st.error(f"Error generating prediction chart: {str(e)}")
+    
+    # Trading Recommendations
+    st.markdown("### 💡 Trading Recommendations")
+    
+    rec_cols = st.columns(3)
+    with rec_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Entry Point</div>', unsafe_allow_html=True)
+        st.metric("Optimal Entry", f"₹{current_price * 0.98:.2f}", "-2.0%")
+        st.metric("Stop Loss", f"₹{current_price * 0.92:.2f}", "-8.0%")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with rec_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Target Levels</div>', unsafe_allow_html=True)
+        st.metric("Target 1", f"₹{current_price * 1.08:.2f}", "+8.0%")
+        st.metric("Target 2", f"₹{current_price * 1.15:.2f}", "+15.0%")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with rec_cols[2]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Position Sizing</div>', unsafe_allow_html=True)
+        st.metric("Risk/Reward", "1:3", "Excellent")
+        st.metric("Allocation", "15-20%", "Portfolio")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# ----------------------- OPTIONS TRADING PAGE -----------------------
-def show_options_trading():
-    """Options Trading - Option chain & strategy analyzer"""
+# ----------------------- MARKET INTELLIGENCE PAGE -----------------------
+def show_market_intelligence():
+    """Market Intelligence - Comprehensive market analysis"""
     st.markdown(
         '<div class="compact-header">'
-        '<h2>💹 Options Trading</h2>'
-        '<p>Options chain analysis and strategy builder</p>'
+        '<h2>💡 Market Intelligence</h2>'
+        '<p>Comprehensive market analysis, sector performance, and institutional insights</p>'
         '</div>',
         unsafe_allow_html=True,
     )
     
-    # Current price
-    current_price = 2500
-    try:
-        df = get_stock_data(ticker, "1d")
-        if df is not None and hasattr(df, 'empty') and not df.empty and len(df) > 0:
-            current_price = float(df['Close'].iloc[-1])
-            st.info(f"{stock_name} Current Price: ₹{current_price:.2f}")
-    except:
-        current_price = 2500
+    # Market Overview
+    st.markdown("### 📊 Market Overview")
     
-    # Options Overview
-    st.markdown("### 📊 Options Overview")
+    intel_data = get_market_intelligence()
+    
     overview_cols = st.columns(4)
     with overview_cols[0]:
-        st.metric("IV Rank", "78%", "High")
+        st.metric("Market Sentiment", intel_data["market_sentiment"], "Bullish")
     with overview_cols[1]:
-        st.metric("Put/Call Ratio", "0.82", "Bullish")
+        st.metric("Volume Trend", intel_data["volume_trend"], "Increasing")
     with overview_cols[2]:
-        st.metric("Open Interest", "2.8M", "+15%")
+        st.metric("Volatility Index", intel_data["volatility_index"], "Medium")
     with overview_cols[3]:
-        st.metric("Volume", "1.9M", "+22%")
+        st.metric("Institutional Flow", intel_data["institutional_activity"], "Buying")
     
-    # Strategy Builder
-    st.markdown("### 🛠 Strategy Builder")
+    # Sector Performance
+    st.markdown("### 🏢 Sector Performance")
     
-    strat_cols = st.columns(2)
-    with strat_cols[0]:
+    sector_data = intel_data["sector_performance"]
+    sector_cols = st.columns(5)
+    
+    for i, (sector, performance) in enumerate(sector_data.items()):
+        with sector_cols[i]:
+            change_color = "#00ffaa" if performance.startswith('+') else "#ff5555"
+            st.markdown(f"""
+            <div class="feature-card">
+                <div style="font-weight: 600; margin-bottom: 0.8rem; color: #66aaff;">{sector}</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: {change_color};">
+                    {performance}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Market Depth Analysis
+    st.markdown("### 📈 Market Depth Analysis")
+    
+    depth_cols = st.columns(2)
+    
+    with depth_cols[0]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Strategy Configuration</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Order Book Analysis</div>', unsafe_allow_html=True)
         
-        strategy = st.selectbox("Select Strategy", 
-                              ["Long Call", "Long Put", "Covered Call", "Bull Spread", "Iron Condor"])
-        expiry = st.selectbox("Expiry", ["Weekly", "Monthly"])
-        strike = st.selectbox("Strike", ["ATM", "OTM 10%", "OTM 20%", "ITM 10%"])
+        # Mock order book data
+        order_data = {
+            'Bid Price': [2495, 2490, 2485, 2480, 2475],
+            'Bid Quantity': [1500, 2200, 1800, 1200, 900],
+            'Ask Price': [2505, 2510, 2515, 2520, 2525],
+            'Ask Quantity': [1300, 1900, 1600, 1100, 800]
+        }
         
-        if st.button("Analyze Strategy", use_container_width=True):
-            st.success("Strategy analyzed successfully!")
+        order_df = pd.DataFrame(order_data)
+        st.dataframe(order_df, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
-    with strat_cols[1]:
+    with depth_cols[1]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Strategy Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Volume Profile</div>', unsafe_allow_html=True)
         
-        st.metric("Max Profit", "₹12,500")
-        st.metric("Max Loss", "₹1,500")
-        st.metric("Breakeven", f"₹{current_price + 15:.2f}")
+        # Mock volume profile
+        vol_profile = {
+            'Price Level': ['2470-2480', '2480-2490', '2490-2500', '2500-2510', '2510-2520'],
+            'Volume': [1200000, 1850000, 2250000, 1950000, 1450000],
+            'POC': ['', '', '★', '', '']
+        }
+        
+        vol_df = pd.DataFrame(vol_profile)
+        st.dataframe(vol_df, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Institutional Activity
+    st.markdown("### 🏛️ Institutional Activity")
+    
+    inst_cols = st.columns(3)
+    with inst_cols[0]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">FII Activity</div>', unsafe_allow_html=True)
+        st.metric("Net Investment", "₹1,250 Cr", "+2.8%")
+        st.metric("Buy/Sell Ratio", "1.8", "Bullish")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with inst_cols[1]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">DII Activity</div>', unsafe_allow_html=True)
+        st.metric("Net Investment", "₹980 Cr", "+1.5%")
+        st.metric("Buy/Sell Ratio", "1.5", "Positive")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with inst_cols[2]:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        st.markdown('<div class="feature-title">Proprietary</div>', unsafe_allow_html=True)
+        st.metric("Net Position", "Long", "Strong")
+        st.metric("Exposure", "85%", "High")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Market Statistics
+    st.markdown("### 📊 Market Statistics")
+    
+    stats_cols = st.columns(4)
+    with stats_cols[0]:
+        st.metric("Advance/Decline", "1250/850", "Positive")
+    with stats_cols[1]:
+        st.metric("52W High/Low", "45/28", "Bullish")
+    with stats_cols[2]:
+        st.metric("Put/Call Ratio", "0.75", "Bullish")
+    with stats_cols[3]:
+        st.metric("VIX", "18.5", "Stable")
 
-# ----------------------- PORTFOLIO INSIGHTS PAGE -----------------------
-def show_portfolio_insights():
-    """Portfolio Insights - User or sample portfolio charts"""
+# ----------------------- NEWS PAGE -----------------------
+def show_news():
+    """News - Market news and sentiment analysis"""
     st.markdown(
         '<div class="compact-header">'
-        '<h2>📊 Portfolio Insights</h2>'
-        '<p>Track your investments and analyze portfolio performance</p>'
+        '<h2>📰 Market News & Analysis</h2>'
+        '<p>Latest financial news, market updates, and sentiment analysis</p>'
         '</div>',
         unsafe_allow_html=True,
     )
     
-    # Portfolio Overview
-    st.markdown("### 📈 Portfolio Overview")
+    # News Feed
+    st.markdown("### 📢 Latest Market News")
     
-    # Sample portfolio data
-    portfolio_data = {
-        'Stock': ['RELIANCE', 'TCS', 'HDFC BANK', 'INFOSYS', 'ICICI BANK'],
-        'Quantity': [10, 25, 15, 30, 20],
-        'Avg Price': [2450, 3200, 1650, 1500, 950],
-        'Current Price': [2650, 3350, 1720, 1580, 1020],
-        'Investment': [24500, 80000, 24750, 45000, 19000],
-        'Current Value': [26500, 83750, 25800, 47400, 20400]
-    }
+    news_data = get_news_data()
     
-    portfolio_df = pd.DataFrame(portfolio_data)
-    portfolio_df['P&L'] = portfolio_df['Current Value'] - portfolio_df['Investment']
-    portfolio_df['P&L %'] = (portfolio_df['P&L'] / portfolio_df['Investment']) * 100
+    for news in news_data:
+        sentiment_color = {
+            "positive": "#00ffaa",
+            "negative": "#ff5555", 
+            "neutral": "#ffaa44"
+        }.get(news["sentiment"], "#ffaa44")
+        
+        st.markdown(f"""
+        <div class="feature-card">
+            <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 0.5rem;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; color: #ffffff; margin-bottom: 0.3rem; font-size: 1.1rem;">{news["title"]}</div>
+                    <div style="color: #88aaff; font-size: 0.9rem;">{news["source"]} • {news["time"]}</div>
+                </div>
+                <div style="background: {sentiment_color}; color: #050817; padding: 0.3rem 0.8rem; border-radius: 15px; font-weight: 700; font-size: 0.8rem;">
+                    {news["sentiment"].upper()}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Portfolio Metrics
-    total_investment = portfolio_df['Investment'].sum()
-    total_current = portfolio_df['Current Value'].sum()
-    total_pnl = total_current - total_investment
-    total_pnl_pct = (total_pnl / total_investment) * 100
+    # Market Sentiment Analysis
+    st.markdown("### 🌡️ News Sentiment Analysis")
     
-    metric_cols = st.columns(4)
-    with metric_cols[0]:
-        st.metric("Total Investment", f"₹{total_investment:,.0f}")
-    with metric_cols[1]:
-        st.metric("Current Value", f"₹{total_current:,.0f}")
-    with metric_cols[2]:
-        st.metric("Total P&L", f"₹{total_pnl:,.0f}", f"{total_pnl_pct:.2f}%")
-    with metric_cols[3]:
-        st.metric("Daily Change", "₹+2,850", "+1.2%")
-    
-    # Portfolio Allocation Chart
-    st.markdown("### 🎯 Portfolio Allocation")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Pie chart for allocation
-        fig_pie = go.Figure(data=[go.Pie(
-            labels=portfolio_df['Stock'],
-            values=portfolio_df['Current Value'],
-            hole=0.4,
-            marker_colors=['#00b4ff', '#0088ff', '#ff5555', '#ffaa44', '#9966ff']
-        )])
-        fig_pie.update_layout(
-            title=dict(text="Portfolio Allocation", font=dict(color='#00b4ff')),
-            template="plotly_dark",
-            height=350
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
-    
-    with col2:
-        # Performance bar chart
-        fig_bar = go.Figure()
-        fig_bar.add_trace(go.Bar(
-            x=portfolio_df['Stock'],
-            y=portfolio_df['P&L %'],
-            marker_color=['#00b4ff' if x >= 0 else '#ff5555' for x in portfolio_df['P&L %']],
-            text=portfolio_df['P&L %'].round(2).astype(str) + '%',
-            textposition='auto',
-        ))
-        fig_bar.update_layout(
-            title=dict(text="Stock Performance (%)", font=dict(color='#00b4ff')),
-            template="plotly_dark",
-            height=350,
-            xaxis_title="Stocks",
-            yaxis_title="P&L %"
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
-    
-    # Portfolio Details Table
-    st.markdown("### 📋 Portfolio Details")
-    
-    # Format the dataframe for display
-    display_df = portfolio_df.copy()
-    display_df['Avg Price'] = display_df['Avg Price'].apply(lambda x: f'₹{x:,.0f}')
-    display_df['Current Price'] = display_df['Current Price'].apply(lambda x: f'₹{x:,.0f}')
-    display_df['Investment'] = display_df['Investment'].apply(lambda x: f'₹{x:,.0f}')
-    display_df['Current Value'] = display_df['Current Value'].apply(lambda x: f'₹{x:,.0f}')
-    display_df['P&L'] = display_df['P&L'].apply(lambda x: f'₹{x:,.0f}')
-    display_df['P&L %'] = display_df['P&L %'].apply(lambda x: f'{x:.2f}%')
-    
-    st.dataframe(display_df, use_container_width=True)
-    
-    # Risk Analysis
-    st.markdown("### 🛡️ Risk Analysis")
-    
-    risk_cols = st.columns(3)
-    with risk_cols[0]:
+    sentiment_cols = st.columns(3)
+    with sentiment_cols[0]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Portfolio Beta</div>', unsafe_allow_html=True)
-        st.metric("Beta", "1.12", "High")
+        st.markdown('<div class="feature-title">Overall Sentiment</div>', unsafe_allow_html=True)
+        st.metric("Market Mood", "BULLISH", "Positive")
+        st.progress(72, text="Positive: 72%")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    with risk_cols[1]:
+    with sentiment_cols[1]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Volatility</div>', unsafe_allow_html=True)
-        st.metric("Annual Vol", "18.5%", "Medium")
+        st.markdown('<div class="feature-title">Sector Sentiment</div>', unsafe_allow_html=True)
+        st.metric("Banking", "VERY POSITIVE", "+85%")
+        st.metric("Technology", "NEUTRAL", "+45%")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    with risk_cols[2]:
+    with sentiment_cols[2]:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
-        st.markdown('<div class="feature-title">Diversification</div>', unsafe_allow_html=True)
-        st.metric("Score", "7.2/10", "Good")
+        st.markdown('<div class="feature-title">Impact Analysis</div>', unsafe_allow_html=True)
+        st.metric("News Impact", "POSITIVE", "+2.3%")
+        st.metric("Volatility Impact", "MEDIUM", "Controlled")
         st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Trending Topics
+    st.markdown("### 🔥 Trending Topics")
+    
+    trending_topics = [
+        {"topic": "RBI Policy Meeting", "mentions": "1.2K", "sentiment": "positive"},
+        {"topic": "Quarterly Results", "mentions": "980", "sentiment": "positive"},
+        {"topic": "Global Markets", "mentions": "850", "sentiment": "neutral"},
+        {"topic": "Oil Prices", "mentions": "720", "sentiment": "negative"},
+        {"topic": "IPO News", "mentions": "650", "sentiment": "positive"}
+    ]
+    
+    for topic in trending_topics:
+        sentiment_color = {
+            "positive": "#00ffaa",
+            "negative": "#ff5555",
+            "neutral": "#ffaa44"
+        }.get(topic["sentiment"], "#ffaa44")
+        
+        st.markdown(f"""
+        <div class="feature-card">
+            <div style="display: flex; justify-content: between; align-items: center;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #ffffff; margin-bottom: 0.2rem;">{topic["topic"]}</div>
+                    <div style="color: #88aaff; font-size: 0.8rem;">{topic["mentions"]} mentions</div>
+                </div>
+                <div style="background: {sentiment_color}; color: #050817; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 700; font-size: 0.7rem;">
+                    {topic["sentiment"].upper()}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Economic Calendar
+    st.markdown("### 📅 Economic Calendar")
+    
+    calendar_data = [
+        {"event": "GDP Data Release", "date": "Today", "impact": "High", "previous": "7.8%"},
+        {"event": "Inflation Data", "date": "Tomorrow", "impact": "High", "previous": "5.0%"},
+        {"event": "RBI Meeting", "date": "Dec 15", "impact": "Very High", "previous": "6.5%"},
+        {"event": "Trade Balance", "date": "Dec 18", "impact": "Medium", "previous": "-$18.2B"},
+        {"event": "PMI Data", "date": "Dec 20", "impact": "Medium", "previous": "58.5"}
+    ]
+    
+    calendar_df = pd.DataFrame(calendar_data)
+    st.dataframe(calendar_df, use_container_width=True)
 
 # ----------------------- BACKTESTING PAGE -----------------------
 def show_backtesting():
@@ -1252,12 +1371,12 @@ def main():
         show_home()
     elif section == "Market Trends":
         show_market_trends()
-    elif section == "AI Predictions":
-        show_ai_predictions()
-    elif section == "Options Trading":
-        show_options_trading()
-    elif section == "Portfolio Insights":
-        show_portfolio_insights()
+    elif section == "AI Signals":
+        show_ai_signals()
+    elif section == "Market Intelligence":
+        show_market_intelligence()
+    elif section == "News":
+        show_news()
     elif section == "Backtesting":
         show_backtesting()
 
