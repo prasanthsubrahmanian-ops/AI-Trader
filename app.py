@@ -792,4 +792,4 @@ def show_backtesting():
     with param_cols[0]:
         ma_fast = st.slider("MA Fast Period", 5, 50, 20)
     with param_cols[1]:
-        ma_slow =
+        ma_slow = st.slider("MA Slow Period", 20, 
