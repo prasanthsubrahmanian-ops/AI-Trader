@@ -808,4 +808,4 @@ def show_options_trading():
 def show_portfolio_insights():
     """Portfolio Insights - User or sample portfolio charts"""
     st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12
+        '<div style="background: rgba(255,255,255,0.
