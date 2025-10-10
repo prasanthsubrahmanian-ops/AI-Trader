@@ -28,13 +28,22 @@ body, .main, .block-container {
 .main-header {
     margin-top: 1rem;
     margin-bottom: 0.5rem;
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     font-weight: 700;
     background: linear-gradient(45deg, #00ffcc, #0099ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
     padding: 0.2rem 0;
+}
+
+.main-subtitle {
+    font-size: 1.1rem;
+    font-style: italic;
+    text-align: center;
+    color: #888;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
 }
 
 /* Top Navigation */
@@ -136,7 +145,7 @@ body, .main, .block-container {
 }
 
 @media (max-width: 768px) {
-    .main-header { font-size: 2.2rem; }
+    .main-header { font-size: 1.8rem; }
     .nav-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
 }
 </style>
@@ -188,12 +197,13 @@ def get_market_data():
 if 'current_section' not in st.session_state:
     st.session_state.current_section = "Home"
 if 'stock_name' not in st.session_state:
-    st.session_state.stock_name = "RELIANCE"
+    st.session_state.stock_name = "NIFTY 50"
 if 'current_ticker' not in st.session_state:
-    st.session_state.current_ticker = "RELIANCE.NS"
+    st.session_state.current_ticker = "^NSEI"
 
 # ----------------------- HEADER -----------------------
-st.markdown('<div class="main-header">SMART TRADE WITH PRASANTH SUBRAHMANIAN</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">SMART TRADE</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-subtitle">with <em>prasanth subrahmanian</em></div>', unsafe_allow_html=True)
 
 # ----------------------- MAIN NAVIGATION -----------------------
 nav_options = ["🏠 Home", "📈 Market Trends", "🤖 AI Predictions", "💹 Options Trading", "📊 Portfolio Insights", "🔍 Backtesting"]
@@ -209,15 +219,43 @@ for i, (col, option) in enumerate(zip(nav_cols, nav_options)):
 
 # ----------------------- STOCK SELECTION -----------------------
 stocks = {
-    "RELIANCE": "RELIANCE.NS", 
-    "TCS": "TCS.NS", 
-    "INFY": "INFY.NS", 
-    "HDFC BANK": "HDFCBANK.NS",
-    "ICICI BANK": "ICICIBANK.NS",
+    # Indices
     "NIFTY 50": "^NSEI",
-    "BANK NIFTY": "^NSEBANK",
+    "BANK NIFTY": "^NSEBANK", 
+    "NIFTY IT": "^CNXIT",
+    "SENSEX": "^BSESN",
+    
+    # Major NIFTY 50 Stocks
+    "RELIANCE": "RELIANCE.NS",
+    "TCS": "TCS.NS",
+    "HDFC BANK": "HDFCBANK.NS",
+    "INFOSYS": "INFY.NS",
+    "ICICI BANK": "ICICIBANK.NS",
+    "HINDUNILVR": "HINDUNILVR.NS",
+    "ITC": "ITC.NS",
+    "SBIN": "SBIN.NS",
+    "BHARTI AIRTEL": "BHARTIARTL.NS",
+    "KOTAK BANK": "KOTAKBANK.NS",
+    "LT": "LT.NS",
+    "HCL TECH": "HCLTECH.NS",
+    "AXIS BANK": "AXISBANK.NS",
+    "MARUTI": "MARUTI.NS",
+    "ASIAN PAINTS": "ASIANPAINT.NS",
+    "SUN PHARMA": "SUNPHARMA.NS",
+    "TITAN": "TITAN.NS",
+    "ULTRACEMCO": "ULTRACEMCO.NS",
+    "WIPRO": "WIPRO.NS",
+    "NESTLE": "NESTLEIND.NS",
+    "POWERGRID": "POWERGRID.NS",
+    "NTPC": "NTPC.NS",
+    "ONGC": "ONGC.NS",
+    "TECH MAHINDRA": "TECHM.NS",
+    
+    # International Stocks
     "AAPL": "AAPL",
-    "TSLA": "TSLA"
+    "TSLA": "TSLA",
+    "GOOGL": "GOOGL",
+    "MSFT": "MSFT"
 }
 
 # Stock selection available on all pages except Home
@@ -401,7 +439,7 @@ def show_market_trends():
             # Advanced Chart with multiple indicators
             st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             
-            # Create subplots
+            # Create chart based on whether it's an index or stock
             fig = go.Figure()
             
             # Price line
@@ -413,18 +451,71 @@ def show_market_trends():
                 line=dict(color='#00ffcc', width=2)
             ))
             
+            # Add moving averages for better analysis
+            if len(df) > 20:
+                df['MA20'] = df['Close'].rolling(window=20).mean()
+                fig.add_trace(go.Scatter(
+                    x=df.index, 
+                    y=df['MA20'], 
+                    mode='lines', 
+                    name='MA20',
+                    line=dict(color='#ff4444', width=1, dash='dash')
+                ))
+            
+            if len(df) > 50:
+                df['MA50'] = df['Close'].rolling(window=50).mean()
+                fig.add_trace(go.Scatter(
+                    x=df.index, 
+                    y=df['MA50'], 
+                    mode='lines', 
+                    name='MA50',
+                    line=dict(color='#0099ff', width=1, dash='dash')
+                ))
+            
+            chart_title = f"{stock_name} - {timeframe}"
+            if stock_name in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"]:
+                chart_title += f" | Index: {current_price:.2f} ({price_change_pct:+.2f}%)"
+            else:
+                chart_title += f" | Price: ₹{current_price:.2f} ({price_change_pct:+.2f}%)"
+            
             fig.update_layout(
-                title=f"{stock_name} - {timeframe} | Price: ₹{current_price:.2f} ({price_change_pct:+.2f}%)",
+                title=chart_title,
                 template="plotly_dark",
                 height=500,
                 showlegend=True,
                 xaxis_rangeslider_visible=False,
                 xaxis_title="Date",
-                yaxis_title="Price (₹)"
+                yaxis_title="Price (₹)" if stock_name not in ["NIFTY 50", "BANK NIFTY", "NIFTY IT", "SENSEX"] else "Index Value"
             )
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
+            # Technical Indicators
+            st.markdown("### 🔧 Technical Indicators")
+            
+            tech_cols = st.columns(4)
+            
+            with tech_cols[0]:
+                rsi = 65.2  # Mock RSI
+                st.metric("RSI (14)", f"{rsi}", "Neutral")
+                
+            with tech_cols[1]:
+                macd = 2.5  # Mock MACD
+                st.metric("MACD", f"{macd}", "Bullish")
+                
+            with tech_cols[2]:
+                if 'Volume' in df.columns:
+                    volume_avg = df['Volume'].mean()
+                    current_volume = df['Volume'].iloc[-1]
+                    volume_ratio = (current_volume / volume_avg) if volume_avg > 0 else 1
+                    st.metric("Volume Ratio", f"{volume_ratio:.1f}x", "High" if volume_ratio > 1.5 else "Normal")
+                else:
+                    st.metric("Volume", "N/A", "")
+                
+            with tech_cols[3]:
+                volatility = df['Close'].pct_change().std() * np.sqrt(252) * 100  # Annualized volatility
+                st.metric("Volatility", f"{volatility:.1f}%", "High" if volatility > 30 else "Medium")
+                
         else:
             st.warning(f"Insufficient data for {stock_name}. Please try a different timeframe or stock.")
             
@@ -554,7 +645,7 @@ def show_portfolio_insights():
     st.markdown("### 💼 Sample Portfolio")
     
     portfolio_data = {
-        "Stock": ["RELIANCE", "TCS", "HDFC BANK", "INFY", "ICICI BANK"],
+        "Stock": ["RELIANCE", "TCS", "HDFC BANK", "INFOSYS", "ICICI BANK"],
         "Quantity": [50, 100, 75, 120, 80],
         "Avg Price": [2450, 3200, 1650, 1850, 920],
         "Current Price": [2580, 3350, 1680, 1920, 950],
@@ -642,7 +733,7 @@ elif section == "Backtesting":
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: #666;'>"
-    "Smart Trade with Prasanth Subrahmanian • Advanced Trading Analytics • Powered by AI"
+    "Smart Trade with <em>prasanth subrahmanian</em> • Advanced Trading Analytics • Powered by AI"
     "</div>", 
     unsafe_allow_html=True
 )
